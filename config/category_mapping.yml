@@ -1,0 +1,28 @@
+categories:
+  groceries:
+    ons_coicop: "01 Food and non-alcoholic beverages"
+    examples: ["Tesco", "Sainsbury's", "Aldi", "Lidl", "Asda", "Morrisons"]
+  eating_out:
+    ons_coicop: "11 Restaurants and hotels"
+    examples: ["Pret", "Costa", "Deliveroo", "Uber Eats", "Nando's"]
+  transport:
+    ons_coicop: "07 Transport"
+    examples: ["TfL", "Trainline", "Uber", "Shell", "BP"]
+  housing:
+    ons_coicop: "04 Housing, water, electricity, gas and other fuels"
+    examples: ["Rent", "Mortgage", "Council Tax"]
+  utilities:
+    ons_coicop: "04 Housing, water, electricity, gas and other fuels"
+    examples: ["British Gas", "Octopus Energy", "Thames Water"]
+  subscriptions:
+    ons_coicop: "09 Recreation and culture"
+    examples: ["Netflix", "Spotify", "Disney+", "Prime"]
+  shopping:
+    ons_coicop: "05 Furniture, household equipment and maintenance"
+    examples: ["Amazon", "Argos", "IKEA", "John Lewis"]
+  health:
+    ons_coicop: "06 Health"
+    examples: ["Boots", "Superdrug", "Pharmacy"]
+  income:
+    ons_coicop: null
+    examples: ["Salary", "Payroll", "Interest"]

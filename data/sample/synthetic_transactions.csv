@@ -1,0 +1,1282 @@
+date,description,amount,category,transaction_type,account
+2022-06-01,Rent Payment,-1050.58,housing,expense,current
+2022-06-02,Deliveroo,-19.94,eating_out,expense,credit_card
+2022-06-02,Thames Water,-35.79,utilities,expense,current
+2022-06-03,Sainsbury's Local,-10.13,groceries,expense,current
+2022-06-03,Pret A Manger,-8.71,eating_out,expense,current
+2022-06-03,Trainline,-68.43,transport,expense,credit_card
+2022-06-05,Tesco Superstore,-32.33,groceries,expense,current
+2022-06-09,Amazon Marketplace,-59.77,shopping,expense,credit_card
+2022-06-10,TfL Travel Charge,-4.02,transport,expense,current
+2022-06-12,TfL Travel Charge,-14.51,transport,expense,current
+2022-06-12,Shell Service Station,-56.89,transport,expense,credit_card
+2022-06-14,Aldi Stores,-26.97,groceries,expense,current
+2022-06-17,Sainsbury's Local,-22.65,groceries,expense,current
+2022-06-18,Tesco Superstore,-73.48,groceries,expense,current
+2022-06-18,Sainsbury's Local,-48.34,groceries,expense,current
+2022-06-18,Deliveroo,-33.89,eating_out,expense,credit_card
+2022-06-18,Spotify,-14.43,subscriptions,expense,current
+2022-06-19,Aldi Stores,-31.53,groceries,expense,current
+2022-06-19,Council Tax,-178.05,housing,expense,current
+2022-06-20,Deliveroo,-37.42,eating_out,expense,credit_card
+2022-06-20,TfL Travel Charge,-13.78,transport,expense,current
+2022-06-21,Sainsbury's Local,-21.32,groceries,expense,current
+2022-06-21,Netflix,-17.55,subscriptions,expense,current
+2022-06-21,Amazon Marketplace,-118.83,shopping,expense,credit_card
+2022-06-22,Tesco Superstore,-73.13,groceries,expense,current
+2022-06-22,Shell Service Station,-56.32,transport,expense,credit_card
+2022-06-23,TfL Travel Charge,-10.51,transport,expense,current
+2022-06-25,Salary Payroll,3153.37,income,income,current
+2022-06-25,Pret A Manger,-7.01,eating_out,expense,current
+2022-06-25,Octopus Energy,-112.29,utilities,expense,current
+2022-06-26,Aldi Stores,-15.49,groceries,expense,current
+2022-06-27,Shell Service Station,-62.20,transport,expense,credit_card
+2022-06-28,Aldi Stores,-35.86,groceries,expense,current
+2022-06-28,Trainline,-74.44,transport,expense,credit_card
+2022-07-01,Pret A Manger,-16.05,eating_out,expense,current
+2022-07-01,TfL Travel Charge,-5.06,transport,expense,current
+2022-07-01,Rent Payment,-1265.83,housing,expense,current
+2022-07-03,Sainsbury's Local,-42.14,groceries,expense,current
+2022-07-04,Pret A Manger,-13.52,eating_out,expense,current
+2022-07-04,Netflix,-14.54,subscriptions,expense,current
+2022-07-05,Tesco Superstore,-65.36,groceries,expense,current
+2022-07-05,Sainsbury's Local,-74.82,groceries,expense,current
+2022-07-08,Tesco Superstore,-33.99,groceries,expense,current
+2022-07-08,Sainsbury's Local,-34.76,groceries,expense,current
+2022-07-11,Octopus Energy,-75.07,utilities,expense,current
+2022-07-12,Thames Water,-31.80,utilities,expense,current
+2022-07-13,Aldi Stores,-59.73,groceries,expense,current
+2022-07-14,Aldi Stores,-74.41,groceries,expense,current
+2022-07-14,TfL Travel Charge,-4.45,transport,expense,current
+2022-07-18,Tesco Superstore,-73.83,groceries,expense,current
+2022-07-18,Pret A Manger,-11.41,eating_out,expense,current
+2022-07-18,Pret A Manger,-13.54,eating_out,expense,current
+2022-07-19,Sainsbury's Local,-36.71,groceries,expense,current
+2022-07-21,Spotify,-12.08,subscriptions,expense,current
+2022-07-25,Salary Payroll,3414.00,income,income,current
+2022-07-25,Amazon Marketplace,-25.12,shopping,expense,credit_card
+2022-07-28,Sainsbury's Local,-58.64,groceries,expense,current
+2022-07-29,TfL Travel Charge,-15.40,transport,expense,current
+2022-07-29,Council Tax,-109.63,housing,expense,current
+2022-07-30,Tesco Superstore,-44.84,groceries,expense,current
+2022-07-31,Amazon Marketplace,-26.09,shopping,expense,credit_card
+2022-08-01,Rent Payment,-933.16,housing,expense,current
+2022-08-02,Pret A Manger,-4.94,eating_out,expense,current
+2022-08-03,Pret A Manger,-16.03,eating_out,expense,current
+2022-08-04,TfL Travel Charge,-8.29,transport,expense,current
+2022-08-04,Trainline,-83.84,transport,expense,credit_card
+2022-08-04,Shell Service Station,-83.04,transport,expense,credit_card
+2022-08-05,Tesco Superstore,-56.21,groceries,expense,current
+2022-08-05,Shell Service Station,-67.18,transport,expense,credit_card
+2022-08-06,Tesco Superstore,-90.59,groceries,expense,current
+2022-08-07,Sainsbury's Local,-36.35,groceries,expense,current
+2022-08-07,Sainsbury's Local,-56.91,groceries,expense,current
+2022-08-07,Deliveroo,-32.07,eating_out,expense,credit_card
+2022-08-07,Shell Service Station,-49.92,transport,expense,credit_card
+2022-08-08,Aldi Stores,-48.86,groceries,expense,current
+2022-08-08,Aldi Stores,-32.26,groceries,expense,current
+2022-08-08,Netflix,-12.94,subscriptions,expense,current
+2022-08-11,Aldi Stores,-31.85,groceries,expense,current
+2022-08-13,Sainsbury's Local,-55.77,groceries,expense,current
+2022-08-13,Council Tax,-122.10,housing,expense,current
+2022-08-14,Trainline,-37.86,transport,expense,credit_card
+2022-08-16,Tesco Superstore,-22.66,groceries,expense,current
+2022-08-18,Aldi Stores,-16.58,groceries,expense,current
+2022-08-19,Deliveroo,-40.07,eating_out,expense,credit_card
+2022-08-21,Sainsbury's Local,-74.68,groceries,expense,current
+2022-08-21,Trainline,-15.95,transport,expense,credit_card
+2022-08-23,Aldi Stores,-15.54,groceries,expense,current
+2022-08-24,Deliveroo,-28.18,eating_out,expense,credit_card
+2022-08-24,Trainline,-46.09,transport,expense,credit_card
+2022-08-25,Salary Payroll,3074.09,income,income,current
+2022-08-25,Tesco Superstore,-79.73,groceries,expense,current
+2022-08-25,Sainsbury's Local,-70.24,groceries,expense,current
+2022-08-25,Thames Water,-31.17,utilities,expense,current
+2022-08-26,TfL Travel Charge,-13.20,transport,expense,current
+2022-08-26,Spotify,-10.52,subscriptions,expense,current
+2022-08-27,Octopus Energy,-189.92,utilities,expense,current
+2022-09-01,Octopus Energy,-182.61,utilities,expense,current
+2022-09-01,Rent Payment,-956.58,housing,expense,current
+2022-09-02,Pret A Manger,-7.05,eating_out,expense,current
+2022-09-03,Deliveroo,-14.06,eating_out,expense,credit_card
+2022-09-04,Thames Water,-61.95,utilities,expense,current
+2022-09-05,Amazon Marketplace,-37.75,shopping,expense,credit_card
+2022-09-06,Deliveroo,-37.58,eating_out,expense,credit_card
+2022-09-06,Deliveroo,-14.40,eating_out,expense,credit_card
+2022-09-09,Tesco Superstore,-93.78,groceries,expense,current
+2022-09-10,Pret A Manger,-6.17,eating_out,expense,current
+2022-09-10,Amazon Marketplace,-83.23,shopping,expense,credit_card
+2022-09-11,Pret A Manger,-4.85,eating_out,expense,current
+2022-09-16,Pret A Manger,-13.27,eating_out,expense,current
+2022-09-17,Deliveroo,-13.71,eating_out,expense,credit_card
+2022-09-17,Netflix,-15.08,subscriptions,expense,current
+2022-09-18,Pret A Manger,-12.11,eating_out,expense,current
+2022-09-19,TfL Travel Charge,-10.41,transport,expense,current
+2022-09-22,Spotify,-11.82,subscriptions,expense,current
+2022-09-25,Salary Payroll,3442.69,income,income,current
+2022-09-29,TfL Travel Charge,-8.25,transport,expense,current
+2022-09-29,Council Tax,-179.66,housing,expense,current
+2022-09-30,Deliveroo,-26.30,eating_out,expense,credit_card
+2022-10-01,Rent Payment,-1028.90,housing,expense,current
+2022-10-02,Deliveroo,-39.24,eating_out,expense,credit_card
+2022-10-02,TfL Travel Charge,-13.78,transport,expense,current
+2022-10-02,Spotify,-11.03,subscriptions,expense,current
+2022-10-05,Aldi Stores,-85.42,groceries,expense,current
+2022-10-05,Pret A Manger,-14.39,eating_out,expense,current
+2022-10-09,TfL Travel Charge,-4.70,transport,expense,current
+2022-10-10,Tesco Superstore,-57.09,groceries,expense,current
+2022-10-10,Octopus Energy,-89.66,utilities,expense,current
+2022-10-11,Deliveroo,-18.32,eating_out,expense,credit_card
+2022-10-12,Council Tax,-158.35,housing,expense,current
+2022-10-15,TfL Travel Charge,-5.10,transport,expense,current
+2022-10-17,Deliveroo,-37.59,eating_out,expense,credit_card
+2022-10-18,Sainsbury's Local,-52.75,groceries,expense,current
+2022-10-21,Deliveroo,-18.11,eating_out,expense,credit_card
+2022-10-25,Salary Payroll,2525.67,income,income,current
+2022-10-25,TfL Travel Charge,-3.05,transport,expense,current
+2022-10-26,Tesco Superstore,-62.77,groceries,expense,current
+2022-10-27,Tesco Superstore,-25.09,groceries,expense,current
+2022-10-28,Thames Water,-59.72,utilities,expense,current
+2022-10-29,Deliveroo,-26.66,eating_out,expense,credit_card
+2022-10-29,Netflix,-11.52,subscriptions,expense,current
+2022-11-01,Rent Payment,-907.82,housing,expense,current
+2022-11-02,Pret A Manger,-9.36,eating_out,expense,current
+2022-11-02,Council Tax,-120.21,housing,expense,current
+2022-11-04,Spotify,-16.56,subscriptions,expense,current
+2022-11-06,Tesco Superstore,-31.65,groceries,expense,current
+2022-11-08,TfL Travel Charge,-13.34,transport,expense,current
+2022-11-09,Trainline,-82.58,transport,expense,credit_card
+2022-11-09,Boots Pharmacy,-34.03,health,expense,current
+2022-11-11,TfL Travel Charge,-5.51,transport,expense,current
+2022-11-12,Octopus Energy,-143.61,utilities,expense,current
+2022-11-20,Thames Water,-38.67,utilities,expense,current
+2022-11-22,TfL Travel Charge,-5.90,transport,expense,current
+2022-11-24,Tesco Superstore,-92.83,groceries,expense,current
+2022-11-24,Sainsbury's Local,-9.66,groceries,expense,current
+2022-11-24,Sainsbury's Local,-52.88,groceries,expense,current
+2022-11-25,Salary Payroll,3308.13,income,income,current
+2022-11-26,Tesco Superstore,-93.03,groceries,expense,current
+2022-11-26,Sainsbury's Local,-69.94,groceries,expense,current
+2022-11-26,Sainsbury's Local,-70.36,groceries,expense,current
+2022-11-27,TfL Travel Charge,-7.55,transport,expense,current
+2022-11-27,Netflix,-15.75,subscriptions,expense,current
+2022-11-30,Tesco Superstore,-24.83,groceries,expense,current
+2022-12-01,Rent Payment,-1049.83,housing,expense,current
+2022-12-02,Amazon Marketplace,-24.50,shopping,expense,credit_card
+2022-12-05,Aldi Stores,-37.17,groceries,expense,current
+2022-12-07,Amazon Marketplace,-33.16,shopping,expense,credit_card
+2022-12-10,Sainsbury's Local,-56.22,groceries,expense,current
+2022-12-10,Pret A Manger,-12.62,eating_out,expense,current
+2022-12-14,Tesco Superstore,-28.35,groceries,expense,current
+2022-12-15,Deliveroo,-21.67,eating_out,expense,credit_card
+2022-12-16,Amazon Marketplace,-35.42,shopping,expense,credit_card
+2022-12-20,Tesco Superstore,-88.42,groceries,expense,current
+2022-12-20,Netflix,-15.64,subscriptions,expense,current
+2022-12-21,Deliveroo,-29.40,eating_out,expense,credit_card
+2022-12-22,Tesco Superstore,-73.58,groceries,expense,current
+2022-12-22,Tesco Superstore,-17.81,groceries,expense,current
+2022-12-22,Aldi Stores,-29.39,groceries,expense,current
+2022-12-22,Aldi Stores,-85.53,groceries,expense,current
+2022-12-23,Aldi Stores,-39.46,groceries,expense,current
+2022-12-23,Thames Water,-34.61,utilities,expense,current
+2022-12-25,Salary Payroll,3229.66,income,income,current
+2022-12-25,Spotify,-15.72,subscriptions,expense,current
+2022-12-26,Deliveroo,-18.31,eating_out,expense,credit_card
+2022-12-26,TfL Travel Charge,-9.65,transport,expense,current
+2022-12-26,TfL Travel Charge,-14.72,transport,expense,current
+2022-12-27,Pret A Manger,-9.69,eating_out,expense,current
+2022-12-29,Octopus Energy,-127.37,utilities,expense,current
+2022-12-29,Council Tax,-160.01,housing,expense,current
+2022-12-31,Tesco Superstore,-69.01,groceries,expense,current
+2023-01-01,Spotify,-16.61,subscriptions,expense,current
+2023-01-01,Rent Payment,-1059.51,housing,expense,current
+2023-01-03,TfL Travel Charge,-12.18,transport,expense,current
+2023-01-05,Sainsbury's Local,-16.13,groceries,expense,current
+2023-01-05,Deliveroo,-14.42,eating_out,expense,credit_card
+2023-01-06,Aldi Stores,-48.44,groceries,expense,current
+2023-01-08,Tesco Superstore,-76.61,groceries,expense,current
+2023-01-10,Deliveroo,-14.32,eating_out,expense,credit_card
+2023-01-11,Deliveroo,-19.03,eating_out,expense,credit_card
+2023-01-11,TfL Travel Charge,-8.39,transport,expense,current
+2023-01-12,Octopus Energy,-75.68,utilities,expense,current
+2023-01-14,Aldi Stores,-81.90,groceries,expense,current
+2023-01-18,Sainsbury's Local,-39.12,groceries,expense,current
+2023-01-18,Sainsbury's Local,-43.59,groceries,expense,current
+2023-01-18,Aldi Stores,-77.29,groceries,expense,current
+2023-01-18,Deliveroo,-21.59,eating_out,expense,credit_card
+2023-01-20,Council Tax,-148.69,housing,expense,current
+2023-01-21,Pret A Manger,-7.46,eating_out,expense,current
+2023-01-21,Pret A Manger,-11.30,eating_out,expense,current
+2023-01-22,Sainsbury's Local,-61.69,groceries,expense,current
+2023-01-24,Aldi Stores,-60.95,groceries,expense,current
+2023-01-25,Salary Payroll,3276.06,income,income,current
+2023-01-25,Pret A Manger,-10.30,eating_out,expense,current
+2023-01-25,Pret A Manger,-7.88,eating_out,expense,current
+2023-01-28,Sainsbury's Local,-24.70,groceries,expense,current
+2023-01-29,Netflix,-13.93,subscriptions,expense,current
+2023-01-29,Thames Water,-41.26,utilities,expense,current
+2023-02-01,Tesco Superstore,-48.17,groceries,expense,current
+2023-02-01,Rent Payment,-1146.05,housing,expense,current
+2023-02-03,Pret A Manger,-7.53,eating_out,expense,current
+2023-02-03,Pret A Manger,-7.14,eating_out,expense,current
+2023-02-04,Netflix,-14.30,subscriptions,expense,current
+2023-02-07,Aldi Stores,-43.43,groceries,expense,current
+2023-02-07,TfL Travel Charge,-15.34,transport,expense,current
+2023-02-09,Aldi Stores,-28.63,groceries,expense,current
+2023-02-11,Aldi Stores,-49.10,groceries,expense,current
+2023-02-12,Pret A Manger,-11.55,eating_out,expense,current
+2023-02-13,Tesco Superstore,-68.37,groceries,expense,current
+2023-02-13,Sainsbury's Local,-43.79,groceries,expense,current
+2023-02-13,Aldi Stores,-72.09,groceries,expense,current
+2023-02-19,Boots Pharmacy,-20.55,health,expense,current
+2023-02-20,Sainsbury's Local,-69.61,groceries,expense,current
+2023-02-20,Amazon Marketplace,-26.79,shopping,expense,credit_card
+2023-02-21,Sainsbury's Local,-9.82,groceries,expense,current
+2023-02-22,Tesco Superstore,-44.28,groceries,expense,current
+2023-02-22,Sainsbury's Local,-47.66,groceries,expense,current
+2023-02-22,Octopus Energy,-110.88,utilities,expense,current
+2023-02-23,Spotify,-11.52,subscriptions,expense,current
+2023-02-23,Amazon Marketplace,-115.94,shopping,expense,credit_card
+2023-02-23,Thames Water,-40.76,utilities,expense,current
+2023-02-23,Council Tax,-124.43,housing,expense,current
+2023-02-24,Pret A Manger,-10.58,eating_out,expense,current
+2023-02-25,Salary Payroll,3437.59,income,income,current
+2023-02-27,Amazon Marketplace,-20.83,shopping,expense,credit_card
+2023-03-01,Deliveroo,-23.37,eating_out,expense,credit_card
+2023-03-01,TfL Travel Charge,-6.59,transport,expense,current
+2023-03-01,Rent Payment,-910.33,housing,expense,current
+2023-03-03,Pret A Manger,-15.63,eating_out,expense,current
+2023-03-04,Sainsbury's Local,-63.10,groceries,expense,current
+2023-03-05,Sainsbury's Local,-38.80,groceries,expense,current
+2023-03-07,Deliveroo,-17.46,eating_out,expense,credit_card
+2023-03-08,Shell Service Station,-68.31,transport,expense,credit_card
+2023-03-09,Aldi Stores,-87.41,groceries,expense,current
+2023-03-09,Aldi Stores,-69.83,groceries,expense,current
+2023-03-10,Spotify,-10.11,subscriptions,expense,current
+2023-03-10,Thames Water,-43.43,utilities,expense,current
+2023-03-11,Deliveroo,-26.83,eating_out,expense,credit_card
+2023-03-11,Octopus Energy,-160.78,utilities,expense,current
+2023-03-12,Tesco Superstore,-47.56,groceries,expense,current
+2023-03-12,Sainsbury's Local,-37.05,groceries,expense,current
+2023-03-15,Pret A Manger,-7.90,eating_out,expense,current
+2023-03-16,Aldi Stores,-55.36,groceries,expense,current
+2023-03-16,Shell Service Station,-78.20,transport,expense,credit_card
+2023-03-16,Netflix,-15.51,subscriptions,expense,current
+2023-03-18,Tesco Superstore,-15.41,groceries,expense,current
+2023-03-18,Amazon Marketplace,-49.33,shopping,expense,credit_card
+2023-03-18,Council Tax,-114.56,housing,expense,current
+2023-03-19,Amazon Marketplace,-42.30,shopping,expense,credit_card
+2023-03-21,Tesco Superstore,-17.72,groceries,expense,current
+2023-03-22,Deliveroo,-29.10,eating_out,expense,credit_card
+2023-03-25,Salary Payroll,3299.73,income,income,current
+2023-03-26,Tesco Superstore,-78.86,groceries,expense,current
+2023-03-26,Tesco Superstore,-93.66,groceries,expense,current
+2023-03-27,Sainsbury's Local,-50.58,groceries,expense,current
+2023-03-27,Aldi Stores,-49.87,groceries,expense,current
+2023-03-29,TfL Travel Charge,-7.42,transport,expense,current
+2023-03-29,TfL Travel Charge,-10.75,transport,expense,current
+2023-03-30,Aldi Stores,-61.19,groceries,expense,current
+2023-04-01,Rent Payment,-1345.02,housing,expense,current
+2023-04-02,Pret A Manger,-5.77,eating_out,expense,current
+2023-04-02,Deliveroo,-22.22,eating_out,expense,credit_card
+2023-04-03,TfL Travel Charge,-8.21,transport,expense,current
+2023-04-05,Pret A Manger,-8.09,eating_out,expense,current
+2023-04-08,Aldi Stores,-29.56,groceries,expense,current
+2023-04-10,Aldi Stores,-42.07,groceries,expense,current
+2023-04-10,Netflix,-16.67,subscriptions,expense,current
+2023-04-10,Thames Water,-58.89,utilities,expense,current
+2023-04-15,Deliveroo,-26.08,eating_out,expense,credit_card
+2023-04-16,Tesco Superstore,-29.96,groceries,expense,current
+2023-04-17,Octopus Energy,-100.95,utilities,expense,current
+2023-04-18,Pret A Manger,-17.64,eating_out,expense,current
+2023-04-18,Spotify,-11.73,subscriptions,expense,current
+2023-04-19,Tesco Superstore,-34.95,groceries,expense,current
+2023-04-20,Council Tax,-154.68,housing,expense,current
+2023-04-25,Salary Payroll,3495.97,income,income,current
+2023-04-25,Pret A Manger,-12.93,eating_out,expense,current
+2023-04-27,Aldi Stores,-88.54,groceries,expense,current
+2023-04-28,Pret A Manger,-10.87,eating_out,expense,current
+2023-04-28,Deliveroo,-19.57,eating_out,expense,credit_card
+2023-05-01,Sainsbury's Local,-13.03,groceries,expense,current
+2023-05-01,Octopus Energy,-144.43,utilities,expense,current
+2023-05-01,Rent Payment,-1143.56,housing,expense,current
+2023-05-06,Tesco Superstore,-66.82,groceries,expense,current
+2023-05-09,Tesco Superstore,-63.92,groceries,expense,current
+2023-05-10,Sainsbury's Local,-47.79,groceries,expense,current
+2023-05-10,Sainsbury's Local,-10.19,groceries,expense,current
+2023-05-13,Amazon Marketplace,-42.06,shopping,expense,credit_card
+2023-05-14,Boots Pharmacy,-6.99,health,expense,current
+2023-05-15,Amazon Marketplace,-111.17,shopping,expense,credit_card
+2023-05-15,Amazon Marketplace,-68.48,shopping,expense,credit_card
+2023-05-17,Amazon Marketplace,-113.58,shopping,expense,credit_card
+2023-05-19,Pret A Manger,-15.08,eating_out,expense,current
+2023-05-23,Sainsbury's Local,-35.37,groceries,expense,current
+2023-05-23,Sainsbury's Local,-55.37,groceries,expense,current
+2023-05-23,Amazon Marketplace,-21.93,shopping,expense,credit_card
+2023-05-25,Salary Payroll,3506.12,income,income,current
+2023-05-26,Pret A Manger,-16.93,eating_out,expense,current
+2023-05-26,Spotify,-10.41,subscriptions,expense,current
+2023-05-27,Netflix,-17.35,subscriptions,expense,current
+2023-05-27,Thames Water,-60.70,utilities,expense,current
+2023-05-27,Council Tax,-166.18,housing,expense,current
+2023-06-01,Rent Payment,-1125.63,housing,expense,current
+2023-06-02,Deliveroo,-25.26,eating_out,expense,credit_card
+2023-06-03,Sainsbury's Local,-40.95,groceries,expense,current
+2023-06-03,Aldi Stores,-17.75,groceries,expense,current
+2023-06-05,Amazon Marketplace,-80.54,shopping,expense,credit_card
+2023-06-06,Sainsbury's Local,-15.01,groceries,expense,current
+2023-06-07,Pret A Manger,-9.79,eating_out,expense,current
+2023-06-09,Tesco Superstore,-48.71,groceries,expense,current
+2023-06-09,Octopus Energy,-133.52,utilities,expense,current
+2023-06-10,Deliveroo,-15.93,eating_out,expense,credit_card
+2023-06-11,Aldi Stores,-38.59,groceries,expense,current
+2023-06-13,Aldi Stores,-36.62,groceries,expense,current
+2023-06-14,Sainsbury's Local,-39.49,groceries,expense,current
+2023-06-14,Netflix,-11.09,subscriptions,expense,current
+2023-06-15,Pret A Manger,-16.17,eating_out,expense,current
+2023-06-16,Thames Water,-44.40,utilities,expense,current
+2023-06-17,Council Tax,-178.75,housing,expense,current
+2023-06-18,Aldi Stores,-76.02,groceries,expense,current
+2023-06-18,Deliveroo,-18.11,eating_out,expense,credit_card
+2023-06-20,TfL Travel Charge,-15.65,transport,expense,current
+2023-06-21,Tesco Superstore,-51.05,groceries,expense,current
+2023-06-21,Deliveroo,-34.69,eating_out,expense,credit_card
+2023-06-22,Sainsbury's Local,-30.33,groceries,expense,current
+2023-06-22,Pret A Manger,-17.83,eating_out,expense,current
+2023-06-23,Deliveroo,-25.14,eating_out,expense,credit_card
+2023-06-25,Salary Payroll,2746.46,income,income,current
+2023-06-27,Sainsbury's Local,-37.20,groceries,expense,current
+2023-06-27,Pret A Manger,-16.11,eating_out,expense,current
+2023-06-30,Spotify,-16.94,subscriptions,expense,current
+2023-07-01,Aldi Stores,-35.04,groceries,expense,current
+2023-07-01,Rent Payment,-1158.73,housing,expense,current
+2023-07-04,Shell Service Station,-54.92,transport,expense,credit_card
+2023-07-08,Deliveroo,-29.15,eating_out,expense,credit_card
+2023-07-10,Aldi Stores,-36.21,groceries,expense,current
+2023-07-10,Council Tax,-159.75,housing,expense,current
+2023-07-14,Deliveroo,-37.68,eating_out,expense,credit_card
+2023-07-15,Aldi Stores,-79.89,groceries,expense,current
+2023-07-15,Pret A Manger,-11.61,eating_out,expense,current
+2023-07-15,Shell Service Station,-87.45,transport,expense,credit_card
+2023-07-16,Aldi Stores,-89.92,groceries,expense,current
+2023-07-16,TfL Travel Charge,-15.75,transport,expense,current
+2023-07-16,Netflix,-12.07,subscriptions,expense,current
+2023-07-19,Aldi Stores,-77.81,groceries,expense,current
+2023-07-20,Spotify,-11.85,subscriptions,expense,current
+2023-07-21,TfL Travel Charge,-13.30,transport,expense,current
+2023-07-21,Octopus Energy,-184.73,utilities,expense,current
+2023-07-22,TfL Travel Charge,-7.96,transport,expense,current
+2023-07-24,Shell Service Station,-62.42,transport,expense,credit_card
+2023-07-25,Salary Payroll,3270.92,income,income,current
+2023-07-25,Pret A Manger,-8.65,eating_out,expense,current
+2023-07-26,Tesco Superstore,-34.93,groceries,expense,current
+2023-07-26,TfL Travel Charge,-12.17,transport,expense,current
+2023-07-28,Pret A Manger,-17.06,eating_out,expense,current
+2023-07-28,Shell Service Station,-43.65,transport,expense,credit_card
+2023-07-28,Amazon Marketplace,-103.40,shopping,expense,credit_card
+2023-07-28,Thames Water,-53.82,utilities,expense,current
+2023-07-30,Shell Service Station,-40.98,transport,expense,credit_card
+2023-08-01,Deliveroo,-19.66,eating_out,expense,credit_card
+2023-08-01,Rent Payment,-1250.97,housing,expense,current
+2023-08-03,Aldi Stores,-27.75,groceries,expense,current
+2023-08-03,Deliveroo,-28.40,eating_out,expense,credit_card
+2023-08-04,Shell Service Station,-86.20,transport,expense,credit_card
+2023-08-06,Tesco Superstore,-20.34,groceries,expense,current
+2023-08-09,Council Tax,-120.21,housing,expense,current
+2023-08-10,Sainsbury's Local,-61.34,groceries,expense,current
+2023-08-10,TfL Travel Charge,-15.84,transport,expense,current
+2023-08-10,Shell Service Station,-56.54,transport,expense,credit_card
+2023-08-10,Shell Service Station,-94.56,transport,expense,credit_card
+2023-08-13,Aldi Stores,-60.71,groceries,expense,current
+2023-08-13,Netflix,-16.80,subscriptions,expense,current
+2023-08-14,Sainsbury's Local,-32.02,groceries,expense,current
+2023-08-14,TfL Travel Charge,-11.31,transport,expense,current
+2023-08-15,Pret A Manger,-6.00,eating_out,expense,current
+2023-08-15,Deliveroo,-38.97,eating_out,expense,credit_card
+2023-08-15,TfL Travel Charge,-11.97,transport,expense,current
+2023-08-17,Sainsbury's Local,-17.75,groceries,expense,current
+2023-08-19,Pret A Manger,-10.97,eating_out,expense,current
+2023-08-19,Shell Service Station,-49.23,transport,expense,credit_card
+2023-08-22,Deliveroo,-39.04,eating_out,expense,credit_card
+2023-08-22,Spotify,-13.95,subscriptions,expense,current
+2023-08-25,Salary Payroll,3547.17,income,income,current
+2023-08-25,Tesco Superstore,-93.20,groceries,expense,current
+2023-08-26,Thames Water,-37.73,utilities,expense,current
+2023-08-27,Octopus Energy,-160.69,utilities,expense,current
+2023-08-28,Tesco Superstore,-64.60,groceries,expense,current
+2023-08-29,Tesco Superstore,-69.60,groceries,expense,current
+2023-09-01,TfL Travel Charge,-13.28,transport,expense,current
+2023-09-01,Rent Payment,-1323.13,housing,expense,current
+2023-09-02,Tesco Superstore,-64.08,groceries,expense,current
+2023-09-03,Sainsbury's Local,-57.07,groceries,expense,current
+2023-09-03,TfL Travel Charge,-10.25,transport,expense,current
+2023-09-04,TfL Travel Charge,-6.44,transport,expense,current
+2023-09-04,Thames Water,-50.07,utilities,expense,current
+2023-09-04,Council Tax,-144.41,housing,expense,current
+2023-09-05,Pret A Manger,-17.48,eating_out,expense,current
+2023-09-06,Sainsbury's Local,-58.08,groceries,expense,current
+2023-09-06,Aldi Stores,-35.44,groceries,expense,current
+2023-09-08,Pret A Manger,-14.56,eating_out,expense,current
+2023-09-11,Sainsbury's Local,-68.95,groceries,expense,current
+2023-09-12,Sainsbury's Local,-10.24,groceries,expense,current
+2023-09-12,Aldi Stores,-80.73,groceries,expense,current
+2023-09-15,Pret A Manger,-15.26,eating_out,expense,current
+2023-09-18,Amazon Marketplace,-77.39,shopping,expense,credit_card
+2023-09-21,Boots Pharmacy,-35.50,health,expense,current
+2023-09-22,Spotify,-12.59,subscriptions,expense,current
+2023-09-25,Salary Payroll,3195.54,income,income,current
+2023-09-26,Aldi Stores,-85.81,groceries,expense,current
+2023-09-26,TfL Travel Charge,-15.57,transport,expense,current
+2023-09-27,Aldi Stores,-34.27,groceries,expense,current
+2023-09-27,Netflix,-15.08,subscriptions,expense,current
+2023-09-29,Tesco Superstore,-64.14,groceries,expense,current
+2023-09-30,Aldi Stores,-54.81,groceries,expense,current
+2023-09-30,Octopus Energy,-169.74,utilities,expense,current
+2023-10-01,Rent Payment,-1222.83,housing,expense,current
+2023-10-02,Deliveroo,-41.13,eating_out,expense,credit_card
+2023-10-03,Deliveroo,-28.94,eating_out,expense,credit_card
+2023-10-04,Pret A Manger,-6.66,eating_out,expense,current
+2023-10-04,Spotify,-15.58,subscriptions,expense,current
+2023-10-05,TfL Travel Charge,-7.27,transport,expense,current
+2023-10-05,Netflix,-17.88,subscriptions,expense,current
+2023-10-06,Octopus Energy,-112.23,utilities,expense,current
+2023-10-08,Deliveroo,-35.60,eating_out,expense,credit_card
+2023-10-08,TfL Travel Charge,-13.57,transport,expense,current
+2023-10-09,Sainsbury's Local,-70.92,groceries,expense,current
+2023-10-12,Sainsbury's Local,-10.19,groceries,expense,current
+2023-10-12,Aldi Stores,-88.34,groceries,expense,current
+2023-10-12,Amazon Marketplace,-22.76,shopping,expense,credit_card
+2023-10-14,Tesco Superstore,-90.52,groceries,expense,current
+2023-10-14,Sainsbury's Local,-40.79,groceries,expense,current
+2023-10-14,Thames Water,-32.31,utilities,expense,current
+2023-10-17,Council Tax,-167.24,housing,expense,current
+2023-10-18,Deliveroo,-36.89,eating_out,expense,credit_card
+2023-10-22,Tesco Superstore,-49.65,groceries,expense,current
+2023-10-22,Aldi Stores,-42.20,groceries,expense,current
+2023-10-22,Pret A Manger,-10.37,eating_out,expense,current
+2023-10-23,Tesco Superstore,-90.80,groceries,expense,current
+2023-10-24,Tesco Superstore,-60.75,groceries,expense,current
+2023-10-25,Salary Payroll,2708.28,income,income,current
+2023-10-26,Deliveroo,-41.66,eating_out,expense,credit_card
+2023-10-27,Sainsbury's Local,-51.88,groceries,expense,current
+2023-10-27,Pret A Manger,-17.29,eating_out,expense,current
+2023-10-28,Aldi Stores,-86.29,groceries,expense,current
+2023-10-29,Aldi Stores,-42.55,groceries,expense,current
+2023-11-01,Aldi Stores,-63.25,groceries,expense,current
+2023-11-01,Rent Payment,-898.28,housing,expense,current
+2023-11-02,Tesco Superstore,-90.47,groceries,expense,current
+2023-11-03,Pret A Manger,-5.03,eating_out,expense,current
+2023-11-03,Thames Water,-31.10,utilities,expense,current
+2023-11-05,Pret A Manger,-8.51,eating_out,expense,current
+2023-11-09,Pret A Manger,-4.92,eating_out,expense,current
+2023-11-11,Amazon Marketplace,-43.01,shopping,expense,credit_card
+2023-11-14,Aldi Stores,-78.55,groceries,expense,current
+2023-11-14,Deliveroo,-27.17,eating_out,expense,credit_card
+2023-11-15,Deliveroo,-27.92,eating_out,expense,credit_card
+2023-11-15,Spotify,-12.36,subscriptions,expense,current
+2023-11-16,Aldi Stores,-19.56,groceries,expense,current
+2023-11-16,Aldi Stores,-66.46,groceries,expense,current
+2023-11-18,Council Tax,-169.94,housing,expense,current
+2023-11-19,Pret A Manger,-12.74,eating_out,expense,current
+2023-11-20,Deliveroo,-23.43,eating_out,expense,credit_card
+2023-11-21,TfL Travel Charge,-14.09,transport,expense,current
+2023-11-25,Salary Payroll,3103.03,income,income,current
+2023-11-29,Netflix,-14.00,subscriptions,expense,current
+2023-11-30,Tesco Superstore,-72.36,groceries,expense,current
+2023-11-30,Octopus Energy,-92.55,utilities,expense,current
+2023-12-01,TfL Travel Charge,-12.02,transport,expense,current
+2023-12-01,Rent Payment,-927.79,housing,expense,current
+2023-12-03,Thames Water,-47.30,utilities,expense,current
+2023-12-03,Council Tax,-108.98,housing,expense,current
+2023-12-04,Pret A Manger,-7.14,eating_out,expense,current
+2023-12-05,Netflix,-12.26,subscriptions,expense,current
+2023-12-05,Spotify,-12.80,subscriptions,expense,current
+2023-12-08,Pret A Manger,-7.90,eating_out,expense,current
+2023-12-10,Aldi Stores,-18.86,groceries,expense,current
+2023-12-11,Boots Pharmacy,-25.99,health,expense,current
+2023-12-11,Octopus Energy,-110.84,utilities,expense,current
+2023-12-12,Aldi Stores,-60.03,groceries,expense,current
+2023-12-17,Aldi Stores,-22.77,groceries,expense,current
+2023-12-17,Amazon Marketplace,-18.28,shopping,expense,credit_card
+2023-12-18,Pret A Manger,-8.90,eating_out,expense,current
+2023-12-20,TfL Travel Charge,-10.24,transport,expense,current
+2023-12-21,TfL Travel Charge,-10.98,transport,expense,current
+2023-12-23,TfL Travel Charge,-5.35,transport,expense,current
+2023-12-24,Aldi Stores,-80.11,groceries,expense,current
+2023-12-25,Salary Payroll,2515.98,income,income,current
+2023-12-25,Pret A Manger,-9.15,eating_out,expense,current
+2023-12-27,TfL Travel Charge,-15.08,transport,expense,current
+2023-12-28,Sainsbury's Local,-35.52,groceries,expense,current
+2024-01-01,Rent Payment,-1250.66,housing,expense,current
+2024-01-02,Netflix,-17.02,subscriptions,expense,current
+2024-01-03,Spotify,-13.21,subscriptions,expense,current
+2024-01-07,Sainsbury's Local,-11.67,groceries,expense,current
+2024-01-07,Sainsbury's Local,-28.20,groceries,expense,current
+2024-01-08,Sainsbury's Local,-28.66,groceries,expense,current
+2024-01-10,Tesco Superstore,-47.68,groceries,expense,current
+2024-01-12,Tesco Superstore,-54.52,groceries,expense,current
+2024-01-14,Tesco Superstore,-62.39,groceries,expense,current
+2024-01-14,Octopus Energy,-156.59,utilities,expense,current
+2024-01-18,TfL Travel Charge,-5.99,transport,expense,current
+2024-01-20,Sainsbury's Local,-34.48,groceries,expense,current
+2024-01-22,Sainsbury's Local,-40.60,groceries,expense,current
+2024-01-23,TfL Travel Charge,-7.94,transport,expense,current
+2024-01-24,Deliveroo,-12.23,eating_out,expense,credit_card
+2024-01-25,Salary Payroll,2749.31,income,income,current
+2024-01-25,Tesco Superstore,-34.67,groceries,expense,current
+2024-01-30,Council Tax,-171.56,housing,expense,current
+2024-01-31,Thames Water,-41.77,utilities,expense,current
+2024-02-01,Rent Payment,-1173.06,housing,expense,current
+2024-02-02,Amazon Marketplace,-90.76,shopping,expense,credit_card
+2024-02-03,Trainline,-37.69,transport,expense,credit_card
+2024-02-05,Boots Pharmacy,-28.78,health,expense,current
+2024-02-06,Aldi Stores,-39.98,groceries,expense,current
+2024-02-06,Deliveroo,-31.67,eating_out,expense,credit_card
+2024-02-07,Amazon Marketplace,-72.03,shopping,expense,credit_card
+2024-02-08,Pret A Manger,-15.41,eating_out,expense,current
+2024-02-09,Pret A Manger,-5.44,eating_out,expense,current
+2024-02-10,Sainsbury's Local,-34.52,groceries,expense,current
+2024-02-15,TfL Travel Charge,-7.11,transport,expense,current
+2024-02-15,TfL Travel Charge,-3.89,transport,expense,current
+2024-02-15,Amazon Marketplace,-64.79,shopping,expense,credit_card
+2024-02-15,Council Tax,-161.61,housing,expense,current
+2024-02-19,Tesco Superstore,-32.20,groceries,expense,current
+2024-02-19,Deliveroo,-28.91,eating_out,expense,credit_card
+2024-02-20,TfL Travel Charge,-11.36,transport,expense,current
+2024-02-21,Aldi Stores,-20.73,groceries,expense,current
+2024-02-21,Pret A Manger,-17.42,eating_out,expense,current
+2024-02-21,Deliveroo,-40.54,eating_out,expense,credit_card
+2024-02-21,TfL Travel Charge,-7.20,transport,expense,current
+2024-02-23,Thames Water,-39.68,utilities,expense,current
+2024-02-24,Pret A Manger,-8.89,eating_out,expense,current
+2024-02-25,Salary Payroll,2848.04,income,income,current
+2024-02-25,Pret A Manger,-6.71,eating_out,expense,current
+2024-02-25,Deliveroo,-16.59,eating_out,expense,credit_card
+2024-02-25,Deliveroo,-26.82,eating_out,expense,credit_card
+2024-02-26,TfL Travel Charge,-11.21,transport,expense,current
+2024-02-26,Amazon Marketplace,-73.00,shopping,expense,credit_card
+2024-02-26,Amazon Marketplace,-58.37,shopping,expense,credit_card
+2024-02-26,Octopus Energy,-126.81,utilities,expense,current
+2024-02-27,Netflix,-11.39,subscriptions,expense,current
+2024-02-28,Spotify,-14.50,subscriptions,expense,current
+2024-03-01,Rent Payment,-931.12,housing,expense,current
+2024-03-03,Netflix,-11.95,subscriptions,expense,current
+2024-03-04,Sainsbury's Local,-12.42,groceries,expense,current
+2024-03-07,Trainline,-25.16,transport,expense,credit_card
+2024-03-10,Tesco Superstore,-42.95,groceries,expense,current
+2024-03-10,TfL Travel Charge,-15.19,transport,expense,current
+2024-03-10,Trainline,-13.33,transport,expense,credit_card
+2024-03-11,Octopus Energy,-79.34,utilities,expense,current
+2024-03-12,Trainline,-42.91,transport,expense,credit_card
+2024-03-13,Sainsbury's Local,-45.38,groceries,expense,current
+2024-03-17,Spotify,-15.51,subscriptions,expense,current
+2024-03-19,Deliveroo,-22.00,eating_out,expense,credit_card
+2024-03-20,Tesco Superstore,-40.08,groceries,expense,current
+2024-03-20,Thames Water,-49.01,utilities,expense,current
+2024-03-21,TfL Travel Charge,-10.27,transport,expense,current
+2024-03-22,Trainline,-18.82,transport,expense,credit_card
+2024-03-23,TfL Travel Charge,-4.68,transport,expense,current
+2024-03-24,Sainsbury's Local,-27.04,groceries,expense,current
+2024-03-25,Salary Payroll,3026.48,income,income,current
+2024-03-25,Tesco Superstore,-44.16,groceries,expense,current
+2024-03-25,Trainline,-36.95,transport,expense,credit_card
+2024-03-26,Council Tax,-166.69,housing,expense,current
+2024-03-27,TfL Travel Charge,-13.29,transport,expense,current
+2024-03-30,Deliveroo,-31.91,eating_out,expense,credit_card
+2024-04-01,Amazon Marketplace,-47.15,shopping,expense,credit_card
+2024-04-01,Rent Payment,-1174.98,housing,expense,current
+2024-04-04,Thames Water,-38.84,utilities,expense,current
+2024-04-06,Deliveroo,-24.56,eating_out,expense,credit_card
+2024-04-08,Sainsbury's Local,-23.68,groceries,expense,current
+2024-04-09,Netflix,-16.33,subscriptions,expense,current
+2024-04-10,Council Tax,-116.01,housing,expense,current
+2024-04-12,Boots Pharmacy,-24.82,health,expense,current
+2024-04-12,Octopus Energy,-189.37,utilities,expense,current
+2024-04-15,Sainsbury's Local,-58.15,groceries,expense,current
+2024-04-15,Deliveroo,-41.53,eating_out,expense,credit_card
+2024-04-16,TfL Travel Charge,-3.68,transport,expense,current
+2024-04-17,Deliveroo,-23.46,eating_out,expense,credit_card
+2024-04-18,TfL Travel Charge,-14.36,transport,expense,current
+2024-04-22,Tesco Superstore,-46.10,groceries,expense,current
+2024-04-23,TfL Travel Charge,-15.15,transport,expense,current
+2024-04-25,Salary Payroll,3442.92,income,income,current
+2024-04-25,Sainsbury's Local,-48.91,groceries,expense,current
+2024-04-25,Deliveroo,-35.08,eating_out,expense,credit_card
+2024-04-26,Sainsbury's Local,-28.73,groceries,expense,current
+2024-04-26,Deliveroo,-36.51,eating_out,expense,credit_card
+2024-04-27,Spotify,-13.58,subscriptions,expense,current
+2024-04-29,Amazon Marketplace,-99.47,shopping,expense,credit_card
+2024-05-01,Tesco Superstore,-49.23,groceries,expense,current
+2024-05-01,Octopus Energy,-133.38,utilities,expense,current
+2024-05-01,Rent Payment,-1036.65,housing,expense,current
+2024-05-03,Spotify,-16.81,subscriptions,expense,current
+2024-05-03,Council Tax,-133.57,housing,expense,current
+2024-05-08,Pret A Manger,-14.87,eating_out,expense,current
+2024-05-08,TfL Travel Charge,-9.70,transport,expense,current
+2024-05-08,Shell Service Station,-71.89,transport,expense,credit_card
+2024-05-16,Tesco Superstore,-74.98,groceries,expense,current
+2024-05-18,Aldi Stores,-77.62,groceries,expense,current
+2024-05-20,Aldi Stores,-85.52,groceries,expense,current
+2024-05-20,TfL Travel Charge,-14.77,transport,expense,current
+2024-05-21,Deliveroo,-19.15,eating_out,expense,credit_card
+2024-05-21,TfL Travel Charge,-9.97,transport,expense,current
+2024-05-21,Thames Water,-43.98,utilities,expense,current
+2024-05-22,Netflix,-12.30,subscriptions,expense,current
+2024-05-25,Salary Payroll,3459.14,income,income,current
+2024-05-27,TfL Travel Charge,-3.82,transport,expense,current
+2024-06-01,Rent Payment,-1025.77,housing,expense,current
+2024-06-02,TfL Travel Charge,-9.15,transport,expense,current
+2024-06-03,Spotify,-11.86,subscriptions,expense,current
+2024-06-04,Boots Pharmacy,-19.69,health,expense,current
+2024-06-06,Thames Water,-52.40,utilities,expense,current
+2024-06-07,Pret A Manger,-4.61,eating_out,expense,current
+2024-06-07,TfL Travel Charge,-12.79,transport,expense,current
+2024-06-09,TfL Travel Charge,-11.52,transport,expense,current
+2024-06-10,Octopus Energy,-151.01,utilities,expense,current
+2024-06-11,Pret A Manger,-16.40,eating_out,expense,current
+2024-06-11,Trainline,-81.82,transport,expense,credit_card
+2024-06-12,Council Tax,-174.60,housing,expense,current
+2024-06-13,Trainline,-43.90,transport,expense,credit_card
+2024-06-15,Aldi Stores,-73.21,groceries,expense,current
+2024-06-16,Aldi Stores,-88.56,groceries,expense,current
+2024-06-18,Sainsbury's Local,-10.97,groceries,expense,current
+2024-06-21,Sainsbury's Local,-30.68,groceries,expense,current
+2024-06-23,Aldi Stores,-25.11,groceries,expense,current
+2024-06-24,Tesco Superstore,-76.03,groceries,expense,current
+2024-06-25,Salary Payroll,2829.28,income,income,current
+2024-06-26,Aldi Stores,-62.38,groceries,expense,current
+2024-06-27,Amazon Marketplace,-56.23,shopping,expense,credit_card
+2024-06-28,TfL Travel Charge,-6.72,transport,expense,current
+2024-06-28,TfL Travel Charge,-13.15,transport,expense,current
+2024-06-29,Trainline,-66.26,transport,expense,credit_card
+2024-06-30,Netflix,-14.47,subscriptions,expense,current
+2024-07-01,Sainsbury's Local,-18.72,groceries,expense,current
+2024-07-01,TfL Travel Charge,-15.49,transport,expense,current
+2024-07-01,Rent Payment,-999.98,housing,expense,current
+2024-07-03,Sainsbury's Local,-10.33,groceries,expense,current
+2024-07-03,Amazon Marketplace,-57.85,shopping,expense,credit_card
+2024-07-05,Amazon Marketplace,-30.42,shopping,expense,credit_card
+2024-07-08,TfL Travel Charge,-11.44,transport,expense,current
+2024-07-10,Spotify,-16.96,subscriptions,expense,current
+2024-07-15,Sainsbury's Local,-53.43,groceries,expense,current
+2024-07-15,Aldi Stores,-26.51,groceries,expense,current
+2024-07-15,Amazon Marketplace,-103.52,shopping,expense,credit_card
+2024-07-16,TfL Travel Charge,-12.56,transport,expense,current
+2024-07-17,Deliveroo,-29.22,eating_out,expense,credit_card
+2024-07-18,Thames Water,-30.21,utilities,expense,current
+2024-07-20,Sainsbury's Local,-17.57,groceries,expense,current
+2024-07-20,Aldi Stores,-57.54,groceries,expense,current
+2024-07-21,Tesco Superstore,-18.23,groceries,expense,current
+2024-07-22,Sainsbury's Local,-61.67,groceries,expense,current
+2024-07-22,Octopus Energy,-188.46,utilities,expense,current
+2024-07-23,Netflix,-16.41,subscriptions,expense,current
+2024-07-23,Amazon Marketplace,-27.34,shopping,expense,credit_card
+2024-07-23,Council Tax,-161.77,housing,expense,current
+2024-07-25,Salary Payroll,3126.34,income,income,current
+2024-07-31,Aldi Stores,-42.16,groceries,expense,current
+2024-08-01,Tesco Superstore,-77.60,groceries,expense,current
+2024-08-01,Rent Payment,-1140.32,housing,expense,current
+2024-08-03,TfL Travel Charge,-13.70,transport,expense,current
+2024-08-05,Trainline,-68.05,transport,expense,credit_card
+2024-08-05,Trainline,-21.06,transport,expense,credit_card
+2024-08-06,Trainline,-58.70,transport,expense,credit_card
+2024-08-06,Thames Water,-45.09,utilities,expense,current
+2024-08-07,Tesco Superstore,-30.61,groceries,expense,current
+2024-08-08,Tesco Superstore,-77.74,groceries,expense,current
+2024-08-08,Netflix,-17.53,subscriptions,expense,current
+2024-08-11,TfL Travel Charge,-4.63,transport,expense,current
+2024-08-13,Aldi Stores,-19.93,groceries,expense,current
+2024-08-15,TfL Travel Charge,-11.35,transport,expense,current
+2024-08-17,TfL Travel Charge,-9.06,transport,expense,current
+2024-08-19,Tesco Superstore,-41.95,groceries,expense,current
+2024-08-20,Octopus Energy,-146.88,utilities,expense,current
+2024-08-21,Amazon Marketplace,-36.07,shopping,expense,credit_card
+2024-08-25,Salary Payroll,3151.47,income,income,current
+2024-08-26,Tesco Superstore,-42.62,groceries,expense,current
+2024-08-27,Trainline,-75.38,transport,expense,credit_card
+2024-08-29,Spotify,-16.58,subscriptions,expense,current
+2024-08-29,Council Tax,-154.96,housing,expense,current
+2024-08-30,Trainline,-43.58,transport,expense,credit_card
+2024-09-01,Rent Payment,-874.33,housing,expense,current
+2024-09-02,Tesco Superstore,-14.35,groceries,expense,current
+2024-09-03,Aldi Stores,-37.31,groceries,expense,current
+2024-09-04,TfL Travel Charge,-9.69,transport,expense,current
+2024-09-07,Thames Water,-60.87,utilities,expense,current
+2024-09-11,Pret A Manger,-10.50,eating_out,expense,current
+2024-09-11,Deliveroo,-37.84,eating_out,expense,credit_card
+2024-09-13,Aldi Stores,-75.55,groceries,expense,current
+2024-09-13,Deliveroo,-22.36,eating_out,expense,credit_card
+2024-09-13,Trainline,-15.69,transport,expense,credit_card
+2024-09-13,Octopus Energy,-77.67,utilities,expense,current
+2024-09-15,TfL Travel Charge,-7.15,transport,expense,current
+2024-09-15,TfL Travel Charge,-4.59,transport,expense,current
+2024-09-15,Amazon Marketplace,-119.55,shopping,expense,credit_card
+2024-09-16,Pret A Manger,-10.15,eating_out,expense,current
+2024-09-16,Amazon Marketplace,-93.47,shopping,expense,credit_card
+2024-09-19,Tesco Superstore,-29.50,groceries,expense,current
+2024-09-19,Spotify,-12.28,subscriptions,expense,current
+2024-09-21,Tesco Superstore,-59.87,groceries,expense,current
+2024-09-21,Sainsbury's Local,-41.37,groceries,expense,current
+2024-09-25,Salary Payroll,3115.65,income,income,current
+2024-09-25,Tesco Superstore,-90.73,groceries,expense,current
+2024-09-26,Aldi Stores,-51.22,groceries,expense,current
+2024-09-27,Council Tax,-152.80,housing,expense,current
+2024-09-28,Tesco Superstore,-15.42,groceries,expense,current
+2024-09-28,Deliveroo,-34.03,eating_out,expense,credit_card
+2024-09-29,Netflix,-17.73,subscriptions,expense,current
+2024-10-01,Rent Payment,-963.77,housing,expense,current
+2024-10-02,Tesco Superstore,-15.76,groceries,expense,current
+2024-10-02,TfL Travel Charge,-8.22,transport,expense,current
+2024-10-04,Tesco Superstore,-12.68,groceries,expense,current
+2024-10-04,Aldi Stores,-66.03,groceries,expense,current
+2024-10-04,Aldi Stores,-24.65,groceries,expense,current
+2024-10-04,Amazon Marketplace,-45.10,shopping,expense,credit_card
+2024-10-05,TfL Travel Charge,-3.59,transport,expense,current
+2024-10-10,Sainsbury's Local,-32.29,groceries,expense,current
+2024-10-11,Spotify,-12.08,subscriptions,expense,current
+2024-10-12,Tesco Superstore,-33.95,groceries,expense,current
+2024-10-12,Tesco Superstore,-75.40,groceries,expense,current
+2024-10-12,Amazon Marketplace,-99.36,shopping,expense,credit_card
+2024-10-15,TfL Travel Charge,-9.16,transport,expense,current
+2024-10-16,Amazon Marketplace,-71.05,shopping,expense,credit_card
+2024-10-16,Octopus Energy,-78.06,utilities,expense,current
+2024-10-17,Sainsbury's Local,-12.93,groceries,expense,current
+2024-10-17,Council Tax,-143.44,housing,expense,current
+2024-10-18,Aldi Stores,-89.01,groceries,expense,current
+2024-10-19,Amazon Marketplace,-117.75,shopping,expense,credit_card
+2024-10-20,Aldi Stores,-35.98,groceries,expense,current
+2024-10-20,Netflix,-12.13,subscriptions,expense,current
+2024-10-23,Amazon Marketplace,-67.62,shopping,expense,credit_card
+2024-10-25,Salary Payroll,3169.69,income,income,current
+2024-10-25,Thames Water,-50.29,utilities,expense,current
+2024-10-26,Aldi Stores,-44.54,groceries,expense,current
+2024-10-26,TfL Travel Charge,-12.28,transport,expense,current
+2024-10-28,Boots Pharmacy,-49.94,health,expense,current
+2024-10-29,Tesco Superstore,-47.77,groceries,expense,current
+2024-10-29,TfL Travel Charge,-4.94,transport,expense,current
+2024-11-01,Rent Payment,-1071.19,housing,expense,current
+2024-11-03,Thames Water,-60.48,utilities,expense,current
+2024-11-04,Tesco Superstore,-90.70,groceries,expense,current
+2024-11-06,Pret A Manger,-8.39,eating_out,expense,current
+2024-11-07,Sainsbury's Local,-35.67,groceries,expense,current
+2024-11-07,Aldi Stores,-25.36,groceries,expense,current
+2024-11-07,TfL Travel Charge,-10.93,transport,expense,current
+2024-11-07,Council Tax,-143.33,housing,expense,current
+2024-11-08,TfL Travel Charge,-10.26,transport,expense,current
+2024-11-09,TfL Travel Charge,-15.45,transport,expense,current
+2024-11-10,Octopus Energy,-167.53,utilities,expense,current
+2024-11-12,Pret A Manger,-8.79,eating_out,expense,current
+2024-11-12,Spotify,-12.21,subscriptions,expense,current
+2024-11-13,Amazon Marketplace,-83.78,shopping,expense,credit_card
+2024-11-13,Amazon Marketplace,-108.33,shopping,expense,credit_card
+2024-11-15,Tesco Superstore,-27.84,groceries,expense,current
+2024-11-18,Pret A Manger,-10.44,eating_out,expense,current
+2024-11-19,Tesco Superstore,-32.10,groceries,expense,current
+2024-11-19,Amazon Marketplace,-40.23,shopping,expense,credit_card
+2024-11-22,Tesco Superstore,-24.27,groceries,expense,current
+2024-11-22,Aldi Stores,-57.07,groceries,expense,current
+2024-11-23,Aldi Stores,-69.56,groceries,expense,current
+2024-11-23,Netflix,-15.92,subscriptions,expense,current
+2024-11-24,Aldi Stores,-80.46,groceries,expense,current
+2024-11-25,Salary Payroll,3141.93,income,income,current
+2024-11-25,Sainsbury's Local,-35.50,groceries,expense,current
+2024-11-28,Pret A Manger,-13.46,eating_out,expense,current
+2024-12-01,Rent Payment,-943.10,housing,expense,current
+2024-12-02,Spotify,-12.02,subscriptions,expense,current
+2024-12-04,Octopus Energy,-97.17,utilities,expense,current
+2024-12-05,Tesco Superstore,-69.78,groceries,expense,current
+2024-12-05,Amazon Marketplace,-107.60,shopping,expense,credit_card
+2024-12-06,Aldi Stores,-88.34,groceries,expense,current
+2024-12-07,Pret A Manger,-10.68,eating_out,expense,current
+2024-12-08,Tesco Superstore,-60.71,groceries,expense,current
+2024-12-10,Pret A Manger,-14.58,eating_out,expense,current
+2024-12-10,Amazon Marketplace,-118.10,shopping,expense,credit_card
+2024-12-16,Amazon Marketplace,-68.85,shopping,expense,credit_card
+2024-12-18,Aldi Stores,-15.39,groceries,expense,current
+2024-12-19,Council Tax,-168.26,housing,expense,current
+2024-12-21,Tesco Superstore,-56.08,groceries,expense,current
+2024-12-21,Pret A Manger,-8.50,eating_out,expense,current
+2024-12-21,Amazon Marketplace,-58.89,shopping,expense,credit_card
+2024-12-21,Thames Water,-52.86,utilities,expense,current
+2024-12-23,Sainsbury's Local,-35.69,groceries,expense,current
+2024-12-24,Tesco Superstore,-21.07,groceries,expense,current
+2024-12-24,Deliveroo,-18.97,eating_out,expense,credit_card
+2024-12-25,Salary Payroll,3360.75,income,income,current
+2024-12-25,Pret A Manger,-4.83,eating_out,expense,current
+2024-12-29,Tesco Superstore,-16.21,groceries,expense,current
+2024-12-29,Deliveroo,-17.25,eating_out,expense,credit_card
+2024-12-30,Deliveroo,-33.69,eating_out,expense,credit_card
+2024-12-30,Deliveroo,-13.12,eating_out,expense,credit_card
+2024-12-30,Deliveroo,-37.13,eating_out,expense,credit_card
+2024-12-30,Amazon Marketplace,-75.51,shopping,expense,credit_card
+2024-12-31,Netflix,-17.55,subscriptions,expense,current
+2025-01-01,Rent Payment,-1208.46,housing,expense,current
+2025-01-03,Tesco Superstore,-54.77,groceries,expense,current
+2025-01-03,Amazon Marketplace,-105.79,shopping,expense,credit_card
+2025-01-03,Amazon Marketplace,-86.82,shopping,expense,credit_card
+2025-01-04,Tesco Superstore,-45.27,groceries,expense,current
+2025-01-04,Amazon Marketplace,-110.73,shopping,expense,credit_card
+2025-01-04,Thames Water,-45.69,utilities,expense,current
+2025-01-05,Tesco Superstore,-27.34,groceries,expense,current
+2025-01-06,Pret A Manger,-10.52,eating_out,expense,current
+2025-01-06,Octopus Energy,-136.72,utilities,expense,current
+2025-01-08,Deliveroo,-23.03,eating_out,expense,credit_card
+2025-01-08,Spotify,-11.52,subscriptions,expense,current
+2025-01-09,Aldi Stores,-57.97,groceries,expense,current
+2025-01-10,Deliveroo,-33.11,eating_out,expense,credit_card
+2025-01-10,Deliveroo,-39.48,eating_out,expense,credit_card
+2025-01-13,Sainsbury's Local,-8.46,groceries,expense,current
+2025-01-14,Tesco Superstore,-45.66,groceries,expense,current
+2025-01-15,TfL Travel Charge,-9.22,transport,expense,current
+2025-01-15,Council Tax,-176.91,housing,expense,current
+2025-01-17,Amazon Marketplace,-66.86,shopping,expense,credit_card
+2025-01-18,Amazon Marketplace,-14.92,shopping,expense,credit_card
+2025-01-20,TfL Travel Charge,-12.72,transport,expense,current
+2025-01-21,Deliveroo,-32.71,eating_out,expense,credit_card
+2025-01-23,Aldi Stores,-64.03,groceries,expense,current
+2025-01-24,Aldi Stores,-37.65,groceries,expense,current
+2025-01-25,Salary Payroll,3191.84,income,income,current
+2025-01-25,Sainsbury's Local,-23.78,groceries,expense,current
+2025-01-26,Netflix,-16.29,subscriptions,expense,current
+2025-01-29,Tesco Superstore,-83.06,groceries,expense,current
+2025-01-29,Deliveroo,-39.69,eating_out,expense,credit_card
+2025-02-01,Tesco Superstore,-33.12,groceries,expense,current
+2025-02-01,Netflix,-17.18,subscriptions,expense,current
+2025-02-01,Rent Payment,-968.45,housing,expense,current
+2025-02-02,Sainsbury's Local,-44.26,groceries,expense,current
+2025-02-02,TfL Travel Charge,-12.95,transport,expense,current
+2025-02-03,Sainsbury's Local,-31.08,groceries,expense,current
+2025-02-03,Sainsbury's Local,-70.62,groceries,expense,current
+2025-02-04,Pret A Manger,-16.04,eating_out,expense,current
+2025-02-05,Aldi Stores,-28.50,groceries,expense,current
+2025-02-05,Deliveroo,-23.79,eating_out,expense,credit_card
+2025-02-07,TfL Travel Charge,-5.02,transport,expense,current
+2025-02-07,Amazon Marketplace,-34.25,shopping,expense,credit_card
+2025-02-08,Deliveroo,-33.84,eating_out,expense,credit_card
+2025-02-08,TfL Travel Charge,-7.93,transport,expense,current
+2025-02-10,Tesco Superstore,-67.84,groceries,expense,current
+2025-02-10,Deliveroo,-12.68,eating_out,expense,credit_card
+2025-02-10,Boots Pharmacy,-30.19,health,expense,current
+2025-02-12,TfL Travel Charge,-6.22,transport,expense,current
+2025-02-13,Tesco Superstore,-72.03,groceries,expense,current
+2025-02-13,Aldi Stores,-43.08,groceries,expense,current
+2025-02-14,Sainsbury's Local,-12.89,groceries,expense,current
+2025-02-14,Aldi Stores,-63.44,groceries,expense,current
+2025-02-15,Tesco Superstore,-16.79,groceries,expense,current
+2025-02-15,Amazon Marketplace,-12.95,shopping,expense,credit_card
+2025-02-16,Sainsbury's Local,-74.07,groceries,expense,current
+2025-02-17,Council Tax,-183.86,housing,expense,current
+2025-02-19,Tesco Superstore,-46.48,groceries,expense,current
+2025-02-19,Octopus Energy,-180.39,utilities,expense,current
+2025-02-20,Spotify,-10.46,subscriptions,expense,current
+2025-02-21,Pret A Manger,-11.55,eating_out,expense,current
+2025-02-22,Pret A Manger,-9.26,eating_out,expense,current
+2025-02-22,Thames Water,-48.33,utilities,expense,current
+2025-02-24,Aldi Stores,-72.44,groceries,expense,current
+2025-02-24,Deliveroo,-25.89,eating_out,expense,credit_card
+2025-02-24,TfL Travel Charge,-15.19,transport,expense,current
+2025-02-24,Amazon Marketplace,-13.45,shopping,expense,credit_card
+2025-02-25,Salary Payroll,3339.56,income,income,current
+2025-02-25,Deliveroo,-37.04,eating_out,expense,credit_card
+2025-02-25,Amazon Marketplace,-92.49,shopping,expense,credit_card
+2025-02-28,Pret A Manger,-17.50,eating_out,expense,current
+2025-02-28,Amazon Marketplace,-83.27,shopping,expense,credit_card
+2025-03-01,Rent Payment,-1328.51,housing,expense,current
+2025-03-02,Pret A Manger,-11.78,eating_out,expense,current
+2025-03-05,Shell Service Station,-68.44,transport,expense,credit_card
+2025-03-08,TfL Travel Charge,-9.99,transport,expense,current
+2025-03-09,Shell Service Station,-58.31,transport,expense,credit_card
+2025-03-10,TfL Travel Charge,-14.04,transport,expense,current
+2025-03-11,Pret A Manger,-15.00,eating_out,expense,current
+2025-03-13,Pret A Manger,-13.01,eating_out,expense,current
+2025-03-13,Amazon Marketplace,-13.77,shopping,expense,credit_card
+2025-03-14,Shell Service Station,-59.76,transport,expense,credit_card
+2025-03-18,Shell Service Station,-89.88,transport,expense,credit_card
+2025-03-18,Spotify,-12.59,subscriptions,expense,current
+2025-03-18,Octopus Energy,-158.30,utilities,expense,current
+2025-03-19,Tesco Superstore,-58.21,groceries,expense,current
+2025-03-20,Amazon Marketplace,-83.45,shopping,expense,credit_card
+2025-03-25,Salary Payroll,2693.15,income,income,current
+2025-03-25,TfL Travel Charge,-7.89,transport,expense,current
+2025-03-26,Boots Pharmacy,-8.64,health,expense,current
+2025-03-30,Netflix,-15.52,subscriptions,expense,current
+2025-03-30,Thames Water,-35.10,utilities,expense,current
+2025-03-31,Pret A Manger,-17.61,eating_out,expense,current
+2025-03-31,Council Tax,-179.97,housing,expense,current
+2025-04-01,Rent Payment,-1269.53,housing,expense,current
+2025-04-02,Pret A Manger,-8.38,eating_out,expense,current
+2025-04-02,Council Tax,-170.44,housing,expense,current
+2025-04-06,Amazon Marketplace,-97.04,shopping,expense,credit_card
+2025-04-07,Tesco Superstore,-62.17,groceries,expense,current
+2025-04-08,Tesco Superstore,-44.92,groceries,expense,current
+2025-04-08,Pret A Manger,-11.88,eating_out,expense,current
+2025-04-10,TfL Travel Charge,-12.36,transport,expense,current
+2025-04-11,TfL Travel Charge,-4.98,transport,expense,current
+2025-04-12,Sainsbury's Local,-43.75,groceries,expense,current
+2025-04-12,Sainsbury's Local,-28.66,groceries,expense,current
+2025-04-12,Pret A Manger,-16.80,eating_out,expense,current
+2025-04-16,Sainsbury's Local,-42.36,groceries,expense,current
+2025-04-16,TfL Travel Charge,-13.83,transport,expense,current
+2025-04-16,Netflix,-16.33,subscriptions,expense,current
+2025-04-18,Amazon Marketplace,-23.68,shopping,expense,credit_card
+2025-04-19,TfL Travel Charge,-15.15,transport,expense,current
+2025-04-19,TfL Travel Charge,-5.99,transport,expense,current
+2025-04-23,Tesco Superstore,-87.90,groceries,expense,current
+2025-04-24,Amazon Marketplace,-59.61,shopping,expense,credit_card
+2025-04-25,Salary Payroll,3265.62,income,income,current
+2025-04-25,Tesco Superstore,-57.82,groceries,expense,current
+2025-04-26,Sainsbury's Local,-39.22,groceries,expense,current
+2025-04-30,Amazon Marketplace,-62.69,shopping,expense,credit_card
+2025-05-01,TfL Travel Charge,-10.17,transport,expense,current
+2025-05-01,Rent Payment,-1192.02,housing,expense,current
+2025-05-05,Tesco Superstore,-17.64,groceries,expense,current
+2025-05-05,Netflix,-11.66,subscriptions,expense,current
+2025-05-08,Octopus Energy,-127.78,utilities,expense,current
+2025-05-09,Spotify,-14.33,subscriptions,expense,current
+2025-05-10,TfL Travel Charge,-6.57,transport,expense,current
+2025-05-12,Boots Pharmacy,-24.84,health,expense,current
+2025-05-14,TfL Travel Charge,-12.07,transport,expense,current
+2025-05-17,Tesco Superstore,-12.76,groceries,expense,current
+2025-05-22,Sainsbury's Local,-49.39,groceries,expense,current
+2025-05-24,TfL Travel Charge,-3.22,transport,expense,current
+2025-05-25,Salary Payroll,3290.77,income,income,current
+2025-05-27,TfL Travel Charge,-3.22,transport,expense,current
+2025-05-28,Council Tax,-157.30,housing,expense,current
+2025-06-01,Rent Payment,-1159.31,housing,expense,current
+2025-06-02,Sainsbury's Local,-43.39,groceries,expense,current
+2025-06-02,Aldi Stores,-50.66,groceries,expense,current
+2025-06-03,Shell Service Station,-48.93,transport,expense,credit_card
+2025-06-03,Council Tax,-162.05,housing,expense,current
+2025-06-06,Tesco Superstore,-12.78,groceries,expense,current
+2025-06-13,Thames Water,-47.92,utilities,expense,current
+2025-06-14,Shell Service Station,-38.22,transport,expense,credit_card
+2025-06-14,Octopus Energy,-183.23,utilities,expense,current
+2025-06-18,Tesco Superstore,-43.48,groceries,expense,current
+2025-06-18,Trainline,-61.42,transport,expense,credit_card
+2025-06-19,TfL Travel Charge,-6.89,transport,expense,current
+2025-06-21,Tesco Superstore,-51.51,groceries,expense,current
+2025-06-22,Aldi Stores,-84.31,groceries,expense,current
+2025-06-22,Aldi Stores,-55.73,groceries,expense,current
+2025-06-24,Trainline,-84.16,transport,expense,credit_card
+2025-06-25,Salary Payroll,3164.88,income,income,current
+2025-06-25,Deliveroo,-29.61,eating_out,expense,credit_card
+2025-06-25,Trainline,-36.22,transport,expense,credit_card
+2025-06-25,Shell Service Station,-55.44,transport,expense,credit_card
+2025-06-25,Netflix,-15.16,subscriptions,expense,current
+2025-06-26,Trainline,-66.00,transport,expense,credit_card
+2025-06-26,Spotify,-14.43,subscriptions,expense,current
+2025-06-27,Deliveroo,-36.62,eating_out,expense,credit_card
+2025-06-28,Tesco Superstore,-18.86,groceries,expense,current
+2025-06-28,Sainsbury's Local,-45.91,groceries,expense,current
+2025-06-29,Sainsbury's Local,-73.25,groceries,expense,current
+2025-06-29,Aldi Stores,-84.42,groceries,expense,current
+2025-06-30,Aldi Stores,-17.47,groceries,expense,current
+2025-07-01,Aldi Stores,-79.78,groceries,expense,current
+2025-07-01,Rent Payment,-1334.36,housing,expense,current
+2025-07-03,Tesco Superstore,-41.94,groceries,expense,current
+2025-07-04,Aldi Stores,-53.43,groceries,expense,current
+2025-07-05,Sainsbury's Local,-26.07,groceries,expense,current
+2025-07-05,Shell Service Station,-62.47,transport,expense,credit_card
+2025-07-06,Pret A Manger,-12.01,eating_out,expense,current
+2025-07-06,TfL Travel Charge,-4.90,transport,expense,current
+2025-07-06,Thames Water,-44.29,utilities,expense,current
+2025-07-07,Shell Service Station,-70.63,transport,expense,credit_card
+2025-07-08,Pret A Manger,-17.90,eating_out,expense,current
+2025-07-11,Tesco Superstore,-73.39,groceries,expense,current
+2025-07-11,Aldi Stores,-59.85,groceries,expense,current
+2025-07-11,Netflix,-16.62,subscriptions,expense,current
+2025-07-12,Aldi Stores,-16.97,groceries,expense,current
+2025-07-14,Sainsbury's Local,-13.85,groceries,expense,current
+2025-07-14,TfL Travel Charge,-8.65,transport,expense,current
+2025-07-16,TfL Travel Charge,-6.91,transport,expense,current
+2025-07-16,Council Tax,-160.60,housing,expense,current
+2025-07-20,Aldi Stores,-56.57,groceries,expense,current
+2025-07-24,Pret A Manger,-14.91,eating_out,expense,current
+2025-07-25,Salary Payroll,2744.77,income,income,current
+2025-07-25,Sainsbury's Local,-37.80,groceries,expense,current
+2025-07-27,Shell Service Station,-58.74,transport,expense,credit_card
+2025-07-27,Spotify,-13.00,subscriptions,expense,current
+2025-07-29,Pret A Manger,-16.62,eating_out,expense,current
+2025-07-31,Trainline,-38.36,transport,expense,credit_card
+2025-07-31,Shell Service Station,-53.28,transport,expense,credit_card
+2025-07-31,Octopus Energy,-111.88,utilities,expense,current
+2025-08-01,Rent Payment,-1110.56,housing,expense,current
+2025-08-04,Deliveroo,-39.43,eating_out,expense,credit_card
+2025-08-04,Netflix,-11.73,subscriptions,expense,current
+2025-08-05,Aldi Stores,-65.47,groceries,expense,current
+2025-08-05,Aldi Stores,-33.95,groceries,expense,current
+2025-08-08,Aldi Stores,-62.50,groceries,expense,current
+2025-08-12,Tesco Superstore,-77.23,groceries,expense,current
+2025-08-12,Amazon Marketplace,-32.76,shopping,expense,credit_card
+2025-08-12,Amazon Marketplace,-64.05,shopping,expense,credit_card
+2025-08-13,TfL Travel Charge,-11.81,transport,expense,current
+2025-08-14,Pret A Manger,-16.17,eating_out,expense,current
+2025-08-15,Sainsbury's Local,-55.46,groceries,expense,current
+2025-08-15,Thames Water,-38.60,utilities,expense,current
+2025-08-16,Pret A Manger,-17.87,eating_out,expense,current
+2025-08-16,Amazon Marketplace,-119.74,shopping,expense,credit_card
+2025-08-17,Spotify,-13.56,subscriptions,expense,current
+2025-08-18,Pret A Manger,-12.15,eating_out,expense,current
+2025-08-19,Tesco Superstore,-21.45,groceries,expense,current
+2025-08-20,TfL Travel Charge,-5.16,transport,expense,current
+2025-08-21,Deliveroo,-28.11,eating_out,expense,credit_card
+2025-08-21,TfL Travel Charge,-3.58,transport,expense,current
+2025-08-23,Amazon Marketplace,-84.11,shopping,expense,credit_card
+2025-08-24,Octopus Energy,-170.60,utilities,expense,current
+2025-08-24,Council Tax,-112.81,housing,expense,current
+2025-08-25,Salary Payroll,3514.54,income,income,current
+2025-08-25,Sainsbury's Local,-20.06,groceries,expense,current
+2025-08-25,Amazon Marketplace,-51.81,shopping,expense,credit_card
+2025-08-26,Aldi Stores,-68.64,groceries,expense,current
+2025-08-26,Deliveroo,-33.05,eating_out,expense,credit_card
+2025-08-27,Tesco Superstore,-43.21,groceries,expense,current
+2025-08-27,Sainsbury's Local,-61.44,groceries,expense,current
+2025-08-30,Pret A Manger,-11.09,eating_out,expense,current
+2025-08-31,Sainsbury's Local,-44.86,groceries,expense,current
+2025-08-31,Sainsbury's Local,-56.72,groceries,expense,current
+2025-08-31,Boots Pharmacy,-25.80,health,expense,current
+2025-09-01,Rent Payment,-1118.69,housing,expense,current
+2025-09-04,Tesco Superstore,-40.48,groceries,expense,current
+2025-09-04,Netflix,-13.74,subscriptions,expense,current
+2025-09-05,Amazon Marketplace,-17.49,shopping,expense,credit_card
+2025-09-06,Sainsbury's Local,-24.34,groceries,expense,current
+2025-09-06,Aldi Stores,-62.23,groceries,expense,current
+2025-09-06,Thames Water,-41.05,utilities,expense,current
+2025-09-06,Council Tax,-179.46,housing,expense,current
+2025-09-07,Pret A Manger,-12.60,eating_out,expense,current
+2025-09-08,Amazon Marketplace,-43.08,shopping,expense,credit_card
+2025-09-13,Aldi Stores,-32.39,groceries,expense,current
+2025-09-14,Pret A Manger,-10.29,eating_out,expense,current
+2025-09-15,Aldi Stores,-56.99,groceries,expense,current
+2025-09-15,TfL Travel Charge,-7.24,transport,expense,current
+2025-09-17,TfL Travel Charge,-14.21,transport,expense,current
+2025-09-19,Deliveroo,-35.88,eating_out,expense,credit_card
+2025-09-19,Amazon Marketplace,-110.89,shopping,expense,credit_card
+2025-09-20,Spotify,-15.91,subscriptions,expense,current
+2025-09-20,Octopus Energy,-119.67,utilities,expense,current
+2025-09-22,TfL Travel Charge,-4.48,transport,expense,current
+2025-09-23,Tesco Superstore,-15.71,groceries,expense,current
+2025-09-23,Pret A Manger,-9.44,eating_out,expense,current
+2025-09-23,Boots Pharmacy,-14.15,health,expense,current
+2025-09-24,Sainsbury's Local,-70.30,groceries,expense,current
+2025-09-24,Pret A Manger,-9.54,eating_out,expense,current
+2025-09-25,Salary Payroll,3216.44,income,income,current
+2025-09-26,Deliveroo,-34.57,eating_out,expense,credit_card
+2025-09-28,Tesco Superstore,-21.55,groceries,expense,current
+2025-09-28,Deliveroo,-15.05,eating_out,expense,credit_card
+2025-10-01,Deliveroo,-14.48,eating_out,expense,credit_card
+2025-10-01,Rent Payment,-866.12,housing,expense,current
+2025-10-02,Tesco Superstore,-49.43,groceries,expense,current
+2025-10-03,Council Tax,-173.98,housing,expense,current
+2025-10-06,Deliveroo,-25.32,eating_out,expense,credit_card
+2025-10-08,Deliveroo,-35.88,eating_out,expense,credit_card
+2025-10-10,TfL Travel Charge,-5.92,transport,expense,current
+2025-10-10,Thames Water,-53.55,utilities,expense,current
+2025-10-15,TfL Travel Charge,-5.19,transport,expense,current
+2025-10-18,Spotify,-16.93,subscriptions,expense,current
+2025-10-18,Boots Pharmacy,-40.95,health,expense,current
+2025-10-21,Pret A Manger,-11.86,eating_out,expense,current
+2025-10-24,Octopus Energy,-123.89,utilities,expense,current
+2025-10-25,Salary Payroll,3060.40,income,income,current
+2025-10-25,TfL Travel Charge,-10.35,transport,expense,current
+2025-10-25,Netflix,-11.79,subscriptions,expense,current
+2025-10-27,Tesco Superstore,-27.53,groceries,expense,current
+2025-10-27,Deliveroo,-24.47,eating_out,expense,credit_card
+2025-10-31,Pret A Manger,-15.41,eating_out,expense,current
+2025-11-01,Amazon Marketplace,-44.66,shopping,expense,credit_card
+2025-11-01,Rent Payment,-958.91,housing,expense,current
+2025-11-02,Pret A Manger,-6.90,eating_out,expense,current
+2025-11-04,Deliveroo,-32.38,eating_out,expense,credit_card
+2025-11-05,Pret A Manger,-6.32,eating_out,expense,current
+2025-11-05,TfL Travel Charge,-14.27,transport,expense,current
+2025-11-05,TfL Travel Charge,-12.12,transport,expense,current
+2025-11-05,Trainline,-40.67,transport,expense,credit_card
+2025-11-09,TfL Travel Charge,-14.94,transport,expense,current
+2025-11-09,Council Tax,-121.95,housing,expense,current
+2025-11-12,Sainsbury's Local,-47.39,groceries,expense,current
+2025-11-12,Amazon Marketplace,-112.87,shopping,expense,credit_card
+2025-11-15,Netflix,-13.89,subscriptions,expense,current
+2025-11-16,Amazon Marketplace,-58.93,shopping,expense,credit_card
+2025-11-18,Pret A Manger,-11.98,eating_out,expense,current
+2025-11-19,Deliveroo,-20.78,eating_out,expense,credit_card
+2025-11-22,Trainline,-67.59,transport,expense,credit_card
+2025-11-22,Octopus Energy,-127.72,utilities,expense,current
+2025-11-23,Deliveroo,-17.05,eating_out,expense,credit_card
+2025-11-23,TfL Travel Charge,-6.25,transport,expense,current
+2025-11-23,Amazon Marketplace,-91.98,shopping,expense,credit_card
+2025-11-24,Sainsbury's Local,-22.06,groceries,expense,current
+2025-11-25,Salary Payroll,2932.98,income,income,current
+2025-11-25,Spotify,-15.55,subscriptions,expense,current
+2025-11-26,Thames Water,-56.90,utilities,expense,current
+2025-11-27,Pret A Manger,-14.99,eating_out,expense,current
+2025-11-28,Deliveroo,-20.02,eating_out,expense,credit_card
+2025-11-28,Amazon Marketplace,-105.32,shopping,expense,credit_card
+2025-11-29,Deliveroo,-27.43,eating_out,expense,credit_card
+2025-12-01,Amazon Marketplace,-57.85,shopping,expense,credit_card
+2025-12-01,Rent Payment,-1041.36,housing,expense,current
+2025-12-02,Tesco Superstore,-75.27,groceries,expense,current
+2025-12-03,Netflix,-13.99,subscriptions,expense,current
+2025-12-05,Amazon Marketplace,-55.30,shopping,expense,credit_card
+2025-12-06,Aldi Stores,-63.75,groceries,expense,current
+2025-12-12,TfL Travel Charge,-6.26,transport,expense,current
+2025-12-13,TfL Travel Charge,-5.15,transport,expense,current
+2025-12-16,Spotify,-10.00,subscriptions,expense,current
+2025-12-19,Tesco Superstore,-59.97,groceries,expense,current
+2025-12-21,TfL Travel Charge,-11.64,transport,expense,current
+2025-12-21,Council Tax,-174.96,housing,expense,current
+2025-12-22,Tesco Superstore,-40.53,groceries,expense,current
+2025-12-22,Amazon Marketplace,-33.33,shopping,expense,credit_card
+2025-12-23,Aldi Stores,-47.08,groceries,expense,current
+2025-12-25,Salary Payroll,2805.15,income,income,current
+2025-12-26,Tesco Superstore,-82.75,groceries,expense,current
+2025-12-26,Tesco Superstore,-20.26,groceries,expense,current
+2025-12-26,Octopus Energy,-85.27,utilities,expense,current
+2025-12-27,Amazon Marketplace,-85.91,shopping,expense,credit_card
+2025-12-28,Sainsbury's Local,-16.32,groceries,expense,current
+2025-12-28,Amazon Marketplace,-21.51,shopping,expense,credit_card
+2025-12-29,Aldi Stores,-83.21,groceries,expense,current
+2025-12-29,Thames Water,-38.65,utilities,expense,current
+2025-12-31,Aldi Stores,-15.05,groceries,expense,current
+2026-01-01,Spotify,-16.21,subscriptions,expense,current
+2026-01-01,Rent Payment,-1327.23,housing,expense,current
+2026-01-03,Council Tax,-106.34,housing,expense,current
+2026-01-04,Sainsbury's Local,-13.81,groceries,expense,current
+2026-01-04,Sainsbury's Local,-17.38,groceries,expense,current
+2026-01-05,Tesco Superstore,-64.13,groceries,expense,current
+2026-01-05,Aldi Stores,-38.59,groceries,expense,current
+2026-01-06,Thames Water,-46.58,utilities,expense,current
+2026-01-07,Tesco Superstore,-41.15,groceries,expense,current
+2026-01-07,Pret A Manger,-12.50,eating_out,expense,current
+2026-01-14,Aldi Stores,-41.37,groceries,expense,current
+2026-01-15,Tesco Superstore,-65.95,groceries,expense,current
+2026-01-17,Pret A Manger,-8.22,eating_out,expense,current
+2026-01-18,Aldi Stores,-21.32,groceries,expense,current
+2026-01-19,Octopus Energy,-173.99,utilities,expense,current
+2026-01-20,Tesco Superstore,-58.75,groceries,expense,current
+2026-01-20,Tesco Superstore,-88.35,groceries,expense,current
+2026-01-20,Netflix,-14.49,subscriptions,expense,current
+2026-01-21,Aldi Stores,-33.58,groceries,expense,current
+2026-01-25,Salary Payroll,3542.23,income,income,current
+2026-01-26,TfL Travel Charge,-13.19,transport,expense,current
+2026-01-28,Pret A Manger,-13.67,eating_out,expense,current
+2026-01-29,Pret A Manger,-15.86,eating_out,expense,current
+2026-01-31,Pret A Manger,-7.99,eating_out,expense,current
+2026-02-01,Amazon Marketplace,-94.40,shopping,expense,credit_card
+2026-02-01,Rent Payment,-933.44,housing,expense,current
+2026-02-03,Sainsbury's Local,-55.02,groceries,expense,current
+2026-02-03,Sainsbury's Local,-13.60,groceries,expense,current
+2026-02-04,Trainline,-66.07,transport,expense,credit_card
+2026-02-04,Amazon Marketplace,-90.09,shopping,expense,credit_card
+2026-02-05,Aldi Stores,-88.07,groceries,expense,current
+2026-02-05,Trainline,-12.92,transport,expense,credit_card
+2026-02-05,Spotify,-11.16,subscriptions,expense,current
+2026-02-06,Trainline,-63.21,transport,expense,credit_card
+2026-02-09,Sainsbury's Local,-49.28,groceries,expense,current
+2026-02-10,Trainline,-56.44,transport,expense,credit_card
+2026-02-13,Tesco Superstore,-90.74,groceries,expense,current
+2026-02-13,Aldi Stores,-55.23,groceries,expense,current
+2026-02-14,Sainsbury's Local,-59.40,groceries,expense,current
+2026-02-14,Pret A Manger,-8.34,eating_out,expense,current
+2026-02-14,TfL Travel Charge,-6.18,transport,expense,current
+2026-02-14,Amazon Marketplace,-45.52,shopping,expense,credit_card
+2026-02-16,Octopus Energy,-147.17,utilities,expense,current
+2026-02-16,Thames Water,-40.24,utilities,expense,current
+2026-02-18,Sainsbury's Local,-50.92,groceries,expense,current
+2026-02-19,Council Tax,-166.87,housing,expense,current
+2026-02-22,Trainline,-60.62,transport,expense,credit_card
+2026-02-23,Boots Pharmacy,-8.19,health,expense,current
+2026-02-25,Salary Payroll,2465.17,income,income,current
+2026-02-27,Netflix,-14.61,subscriptions,expense,current
+2026-03-01,Amazon Marketplace,-114.51,shopping,expense,credit_card
+2026-03-01,Rent Payment,-1330.59,housing,expense,current
+2026-03-03,Deliveroo,-40.62,eating_out,expense,credit_card
+2026-03-05,Tesco Superstore,-43.79,groceries,expense,current
+2026-03-08,Tesco Superstore,-83.62,groceries,expense,current
+2026-03-08,Aldi Stores,-31.84,groceries,expense,current
+2026-03-08,Thames Water,-46.01,utilities,expense,current
+2026-03-09,Council Tax,-116.39,housing,expense,current
+2026-03-10,TfL Travel Charge,-13.06,transport,expense,current
+2026-03-10,Octopus Energy,-159.88,utilities,expense,current
+2026-03-12,Tesco Superstore,-15.82,groceries,expense,current
+2026-03-12,Aldi Stores,-20.84,groceries,expense,current
+2026-03-12,TfL Travel Charge,-8.94,transport,expense,current
+2026-03-12,Spotify,-11.62,subscriptions,expense,current
+2026-03-15,Trainline,-57.46,transport,expense,credit_card
+2026-03-16,Trainline,-38.88,transport,expense,credit_card
+2026-03-18,TfL Travel Charge,-7.25,transport,expense,current
+2026-03-24,Aldi Stores,-46.22,groceries,expense,current
+2026-03-24,Trainline,-69.27,transport,expense,credit_card
+2026-03-25,Salary Payroll,3191.53,income,income,current
+2026-03-25,Trainline,-84.84,transport,expense,credit_card
+2026-03-26,Pret A Manger,-6.51,eating_out,expense,current
+2026-03-27,Aldi Stores,-39.00,groceries,expense,current
+2026-03-28,Tesco Superstore,-12.21,groceries,expense,current
+2026-03-29,Trainline,-26.27,transport,expense,credit_card
+2026-03-30,Netflix,-12.04,subscriptions,expense,current
+2026-03-31,Tesco Superstore,-26.85,groceries,expense,current
+2026-04-01,Rent Payment,-880.83,housing,expense,current
+2026-04-02,Amazon Marketplace,-52.38,shopping,expense,credit_card
+2026-04-03,Tesco Superstore,-80.06,groceries,expense,current
+2026-04-04,Tesco Superstore,-19.05,groceries,expense,current
+2026-04-04,Octopus Energy,-138.26,utilities,expense,current
+2026-04-05,Sainsbury's Local,-37.14,groceries,expense,current
+2026-04-05,Pret A Manger,-12.19,eating_out,expense,current
+2026-04-05,Thames Water,-55.33,utilities,expense,current
+2026-04-06,Amazon Marketplace,-99.85,shopping,expense,credit_card
+2026-04-07,Pret A Manger,-7.27,eating_out,expense,current
+2026-04-07,Deliveroo,-40.94,eating_out,expense,credit_card
+2026-04-07,Council Tax,-122.78,housing,expense,current
+2026-04-09,Amazon Marketplace,-83.84,shopping,expense,credit_card
+2026-04-11,Aldi Stores,-77.39,groceries,expense,current
+2026-04-12,Deliveroo,-15.62,eating_out,expense,credit_card
+2026-04-14,Deliveroo,-25.98,eating_out,expense,credit_card
+2026-04-15,Deliveroo,-25.56,eating_out,expense,credit_card
+2026-04-15,Boots Pharmacy,-25.22,health,expense,current
+2026-04-21,Tesco Superstore,-53.95,groceries,expense,current
+2026-04-23,Aldi Stores,-75.06,groceries,expense,current
+2026-04-23,Spotify,-11.03,subscriptions,expense,current
+2026-04-24,Tesco Superstore,-42.92,groceries,expense,current
+2026-04-25,Salary Payroll,2552.33,income,income,current
+2026-04-25,Pret A Manger,-5.91,eating_out,expense,current
+2026-04-26,TfL Travel Charge,-4.18,transport,expense,current
+2026-04-27,Netflix,-11.27,subscriptions,expense,current
+2026-04-29,Tesco Superstore,-46.28,groceries,expense,current
+2026-04-30,Aldi Stores,-78.82,groceries,expense,current
+2026-05-01,Amazon Marketplace,-68.89,shopping,expense,credit_card
+2026-05-01,Rent Payment,-1044.19,housing,expense,current
+2026-05-02,TfL Travel Charge,-14.48,transport,expense,current
+2026-05-06,TfL Travel Charge,-5.79,transport,expense,current
+2026-05-08,Amazon Marketplace,-97.29,shopping,expense,credit_card
+2026-05-08,Council Tax,-130.51,housing,expense,current
+2026-05-09,Tesco Superstore,-60.33,groceries,expense,current
+2026-05-09,Spotify,-10.42,subscriptions,expense,current
+2026-05-11,Pret A Manger,-15.61,eating_out,expense,current
+2026-05-15,TfL Travel Charge,-6.57,transport,expense,current
+2026-05-16,Deliveroo,-33.73,eating_out,expense,credit_card
+2026-05-18,Octopus Energy,-116.30,utilities,expense,current
+2026-05-19,Thames Water,-39.70,utilities,expense,current
+2026-05-21,Aldi Stores,-29.83,groceries,expense,current
+2026-05-22,Deliveroo,-12.88,eating_out,expense,credit_card
+2026-05-25,Salary Payroll,3356.04,income,income,current
+2026-05-26,Amazon Marketplace,-78.64,shopping,expense,credit_card
+2026-05-27,Deliveroo,-29.22,eating_out,expense,credit_card
+2026-05-28,Pret A Manger,-5.29,eating_out,expense,current
+2026-05-29,Netflix,-14.48,subscriptions,expense,current
+2026-05-29,Amazon Marketplace,-30.34,shopping,expense,credit_card
+2026-05-30,Deliveroo,-13.52,eating_out,expense,credit_card
+2026-06-01,Rent Payment,-859.96,housing,expense,current
+2026-06-06,Octopus Energy,-137.34,utilities,expense,current
+2026-06-07,Spotify,-13.93,subscriptions,expense,current
+2026-06-08,Tesco Superstore,-60.47,groceries,expense,current
+2026-06-08,Thames Water,-31.07,utilities,expense,current
+2026-06-11,TfL Travel Charge,-6.08,transport,expense,current
+2026-06-16,Tesco Superstore,-16.86,groceries,expense,current
+2026-06-19,Netflix,-13.45,subscriptions,expense,current
+2026-06-20,Council Tax,-131.54,housing,expense,current
+2026-06-23,TfL Travel Charge,-13.48,transport,expense,current
+2026-06-24,Aldi Stores,-74.34,groceries,expense,current
+2026-06-25,Salary Payroll,2482.23,income,income,current
+2026-06-25,Tesco Superstore,-55.94,groceries,expense,current
+2026-06-26,Pret A Manger,-12.06,eating_out,expense,current
+2026-06-27,Aldi Stores,-34.99,groceries,expense,current
+2026-06-30,Pret A Manger,-9.44,eating_out,expense,current

@@ -1,0 +1,56 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+.agents/
+.codex/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+backend/.venv/
+backend/venv/
+venv/
+
+# Node / Next.js
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.vercel/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Data
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/ons/
+!data/raw/ons/.gitkeep
+!data/raw/boe/
+!data/raw/boe/.gitkeep
+!data/raw/housing/
+!data/raw/housing/.gitkeep
+data/external/*
+!data/external/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/models/*
+!data/models/.gitkeep
+
+# Local notebooks and OS files
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
