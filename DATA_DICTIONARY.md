@@ -31,3 +31,12 @@ I use this public-safe schema for synthetic data and uploaded demo files:
 ## Category Mapping
 
 The first mapping from app categories to ONS categories lives in `config/category_mapping.yml`. I keep it explicit because this is the traceability bridge for personal inflation.
+
+## Loader Progress
+
+I added the first reproducible data layer in `backend/app/data/loaders.py`.
+
+- `load_synthetic_transactions` reads the generated demo transactions.
+- `load_uk_hpi` keeps the UK HPI file tidy with date, region, price, index, and percentage-change columns.
+- `load_bank_rate_history` reads the Bank of England `Raw Data` sheet and builds one `policy_rate` column across the historical rate regimes.
+- `dataset_statuses` checks whether the official raw files are present and notes duplicate downloads.

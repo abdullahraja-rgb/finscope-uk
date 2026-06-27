@@ -12,15 +12,15 @@ The CV line I am working toward:
 
 ```text
 .
-├── backend/              # FastAPI API, services, schemas, tests
-├── frontend/             # Next.js dashboard
-├── config/               # Category mappings and app configuration
-├── data/                 # Raw/processed/external/sample data folders
-├── docs/                 # Project notes, plan review, architecture decisions
-├── notebooks/            # EDA and modelling notebooks
-├── scripts/              # One-off project utilities
-├── DATA_DICTIONARY.md
-└── LEARNING_LOG.md
+|-- backend/              # FastAPI API, services, schemas, tests
+|-- frontend/             # Next.js dashboard
+|-- config/               # Category mappings and app configuration
+|-- data/                 # Raw/processed/external/sample data folders
+|-- docs/                 # Project notes, plan review, architecture decisions
+|-- notebooks/            # EDA and modelling notebooks
+|-- scripts/              # One-off project utilities
+|-- DATA_DICTIONARY.md
+`-- LEARNING_LOG.md
 ```
 
 ## Quick Start
