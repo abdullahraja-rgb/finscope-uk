@@ -26,6 +26,94 @@ export type TransactionPayload = {
   account?: string | null;
 };
 
+export type CategorisedTransaction = TransactionPayload & {
+  predicted_category: string;
+  confidence: number;
+};
+
+export type CategorisationResponse = {
+  transactions: CategorisedTransaction[];
+};
+
+export type CategorisationMetric = {
+  category: string;
+  precision: number;
+  recall: number;
+  f1: number;
+  support: number;
+};
+
+export type ConfusionMatrixRow = {
+  actual: string;
+  predicted: Record<string, number>;
+};
+
+export type MisclassifiedTransaction = {
+  description: string;
+  amount: number;
+  actual_category: string;
+  predicted_category: string;
+};
+
+export type CategorisationEvaluationResponse = {
+  training_rows: number;
+  test_rows: number;
+  accuracy: number;
+  macro_f1: number;
+  weighted_f1: number;
+  per_class: CategorisationMetric[];
+  confusion_matrix: ConfusionMatrixRow[];
+  misclassified: MisclassifiedTransaction[];
+};
+
+export type TransactionPreviewResponse = {
+  rows: number;
+  columns: string[];
+  total_income: number;
+  total_spend: number;
+  preview: Record<string, unknown>[];
+};
+
+export type ForecastPoint = {
+  category: string;
+  expected_spend: number;
+  lower_bound: number;
+  upper_bound: number;
+  model: string;
+  baseline_expected_spend: number | null;
+  error_margin: number | null;
+  backtest_mae: number | null;
+  baseline_mae: number | null;
+  beats_baseline: boolean | null;
+};
+
+export type ForecastResponse = {
+  period: string;
+  forecasts: ForecastPoint[];
+  baseline: string;
+  generated_from_months: number;
+  notes: string[];
+};
+
+export type ForecastMetric = {
+  category: string;
+  model: string;
+  baseline: string;
+  windows: number;
+  mae: number;
+  rmse: number;
+  mape: number | null;
+  baseline_mae: number;
+  beats_baseline: boolean;
+};
+
+export type ForecastBacktestResponse = {
+  baseline: string;
+  candidate_models: string[];
+  metrics: ForecastMetric[];
+  notes: string[];
+};
+
 export type LatestInflationCategory = {
   index_type: string;
   date: string;
@@ -126,5 +214,13 @@ export type DerivedHealthScoreResponse = {
   emergency_fund_months: number;
   spending_volatility: number;
   benchmarks: SpendingBenchmark[];
+  notes: string[];
+};
+
+export type TransactionAnalysisResponse = TransactionPreviewResponse & {
+  transactions: CategorisedTransaction[];
+  forecast: ForecastResponse;
+  personal_inflation: PersonalInflationResponse | null;
+  health_score: DerivedHealthScoreResponse | null;
   notes: string[];
 };

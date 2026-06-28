@@ -23,4 +23,10 @@ Verify the raw downloads:
 python scripts/verify_raw_datasets.py
 ```
 
+Train the transaction categoriser:
+
+```powershell
+python scripts/train_categorisation_model.py
+```
+
 The backend data layer starts in `backend/app/data/loaders.py`. I use that code for repeatable reads instead of loading the workbooks ad hoc in notebooks. The first loaders cover synthetic transactions, UK HPI, Bank Rate, ONS CPIH/CPI category inflation, and ONS Family Spending benchmarks.

@@ -1,10 +1,15 @@
 import type {
-  LatestInflationResponse,
+  CategorisationEvaluationResponse,
+  CategorisationResponse,
   DerivedHealthScoreRequest,
   DerivedHealthScoreResponse,
+  ForecastBacktestResponse,
+  ForecastResponse,
+  LatestInflationResponse,
   PersonalInflationResponse,
   RateImpactRequest,
   RateImpactResponse,
+  TransactionAnalysisResponse,
   TransactionPayload
 } from "@/types/finscope";
 
@@ -26,7 +31,7 @@ export async function uploadTransactions(file: File) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/transactions/preview`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/transactions/analyse`, {
     method: "POST",
     body: formData
   });
@@ -36,7 +41,7 @@ export async function uploadTransactions(file: File) {
     throw new Error(payload.detail ?? "Upload failed");
   }
 
-  return response.json();
+  return response.json() as Promise<TransactionAnalysisResponse>;
 }
 
 export async function getLatestInflation(indexType = "cpih") {
@@ -50,6 +55,81 @@ export async function getLatestInflation(indexType = "cpih") {
   }
 
   return response.json() as Promise<LatestInflationResponse>;
+}
+
+export async function categoriseTransactions(transactions: TransactionPayload[]) {
+  const response = await fetch(`${API_BASE_URL}/api/v1/categorise`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ transactions })
+  });
+
+  if (!response.ok) {
+    throw new Error("Transaction categorisation failed");
+  }
+
+  return response.json() as Promise<CategorisationResponse>;
+}
+
+export async function evaluateCategorisationModel(
+  transactions: TransactionPayload[],
+  testSize = 0.25,
+  randomState = 42
+) {
+  const response = await fetch(`${API_BASE_URL}/api/v1/categorise/evaluate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      transactions,
+      test_size: testSize,
+      random_state: randomState
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error("Categorisation evaluation failed");
+  }
+
+  return response.json() as Promise<CategorisationEvaluationResponse>;
+}
+
+export async function calculateForecast(transactions: TransactionPayload[]) {
+  const response = await fetch(`${API_BASE_URL}/api/v1/forecast`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ transactions })
+  });
+
+  if (!response.ok) {
+    throw new Error("Forecast calculation failed");
+  }
+
+  return response.json() as Promise<ForecastResponse>;
+}
+
+export async function backtestForecast(transactions: TransactionPayload[], minTrainMonths = 4) {
+  const response = await fetch(`${API_BASE_URL}/api/v1/forecast/backtest`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      transactions,
+      min_train_months: minTrainMonths
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error("Forecast backtest failed");
+  }
+
+  return response.json() as Promise<ForecastBacktestResponse>;
 }
 
 export async function calculatePersonalInflation(transactions: TransactionPayload[], indexType = "cpih") {

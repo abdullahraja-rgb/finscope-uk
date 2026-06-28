@@ -65,7 +65,12 @@ See `DATA_DICTIONARY.md` for links, licence notes, and expected usage.
 
 The backend now has a first cost-of-living engine:
 
+- `POST /api/v1/transactions/analyse` powers the upload-to-dashboard flow from a CSV.
 - `GET /api/v1/datasets/inflation/latest` returns latest ONS CPIH/CPI category rates.
+- `POST /api/v1/categorise` uses a saved ML model when available and falls back to rules.
+- `POST /api/v1/categorise/evaluate` evaluates a labelled transaction batch with F1 and confusion-matrix output.
+- `POST /api/v1/forecast` forecasts next-month category spend with uncertainty intervals.
+- `POST /api/v1/forecast/backtest` runs rolling time-aware forecast validation.
 - `POST /api/v1/cost-of-living/personal-inflation` calculates personal inflation from transaction categories.
 - `POST /api/v1/cost-of-living/rate-impact` estimates Bank Rate effects on savings, debt, and repayment mortgages.
 - `POST /api/v1/score/from-transactions` derives a financial-health score and ONS spending benchmarks from transactions.

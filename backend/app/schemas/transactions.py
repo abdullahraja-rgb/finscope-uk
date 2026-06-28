@@ -25,17 +25,92 @@ class CategorisationResponse(BaseModel):
     transactions: list[CategorisedTransaction]
 
 
+class TransactionPreviewResponse(BaseModel):
+    rows: int
+    columns: list[str]
+    total_income: float
+    total_spend: float
+    preview: list[dict[str, object]]
+
+
+class CategorisationEvaluationRequest(TransactionBatch):
+    test_size: float = Field(default=0.25, ge=0.1, le=0.5)
+    random_state: int = 42
+
+
+class CategorisationMetric(BaseModel):
+    category: str
+    precision: float
+    recall: float
+    f1: float
+    support: int
+
+
+class ConfusionMatrixRow(BaseModel):
+    actual: str
+    predicted: dict[str, int]
+
+
+class MisclassifiedTransaction(BaseModel):
+    description: str
+    amount: float
+    actual_category: str
+    predicted_category: str
+
+
+class CategorisationEvaluationResponse(BaseModel):
+    training_rows: int
+    test_rows: int
+    accuracy: float
+    macro_f1: float
+    weighted_f1: float
+    per_class: list[CategorisationMetric]
+    confusion_matrix: list[ConfusionMatrixRow]
+    misclassified: list[MisclassifiedTransaction]
+
+
 class ForecastPoint(BaseModel):
     category: str
     expected_spend: float
     lower_bound: float
     upper_bound: float
+    model: str = "three-month moving average"
+    baseline_expected_spend: float | None = None
+    error_margin: float | None = None
+    backtest_mae: float | None = None
+    baseline_mae: float | None = None
+    beats_baseline: bool | None = None
 
 
 class ForecastResponse(BaseModel):
     period: str
     forecasts: list[ForecastPoint]
     baseline: str
+    generated_from_months: int = 0
+    notes: list[str] = Field(default_factory=list)
+
+
+class ForecastBacktestRequest(TransactionBatch):
+    min_train_months: int = Field(default=4, ge=2, le=24)
+
+
+class ForecastMetric(BaseModel):
+    category: str
+    model: str
+    baseline: str
+    windows: int
+    mae: float
+    rmse: float
+    mape: float | None
+    baseline_mae: float
+    beats_baseline: bool
+
+
+class ForecastBacktestResponse(BaseModel):
+    baseline: str
+    candidate_models: list[str]
+    metrics: list[ForecastMetric]
+    notes: list[str]
 
 
 class HealthScoreRequest(BaseModel):
@@ -159,3 +234,11 @@ class RateImpactResponse(BaseModel):
     annual_net_cashflow_delta: float
     lines: list[RateImpactLine]
     notes: list[str]
+
+
+class TransactionAnalysisResponse(TransactionPreviewResponse):
+    transactions: list[CategorisedTransaction]
+    forecast: ForecastResponse
+    personal_inflation: PersonalInflationResponse | None = None
+    health_score: DerivedHealthScoreResponse | None = None
+    notes: list[str] = Field(default_factory=list)

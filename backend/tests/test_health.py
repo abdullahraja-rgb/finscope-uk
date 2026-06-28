@@ -80,7 +80,7 @@ def test_forecast_endpoint() -> None:
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["baseline"] == "three-month moving average"
+    assert payload["baseline"] == "last-month naive"
     assert payload["forecasts"][0]["expected_spend"] == 120
 
 

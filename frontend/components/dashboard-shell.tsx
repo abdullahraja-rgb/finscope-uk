@@ -27,12 +27,15 @@ import {
 import type {
   CategorySpend,
   DerivedHealthScoreResponse,
+  ForecastResponse,
   InflationImpact,
   Metric,
-  RateImpactResponse
+  RateImpactResponse,
+  TransactionPayload
 } from "@/types/finscope";
 import {
   calculateDerivedHealthScore,
+  calculateForecast,
   calculatePersonalInflation,
   calculateRateImpact,
   uploadTransactions
@@ -45,7 +48,7 @@ const metrics: Metric[] = [
   { label: "Health score", value: "74", delta: "Stable", tone: "watch" }
 ];
 
-const categorySpend: CategorySpend[] = [
+const fallbackCategorySpend: CategorySpend[] = [
   { category: "Groceries", spend: 410, forecast: 442 },
   { category: "Housing", spend: 1080, forecast: 1080 },
   { category: "Transport", spend: 165, forecast: 188 },
@@ -109,6 +112,47 @@ const demoHealthTransactions = [
   },
   ...demoInflationTransactions
 ];
+
+const forecastMonths = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"];
+
+const demoForecastTransactions: TransactionPayload[] = forecastMonths.flatMap((month, index) => [
+  {
+    date: `${month}-03`,
+    description: "Tesco Superstore",
+    amount: -(390 + index * 8),
+    category: "groceries"
+  },
+  {
+    date: `${month}-01`,
+    description: "Rent Payment",
+    amount: -1080,
+    category: "housing"
+  },
+  {
+    date: `${month}-05`,
+    description: "TfL Travel Charge",
+    amount: -(145 + index * 4),
+    category: "transport"
+  },
+  {
+    date: `${month}-10`,
+    description: "Deliveroo",
+    amount: -(200 + index * 5),
+    category: "eating_out"
+  },
+  {
+    date: `${month}-08`,
+    description: "Octopus Energy",
+    amount: -(260 + index * 6),
+    category: "utilities"
+  },
+  {
+    date: `${month}-11`,
+    description: "Netflix",
+    amount: -54,
+    category: "subscriptions"
+  }
+]);
 
 const fallbackRateImpact: RateImpactResponse = {
   current_bank_rate_pct: 3.75,
@@ -175,6 +219,39 @@ function shortCategory(category: string) {
     .replace("Recreation and culture", "Subscriptions");
 }
 
+function displayCategory(category: string) {
+  return category
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function latestMonthSpend(transactions: TransactionPayload[]) {
+  const expenseMonths = transactions
+    .filter((transaction) => transaction.amount < 0)
+    .map((transaction) => transaction.date.slice(0, 7))
+    .sort();
+  const latestMonth = expenseMonths[expenseMonths.length - 1];
+  const totals: Record<string, number> = {};
+
+  for (const transaction of transactions) {
+    if (transaction.amount >= 0 || transaction.date.slice(0, 7) !== latestMonth) continue;
+    const category = transaction.category ?? "uncategorised";
+    totals[category] = (totals[category] ?? 0) + Math.abs(transaction.amount);
+  }
+
+  return totals;
+}
+
+function forecastRowsFromResponse(forecast: ForecastResponse, transactions: TransactionPayload[]) {
+  const currentSpend = latestMonthSpend(transactions);
+  return forecast.forecasts.slice(0, 6).map((point) => ({
+    category: displayCategory(point.category),
+    spend: Math.round(currentSpend[point.category] ?? 0),
+    forecast: Math.round(point.expected_spend)
+  }));
+}
+
 export function DashboardShell() {
   const [uploadStatus, setUploadStatus] = useState<{
     state: "idle" | "loading" | "success" | "error";
@@ -193,13 +270,15 @@ export function DashboardShell() {
   });
   const [rateImpact, setRateImpact] = useState<RateImpactResponse>(fallbackRateImpact);
   const [healthScore, setHealthScore] = useState<DerivedHealthScoreResponse>(fallbackHealth);
+  const [forecastRows, setForecastRows] = useState<CategorySpend[]>(fallbackCategorySpend);
+  const [forecastPeriod, setForecastPeriod] = useState("Demo");
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadLiveCostOfLiving() {
       try {
-        const [inflationResponse, rateResponse, healthResponse] = await Promise.all([
+        const [inflationResponse, rateResponse, healthResponse, forecastResponse] = await Promise.all([
           calculatePersonalInflation(demoInflationTransactions),
           calculateRateImpact({
             savings_balance: 6000,
@@ -213,7 +292,8 @@ export function DashboardShell() {
             transactions: demoHealthTransactions,
             liquid_savings: 6000,
             monthly_debt_payment: 120
-          })
+          }),
+          calculateForecast(demoForecastTransactions)
         ]);
         if (!isMounted) return;
 
@@ -232,6 +312,8 @@ export function DashboardShell() {
         });
         setRateImpact(rateResponse);
         setHealthScore(healthResponse);
+        setForecastPeriod(forecastResponse.period);
+        setForecastRows(forecastRowsFromResponse(forecastResponse, demoForecastTransactions));
       } catch {
         if (!isMounted) return;
       }
@@ -254,6 +336,31 @@ export function DashboardShell() {
         state: "success",
         message: `${result.rows} rows, GBP ${Number(result.total_spend).toLocaleString()} spend`
       });
+
+      if (result.forecast.forecasts.length > 0) {
+        setForecastPeriod(result.forecast.period);
+        setForecastRows(forecastRowsFromResponse(result.forecast, result.transactions));
+      }
+
+      if (result.personal_inflation) {
+        setCostOfLiving({
+          period: result.personal_inflation.period,
+          personalRate: result.personal_inflation.personal_inflation_pct,
+          nationalRate: result.personal_inflation.national_inflation_pct,
+          chart: result.personal_inflation.categories
+            .filter((category) => category.annual_change_pct !== null)
+            .slice(0, 6)
+            .map((category) => ({
+              category: shortCategory(category.ons_category ?? category.app_category),
+              personal: category.annual_change_pct ?? 0,
+              national: result.personal_inflation?.national_inflation_pct ?? 0
+            }))
+        });
+      }
+
+      if (result.health_score) {
+        setHealthScore(result.health_score);
+      }
     } catch (error) {
       setUploadStatus({
         state: "error",
@@ -329,13 +436,13 @@ export function DashboardShell() {
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold tracking-normal text-ink">Spending and forecast</h2>
-                <p className="text-sm text-slate-500">Current month against next-month baseline</p>
+                <p className="text-sm text-slate-500">Current month against {forecastPeriod} forecast</p>
               </div>
               <ReceiptText className="text-cobalt" size={22} aria-hidden="true" />
             </div>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={categorySpend} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
+                <BarChart data={forecastRows} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="category" tickLine={false} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} />
