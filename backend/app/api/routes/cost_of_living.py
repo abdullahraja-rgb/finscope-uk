@@ -1,9 +1,18 @@
 from fastapi import APIRouter
 
 from app.core.config import settings
-from app.data import latest_ons_category_inflation
-from app.schemas.transactions import PersonalInflationRequest, PersonalInflationResponse
-from app.services.cost_of_living import calculate_personal_inflation, load_category_mapping
+from app.data import latest_ons_category_inflation, load_bank_rate_history
+from app.schemas.transactions import (
+    PersonalInflationRequest,
+    PersonalInflationResponse,
+    RateImpactRequest,
+    RateImpactResponse,
+)
+from app.services.cost_of_living import (
+    calculate_personal_inflation,
+    calculate_rate_impact,
+    load_category_mapping,
+)
 
 router = APIRouter()
 
@@ -18,3 +27,10 @@ def personal_inflation(request: PersonalInflationRequest) -> PersonalInflationRe
         category_mapping=mapping,
         index_type=request.index_type,
     )
+
+
+@router.post("/cost-of-living/rate-impact", response_model=RateImpactResponse)
+def rate_impact(request: RateImpactRequest) -> RateImpactResponse:
+    bank_rate = load_bank_rate_history(settings.data_dir).sort_values("date")
+    latest_rate = float(bank_rate.iloc[-1]["policy_rate"])
+    return calculate_rate_impact(request, current_bank_rate_pct=latest_rate)

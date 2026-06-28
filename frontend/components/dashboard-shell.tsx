@@ -24,8 +24,8 @@ import {
   YAxis
 } from "recharts";
 
-import type { CategorySpend, InflationImpact, Metric } from "@/types/finscope";
-import { calculatePersonalInflation, uploadTransactions } from "@/lib/api";
+import type { CategorySpend, InflationImpact, Metric, RateImpactResponse } from "@/types/finscope";
+import { calculatePersonalInflation, calculateRateImpact, uploadTransactions } from "@/lib/api";
 
 const metrics: Metric[] = [
   { label: "Monthly income", value: "GBP 3,240", delta: "+2.1%", tone: "good" },
@@ -89,6 +89,30 @@ const demoInflationTransactions = [
   }
 ];
 
+const fallbackRateImpact: RateImpactResponse = {
+  current_bank_rate_pct: 3.75,
+  scenario_bank_rate_pct: 4,
+  bank_rate_change_pct_points: 0.25,
+  effective_rate_change_pct_points: 0.25,
+  monthly_net_cashflow_delta: -27,
+  annual_net_cashflow_delta: -324,
+  lines: [
+    {
+      name: "Repayment mortgage",
+      monthly_delta: -28,
+      annual_delta: -336,
+      note: "Negative means the monthly repayment rises."
+    },
+    {
+      name: "Savings interest",
+      monthly_delta: 1,
+      annual_delta: 12,
+      note: "Positive means the savings balance earns more interest."
+    }
+  ],
+  notes: []
+};
+
 const healthRows = [
   { name: "Savings rate", score: 73 },
   { name: "Housing burden", score: 68 },
@@ -127,34 +151,46 @@ export function DashboardShell() {
     nationalRate: 3.9,
     chart: inflationImpact
   });
+  const [rateImpact, setRateImpact] = useState<RateImpactResponse>(fallbackRateImpact);
 
   useEffect(() => {
     let isMounted = true;
 
-    async function loadInflation() {
+    async function loadLiveCostOfLiving() {
       try {
-        const response = await calculatePersonalInflation(demoInflationTransactions);
+        const [inflationResponse, rateResponse] = await Promise.all([
+          calculatePersonalInflation(demoInflationTransactions),
+          calculateRateImpact({
+            savings_balance: 6000,
+            variable_debt_balance: 2400,
+            mortgage_balance: 180000,
+            mortgage_years_remaining: 22,
+            current_mortgage_rate_pct: 5,
+            bank_rate_change_pct_points: 0.25
+          })
+        ]);
         if (!isMounted) return;
 
         setCostOfLiving({
-          period: response.period,
-          personalRate: response.personal_inflation_pct,
-          nationalRate: response.national_inflation_pct,
-          chart: response.categories
+          period: inflationResponse.period,
+          personalRate: inflationResponse.personal_inflation_pct,
+          nationalRate: inflationResponse.national_inflation_pct,
+          chart: inflationResponse.categories
             .filter((category) => category.annual_change_pct !== null)
             .slice(0, 6)
             .map((category) => ({
               category: shortCategory(category.ons_category ?? category.app_category),
               personal: category.annual_change_pct ?? 0,
-              national: response.national_inflation_pct
+              national: inflationResponse.national_inflation_pct
             }))
         });
+        setRateImpact(rateResponse);
       } catch {
         if (!isMounted) return;
       }
     }
 
-    void loadInflation();
+    void loadLiveCostOfLiving();
 
     return () => {
       isMounted = false;
@@ -178,6 +214,10 @@ export function DashboardShell() {
       });
     }
   }
+
+  const mortgageImpact = rateImpact.lines.find((line) => line.name === "Repayment mortgage");
+  const savingsImpact = rateImpact.lines.find((line) => line.name === "Savings interest");
+  const debtImpact = rateImpact.lines.find((line) => line.name === "Variable debt cost");
 
   return (
     <main className="min-h-screen bg-paper">
@@ -333,16 +373,31 @@ export function DashboardShell() {
             </div>
             <div className="grid gap-3 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-slate-600">Rent +8%</span>
-                <span className="font-semibold text-ink">GBP 86/month</span>
+                <span className="text-slate-600">Mortgage impact</span>
+                <span className="font-semibold text-ink">
+                  GBP {Math.round(mortgageImpact?.monthly_delta ?? 0)}/month
+                </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-600">Food +10%</span>
-                <span className="font-semibold text-ink">GBP 41/month</span>
+                <span className="text-slate-600">Savings interest</span>
+                <span className="font-semibold text-ink">
+                  GBP +{Math.round(savingsImpact?.monthly_delta ?? 0)}/month
+                </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-600">Bank Rate +0.25 pp</span>
-                <span className="font-semibold text-ink">GBP 7/month</span>
+                <span className="text-slate-600">Variable debt</span>
+                <span className="font-semibold text-ink">
+                  GBP {Math.round(debtImpact?.monthly_delta ?? 0)}/month
+                </span>
+              </div>
+              <div className="flex items-center justify-between border-t border-slate-200 pt-3">
+                <span className="font-medium text-slate-600">
+                  Bank Rate {rateImpact.current_bank_rate_pct.toFixed(2)}% to{" "}
+                  {rateImpact.scenario_bank_rate_pct.toFixed(2)}%
+                </span>
+                <span className="font-semibold text-ink">
+                  GBP {Math.round(rateImpact.monthly_net_cashflow_delta)}/month
+                </span>
               </div>
             </div>
           </section>

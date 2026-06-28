@@ -46,3 +46,5 @@ I added the first reproducible data layer in `backend/app/data/loaders.py`.
 ## Cost Of Living Engine
 
 I calculate personal inflation by mapping app spending categories to ONS COICOP divisions, then weighting the latest CPIH category inflation by the user's spend share. I documented the first version in `docs/cost-of-living-engine.md`.
+
+I estimate Bank Rate impact from the Bank of England history and user balances. I documented the first version in `docs/rate-impact-engine.md`.

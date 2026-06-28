@@ -1,6 +1,8 @@
 import type {
   LatestInflationResponse,
   PersonalInflationResponse,
+  RateImpactRequest,
+  RateImpactResponse,
   TransactionPayload
 } from "@/types/finscope";
 
@@ -65,4 +67,20 @@ export async function calculatePersonalInflation(transactions: TransactionPayloa
   }
 
   return response.json() as Promise<PersonalInflationResponse>;
+}
+
+export async function calculateRateImpact(request: RateImpactRequest) {
+  const response = await fetch(`${API_BASE_URL}/api/v1/cost-of-living/rate-impact`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    throw new Error("Rate impact calculation failed");
+  }
+
+  return response.json() as Promise<RateImpactResponse>;
 }

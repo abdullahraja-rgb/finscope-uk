@@ -62,3 +62,31 @@ export type PersonalInflationResponse = {
   categories: PersonalInflationCategory[];
   notes: string[];
 };
+
+export type RateImpactRequest = {
+  savings_balance: number;
+  variable_debt_balance: number;
+  mortgage_balance?: number;
+  mortgage_years_remaining?: number;
+  current_mortgage_rate_pct?: number | null;
+  bank_rate_change_pct_points?: number;
+  pass_through_pct?: number;
+};
+
+export type RateImpactLine = {
+  name: string;
+  monthly_delta: number;
+  annual_delta: number;
+  note: string;
+};
+
+export type RateImpactResponse = {
+  current_bank_rate_pct: number;
+  scenario_bank_rate_pct: number;
+  bank_rate_change_pct_points: number;
+  effective_rate_change_pct_points: number;
+  monthly_net_cashflow_delta: number;
+  annual_net_cashflow_delta: number;
+  lines: RateImpactLine[];
+  notes: string[];
+};

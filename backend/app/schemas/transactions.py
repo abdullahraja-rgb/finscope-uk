@@ -104,3 +104,31 @@ class PersonalInflationResponse(BaseModel):
     difference_pct_points: float
     categories: list[PersonalInflationCategory]
     notes: list[str]
+
+
+class RateImpactRequest(BaseModel):
+    savings_balance: float = Field(ge=0)
+    variable_debt_balance: float = Field(ge=0)
+    mortgage_balance: float = Field(default=0, ge=0)
+    mortgage_years_remaining: float = Field(default=25, gt=0)
+    current_mortgage_rate_pct: float | None = Field(default=None, ge=0)
+    bank_rate_change_pct_points: float = 0.25
+    pass_through_pct: float = Field(default=100, ge=0, le=200)
+
+
+class RateImpactLine(BaseModel):
+    name: str
+    monthly_delta: float
+    annual_delta: float
+    note: str
+
+
+class RateImpactResponse(BaseModel):
+    current_bank_rate_pct: float
+    scenario_bank_rate_pct: float
+    bank_rate_change_pct_points: float
+    effective_rate_change_pct_points: float
+    monthly_net_cashflow_delta: float
+    annual_net_cashflow_delta: float
+    lines: list[RateImpactLine]
+    notes: list[str]

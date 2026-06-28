@@ -67,3 +67,4 @@ The backend now has a first cost-of-living engine:
 
 - `GET /api/v1/datasets/inflation/latest` returns latest ONS CPIH/CPI category rates.
 - `POST /api/v1/cost-of-living/personal-inflation` calculates personal inflation from transaction categories.
+- `POST /api/v1/cost-of-living/rate-impact` estimates Bank Rate effects on savings, debt, and repayment mortgages.
