@@ -1,3 +1,9 @@
+import type {
+  LatestInflationResponse,
+  PersonalInflationResponse,
+  TransactionPayload
+} from "@/types/finscope";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
 export async function getHealth() {
@@ -27,4 +33,36 @@ export async function uploadTransactions(file: File) {
   }
 
   return response.json();
+}
+
+export async function getLatestInflation(indexType = "cpih") {
+  const params = new URLSearchParams({ index_type: indexType });
+  const response = await fetch(`${API_BASE_URL}/api/v1/datasets/inflation/latest?${params}`, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("Latest inflation data unavailable");
+  }
+
+  return response.json() as Promise<LatestInflationResponse>;
+}
+
+export async function calculatePersonalInflation(transactions: TransactionPayload[], indexType = "cpih") {
+  const response = await fetch(`${API_BASE_URL}/api/v1/cost-of-living/personal-inflation`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      index_type: indexType,
+      transactions
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error("Personal inflation calculation failed");
+  }
+
+  return response.json() as Promise<PersonalInflationResponse>;
 }

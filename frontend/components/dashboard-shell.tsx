@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Activity,
   ArrowDownRight,
@@ -25,7 +25,7 @@ import {
 } from "recharts";
 
 import type { CategorySpend, InflationImpact, Metric } from "@/types/finscope";
-import { uploadTransactions } from "@/lib/api";
+import { calculatePersonalInflation, uploadTransactions } from "@/lib/api";
 
 const metrics: Metric[] = [
   { label: "Monthly income", value: "GBP 3,240", delta: "+2.1%", tone: "good" },
@@ -50,6 +50,45 @@ const inflationImpact: InflationImpact[] = [
   { category: "Energy", personal: 3.6, national: 3.2 }
 ];
 
+const demoInflationTransactions = [
+  {
+    date: "2026-06-01",
+    description: "Tesco Superstore",
+    amount: -410,
+    category: "groceries"
+  },
+  {
+    date: "2026-06-01",
+    description: "Rent Payment",
+    amount: -1080,
+    category: "housing"
+  },
+  {
+    date: "2026-06-03",
+    description: "TfL Travel Charge",
+    amount: -165,
+    category: "transport"
+  },
+  {
+    date: "2026-06-04",
+    description: "Deliveroo",
+    amount: -225,
+    category: "eating_out"
+  },
+  {
+    date: "2026-06-08",
+    description: "Octopus Energy",
+    amount: -285,
+    category: "utilities"
+  },
+  {
+    date: "2026-06-11",
+    description: "Netflix",
+    amount: -54,
+    category: "subscriptions"
+  }
+];
+
 const healthRows = [
   { name: "Savings rate", score: 73 },
   { name: "Housing burden", score: 68 },
@@ -64,11 +103,63 @@ function toneClass(tone: Metric["tone"]) {
   return "text-slate-500";
 }
 
+function shortCategory(category: string) {
+  return category
+    .replace("Food and non-alcoholic beverages", "Food")
+    .replace("Housing, water, electricity, gas and other fuels (Inc OOH)", "Housing")
+    .replace("Restaurants and hotels", "Eating out")
+    .replace("Recreation and culture", "Subscriptions");
+}
+
 export function DashboardShell() {
   const [uploadStatus, setUploadStatus] = useState<{
     state: "idle" | "loading" | "success" | "error";
     message: string;
   }>({ state: "idle", message: "" });
+  const [costOfLiving, setCostOfLiving] = useState<{
+    period: string;
+    personalRate: number;
+    nationalRate: number;
+    chart: InflationImpact[];
+  }>({
+    period: "Demo",
+    personalRate: 4.1,
+    nationalRate: 3.9,
+    chart: inflationImpact
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadInflation() {
+      try {
+        const response = await calculatePersonalInflation(demoInflationTransactions);
+        if (!isMounted) return;
+
+        setCostOfLiving({
+          period: response.period,
+          personalRate: response.personal_inflation_pct,
+          nationalRate: response.national_inflation_pct,
+          chart: response.categories
+            .filter((category) => category.annual_change_pct !== null)
+            .slice(0, 6)
+            .map((category) => ({
+              category: shortCategory(category.ons_category ?? category.app_category),
+              personal: category.annual_change_pct ?? 0,
+              national: response.national_inflation_pct
+            }))
+        });
+      } catch {
+        if (!isMounted) return;
+      }
+    }
+
+    void loadInflation();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   async function handleUpload(file: File | undefined) {
     if (!file) return;
@@ -167,13 +258,16 @@ export function DashboardShell() {
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold tracking-normal text-ink">Cost-of-living impact</h2>
-                <p className="text-sm text-slate-500">Personal category mix against national releases</p>
+                <p className="text-sm text-slate-500">
+                  CPIH {costOfLiving.period} - personal {costOfLiving.personalRate.toFixed(1)}% vs UK{" "}
+                  {costOfLiving.nationalRate.toFixed(1)}%
+                </p>
               </div>
               <Activity className="text-rose" size={22} aria-hidden="true" />
             </div>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={inflationImpact} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
+                <LineChart data={costOfLiving.chart} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="category" tickLine={false} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} />

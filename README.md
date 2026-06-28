@@ -60,3 +60,10 @@ I am starting with:
 - Synthetic transaction data from `scripts/generate_synthetic_transactions.py`.
 
 See `DATA_DICTIONARY.md` for links, licence notes, and expected usage.
+
+## Current Build
+
+The backend now has a first cost-of-living engine:
+
+- `GET /api/v1/datasets/inflation/latest` returns latest ONS CPIH/CPI category rates.
+- `POST /api/v1/cost-of-living/personal-inflation` calculates personal inflation from transaction categories.

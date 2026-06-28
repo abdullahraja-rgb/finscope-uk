@@ -9,6 +9,7 @@ class Settings(BaseSettings):
 
     app_name: str = "FinScope UK"
     data_dir: str = Field(default="../data", alias="DATA_DIR")
+    config_dir: str = Field(default="../config", alias="CONFIG_DIR")
     cors_origins_raw: str = Field(default="http://localhost:3000", alias="CORS_ORIGINS")
 
     @property

@@ -42,3 +42,7 @@ I added the first reproducible data layer in `backend/app/data/loaders.py`.
 - `load_uk_hpi` keeps the UK HPI file tidy with date, region, price, index, and percentage-change columns.
 - `load_bank_rate_history` reads the Bank of England `Raw Data` sheet and builds one `policy_rate` column across the historical rate regimes.
 - `dataset_statuses` checks whether the official raw files are present and notes duplicate downloads.
+
+## Cost Of Living Engine
+
+I calculate personal inflation by mapping app spending categories to ONS COICOP divisions, then weighting the latest CPIH category inflation by the user's spend share. I documented the first version in `docs/cost-of-living-engine.md`.

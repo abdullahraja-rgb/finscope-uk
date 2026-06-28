@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -45,6 +46,26 @@ HPI_COLUMNS = {
     "Index": "index",
     "1m%Change": "monthly_change_pct",
     "12m%Change": "annual_change_pct",
+}
+
+CPI_TABLES = {
+    "cpih": {"sheet": "Table 3", "overall_label": "CPIH"},
+    "cpi": {"sheet": "Table 4", "overall_label": "CPI"},
+}
+
+MONTH_LOOKUP = {
+    "jan": 1,
+    "feb": 2,
+    "mar": 3,
+    "apr": 4,
+    "may": 5,
+    "jun": 6,
+    "jul": 7,
+    "aug": 8,
+    "sep": 9,
+    "oct": 10,
+    "nov": 11,
+    "dec": 12,
 }
 
 
@@ -139,6 +160,130 @@ def load_bank_rate_history(data_dir: str | Path) -> pd.DataFrame:
         frame["date"].notna() & frame["policy_rate"].notna(),
         ["date", *rate_columns, "policy_rate"],
     ]
+
+
+def parse_ons_category_label(label: object) -> tuple[str | None, str, str]:
+    text = " ".join(str(label).split())
+    match = re.match(r"^(?P<code>\d{2}(?:\.\d+)*)\s+(?P<name>.+)$", text)
+    if not match:
+        return None, text, "overall"
+
+    code = match.group("code")
+    name = match.group("name")
+    if "." not in code:
+        level = "division"
+    elif code.count(".") == 1:
+        level = "group"
+    else:
+        level = "class"
+    return code, name, level
+
+
+def find_cpi_category_column(frame: pd.DataFrame) -> int:
+    for row_index in range(min(20, len(frame))):
+        for column, value in frame.loc[row_index].items():
+            text = str(value).lower()
+            if "overall index" in text or "food and non-alcoholic beverages" in text:
+                return int(column)
+    raise ValueError("Could not find the ONS category column")
+
+
+def find_cpi_weight_column(frame: pd.DataFrame, category_col: int) -> int:
+    for column, value in frame.loc[8].items():
+        if column > category_col and "feb-dec" in str(value).lower():
+            return int(column)
+    raise ValueError("Could not find the ONS weight column")
+
+
+def find_cpi_annual_change_columns(frame: pd.DataFrame) -> list[int]:
+    start_col: int | None = None
+    for row_index in [4, 5]:
+        for column, value in frame.loc[row_index].items():
+            if "over 12 months" in str(value).lower():
+                start_col = int(column)
+                break
+        if start_col is not None:
+            break
+
+    if start_col is None:
+        raise ValueError("Could not find the annual inflation columns")
+
+    columns: list[int] = []
+    for column in frame.columns:
+        if column < start_col:
+            continue
+        year = pd.to_numeric(frame.at[7, column], errors="coerce")
+        month_text = str(frame.at[8, column]).strip()[:3].lower()
+        if pd.notna(year) and month_text in MONTH_LOOKUP:
+            columns.append(int(column))
+    return columns
+
+
+def load_ons_category_inflation(data_dir: str | Path, index_type: str = "cpih") -> pd.DataFrame:
+    index_key = index_type.lower()
+    if index_key not in CPI_TABLES:
+        expected = ", ".join(sorted(CPI_TABLES))
+        raise ValueError(f"index_type must be one of: {expected}")
+
+    path = find_raw_file(data_dir, RAW_DATASETS["consumer_price_inflation"])
+    table = CPI_TABLES[index_key]
+    frame = pd.read_excel(path, sheet_name=table["sheet"], header=None)
+
+    category_col = find_cpi_category_column(frame)
+    weight_col = find_cpi_weight_column(frame, category_col)
+    annual_cols = find_cpi_annual_change_columns(frame)
+
+    rows: list[dict[str, object]] = []
+    for row_index in range(10, len(frame)):
+        label = frame.at[row_index, category_col] if category_col in frame.columns else None
+        if pd.isna(label):
+            continue
+
+        coicop_code, category, category_level = parse_ons_category_label(label)
+        if not category or category.lower().startswith("source:"):
+            continue
+
+        weight = pd.to_numeric(frame.at[row_index, weight_col], errors="coerce")
+        for column in annual_cols:
+            year = int(float(frame.at[7, column]))
+            month = MONTH_LOOKUP[str(frame.at[8, column]).strip()[:3].lower()]
+            annual_change = pd.to_numeric(frame.at[row_index, column], errors="coerce")
+            if pd.isna(annual_change):
+                continue
+
+            rows.append(
+                {
+                    "index_type": index_key,
+                    "date": pd.Timestamp(year=year, month=month, day=1),
+                    "coicop_code": coicop_code,
+                    "category": category,
+                    "category_level": category_level,
+                    "weight": float(weight) if pd.notna(weight) else None,
+                    "annual_change_pct": float(annual_change),
+                    "weight_series_id": frame.at[row_index, 0],
+                    "index_series_id": frame.at[row_index, 1],
+                    "month_rate_series_id": frame.at[row_index, 2],
+                    "annual_rate_series_id": frame.at[row_index, 3],
+                    "source_sheet": table["sheet"],
+                }
+            )
+
+    result = pd.DataFrame(rows)
+    if result.empty:
+        return result
+
+    return result.sort_values(["date", "category_level", "coicop_code"], na_position="first").reset_index(
+        drop=True
+    )
+
+
+def latest_ons_category_inflation(data_dir: str | Path, index_type: str = "cpih") -> pd.DataFrame:
+    frame = load_ons_category_inflation(data_dir, index_type=index_type)
+    if frame.empty:
+        return frame
+
+    latest_date = frame["date"].max()
+    return frame.loc[frame["date"].eq(latest_date)].reset_index(drop=True)
 
 
 def summarise_workbook(path: Path) -> WorkbookSummary:

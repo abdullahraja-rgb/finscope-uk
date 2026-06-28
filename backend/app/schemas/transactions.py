@@ -79,3 +79,28 @@ class ScenarioResponse(BaseModel):
     savings_interest_delta_monthly: float
     debt_cost_delta_monthly: float
     notes: list[str]
+
+
+class PersonalInflationRequest(TransactionBatch):
+    index_type: str = "cpih"
+
+
+class PersonalInflationCategory(BaseModel):
+    app_category: str
+    spend: float
+    spend_share: float
+    ons_category: str | None
+    coicop_code: str | None
+    annual_change_pct: float | None
+    contribution_pct_points: float | None
+
+
+class PersonalInflationResponse(BaseModel):
+    index_type: str
+    period: str
+    total_spend: float
+    personal_inflation_pct: float
+    national_inflation_pct: float
+    difference_pct_points: float
+    categories: list[PersonalInflationCategory]
+    notes: list[str]

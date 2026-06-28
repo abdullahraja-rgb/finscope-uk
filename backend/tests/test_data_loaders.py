@@ -2,7 +2,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from app.data.loaders import find_raw_file, load_bank_rate_history, load_uk_hpi, summarise_workbook
+from app.data.loaders import (
+    find_raw_file,
+    latest_ons_category_inflation,
+    load_bank_rate_history,
+    load_ons_category_inflation,
+    load_uk_hpi,
+    summarise_workbook,
+)
 
 
 def test_load_uk_hpi_tidy_columns(tmp_path: Path) -> None:
@@ -77,3 +84,66 @@ def test_summarise_workbook(tmp_path: Path) -> None:
 
     assert summary.first_sheet == "Contents"
     assert summary.preview_rows > 0
+
+
+def test_load_ons_category_inflation_from_cpih_table(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (tmp_path / "sample").mkdir()
+    source = raw / "consumerpriceinflationdetailedreferencetables.xlsx"
+
+    frame = pd.DataFrame(index=range(12), columns=range(24))
+    frame.at[4, 15] = "Percentage change over 12 months"
+    frame.at[7, 7] = 2026
+    frame.at[8, 7] = "Feb-Dec"
+    frame.at[7, 15] = 2026
+    frame.at[8, 15] = "May"
+    frame.at[10, 5] = "CPIH (overall index)"
+    frame.at[10, 7] = 1000
+    frame.at[10, 15] = 3.0
+    frame.at[11, 0] = "L5CZ"
+    frame.at[11, 1] = "L523"
+    frame.at[11, 2] = "L59D"
+    frame.at[11, 3] = "L55P"
+    frame.at[11, 5] = "01    Food and non-alcoholic beverages"
+    frame.at[11, 7] = 86.5
+    frame.at[11, 15] = 2.2
+
+    with pd.ExcelWriter(source, engine="openpyxl") as writer:
+        frame.to_excel(writer, sheet_name="Table 3", index=False, header=False)
+
+    loaded = load_ons_category_inflation(tmp_path, index_type="cpih")
+
+    food = loaded.loc[loaded["coicop_code"].eq("01")].iloc[0]
+    assert food["category"] == "Food and non-alcoholic beverages"
+    assert food["category_level"] == "division"
+    assert food["annual_change_pct"] == 2.2
+    assert food["date"].strftime("%Y-%m") == "2026-05"
+
+
+def test_latest_ons_category_inflation_returns_latest_month(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (tmp_path / "sample").mkdir()
+    source = raw / "consumerpriceinflationdetailedreferencetables.xlsx"
+
+    frame = pd.DataFrame(index=range(12), columns=range(24))
+    frame.at[4, 15] = "Percentage change over 12 months"
+    frame.at[7, 7] = 2026
+    frame.at[8, 7] = "Feb-Dec"
+    frame.at[7, 15] = 2026
+    frame.at[8, 15] = "Apr"
+    frame.at[7, 16] = 2026
+    frame.at[8, 16] = "May"
+    frame.at[10, 5] = "CPIH (overall index)"
+    frame.at[10, 7] = 1000
+    frame.at[10, 15] = 2.8
+    frame.at[10, 16] = 3.0
+
+    with pd.ExcelWriter(source, engine="openpyxl") as writer:
+        frame.to_excel(writer, sheet_name="Table 3", index=False, header=False)
+
+    latest = latest_ons_category_inflation(tmp_path, index_type="cpih")
+
+    assert latest["date"].dt.strftime("%Y-%m").unique().tolist() == ["2026-05"]
+    assert latest.iloc[0]["annual_change_pct"] == 3.0
