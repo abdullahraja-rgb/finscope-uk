@@ -48,6 +48,21 @@ HPI_COLUMNS = {
     "12m%Change": "annual_change_pct",
 }
 
+FAMILY_SPENDING_DIVISIONS = {
+    "1": "01",
+    "2": "02",
+    "3": "03",
+    "4": "04",
+    "5": "05",
+    "6": "06",
+    "7": "07",
+    "8": "08",
+    "9": "09",
+    "10": "10",
+    "11": "11",
+    "12": "12",
+}
+
 CPI_TABLES = {
     "cpih": {"sheet": "Table 3", "overall_label": "CPIH"},
     "cpi": {"sheet": "Table 4", "overall_label": "CPI"},
@@ -160,6 +175,52 @@ def load_bank_rate_history(data_dir: str | Path) -> pd.DataFrame:
         frame["date"].notna() & frame["policy_rate"].notna(),
         ["date", *rate_columns, "policy_rate"],
     ]
+
+
+def load_family_spending_benchmarks(data_dir: str | Path) -> pd.DataFrame:
+    path = find_raw_file(data_dir, RAW_DATASETS["family_spending"])
+    frame = pd.read_excel(path, sheet_name="4.1", header=None)
+
+    latest_column = None
+    latest_period = None
+    for column, value in frame.loc[6].items():
+        text = str(value).strip()
+        if re.match(r"^\d{4}-\d{2}", text):
+            latest_column = int(column)
+            latest_period = text
+
+    if latest_column is None or latest_period is None:
+        raise ValueError("Could not find the latest Family Spending period")
+
+    all_groups = frame.loc[frame[0].astype(str).eq("1-12")]
+    if all_groups.empty:
+        raise ValueError("Could not find all expenditure groups in Family Spending workbook")
+    all_weekly_spend = float(pd.to_numeric(all_groups.iloc[0, latest_column], errors="coerce"))
+
+    rows: list[dict[str, object]] = []
+    for _, row in frame.iterrows():
+        raw_code = str(row.get(0, "")).strip()
+        coicop_code = FAMILY_SPENDING_DIVISIONS.get(raw_code)
+        if not coicop_code:
+            continue
+
+        weekly_spend = pd.to_numeric(row.get(latest_column), errors="coerce")
+        category = row.get(1)
+        if pd.isna(weekly_spend) or pd.isna(category):
+            continue
+
+        rows.append(
+            {
+                "period": latest_period,
+                "coicop_code": coicop_code,
+                "category": str(category).strip(),
+                "average_weekly_spend": float(weekly_spend),
+                "benchmark_share": float(weekly_spend) / all_weekly_spend,
+                "source_sheet": "4.1",
+            }
+        )
+
+    return pd.DataFrame(rows)
 
 
 def parse_ons_category_label(label: object) -> tuple[str | None, str, str]:

@@ -1,5 +1,7 @@
 import type {
   LatestInflationResponse,
+  DerivedHealthScoreRequest,
+  DerivedHealthScoreResponse,
   PersonalInflationResponse,
   RateImpactRequest,
   RateImpactResponse,
@@ -83,4 +85,20 @@ export async function calculateRateImpact(request: RateImpactRequest) {
   }
 
   return response.json() as Promise<RateImpactResponse>;
+}
+
+export async function calculateDerivedHealthScore(request: DerivedHealthScoreRequest) {
+  const response = await fetch(`${API_BASE_URL}/api/v1/score/from-transactions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    throw new Error("Financial health calculation failed");
+  }
+
+  return response.json() as Promise<DerivedHealthScoreResponse>;
 }

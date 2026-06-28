@@ -6,6 +6,7 @@ from app.data.loaders import (
     find_raw_file,
     latest_ons_category_inflation,
     load_bank_rate_history,
+    load_family_spending_benchmarks,
     load_ons_category_inflation,
     load_uk_hpi,
     summarise_workbook,
@@ -147,3 +148,31 @@ def test_latest_ons_category_inflation_returns_latest_month(tmp_path: Path) -> N
 
     assert latest["date"].dt.strftime("%Y-%m").unique().tolist() == ["2026-05"]
     assert latest.iloc[0]["annual_change_pct"] == 3.0
+
+
+def test_load_family_spending_benchmarks_latest_period(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    source = raw / "workbook1detailedexpenditureandtrends.xlsx"
+
+    frame = pd.DataFrame(index=range(52), columns=range(30))
+    frame.at[6, 29] = "2024-25"
+    frame.at[20, 0] = "1"
+    frame.at[20, 1] = "Food & non-alcoholic drinks"
+    frame.at[20, 29] = 73.7
+    frame.at[26, 0] = "4"
+    frame.at[26, 1] = "Housing (net), fuel & power"
+    frame.at[26, 29] = 118.4
+    frame.at[45, 0] = "1-12"
+    frame.at[45, 1] = "All expenditure groups"
+    frame.at[45, 29] = 582.5
+
+    with pd.ExcelWriter(source, engine="openpyxl") as writer:
+        frame.to_excel(writer, sheet_name="4.1", index=False, header=False)
+
+    loaded = load_family_spending_benchmarks(tmp_path)
+
+    food = loaded.loc[loaded["coicop_code"].eq("01")].iloc[0]
+    assert food["period"] == "2024-25"
+    assert food["average_weekly_spend"] == 73.7
+    assert round(food["benchmark_share"], 4) == 0.1265

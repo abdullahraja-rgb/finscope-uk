@@ -24,8 +24,19 @@ import {
   YAxis
 } from "recharts";
 
-import type { CategorySpend, InflationImpact, Metric, RateImpactResponse } from "@/types/finscope";
-import { calculatePersonalInflation, calculateRateImpact, uploadTransactions } from "@/lib/api";
+import type {
+  CategorySpend,
+  DerivedHealthScoreResponse,
+  InflationImpact,
+  Metric,
+  RateImpactResponse
+} from "@/types/finscope";
+import {
+  calculateDerivedHealthScore,
+  calculatePersonalInflation,
+  calculateRateImpact,
+  uploadTransactions
+} from "@/lib/api";
 
 const metrics: Metric[] = [
   { label: "Monthly income", value: "GBP 3,240", delta: "+2.1%", tone: "good" },
@@ -89,6 +100,16 @@ const demoInflationTransactions = [
   }
 ];
 
+const demoHealthTransactions = [
+  {
+    date: "2026-06-25",
+    description: "Salary Payroll",
+    amount: 3240,
+    category: "income"
+  },
+  ...demoInflationTransactions
+];
+
 const fallbackRateImpact: RateImpactResponse = {
   current_bank_rate_pct: 3.75,
   scenario_bank_rate_pct: 4,
@@ -119,6 +140,25 @@ const healthRows = [
   { name: "Debt load", score: 91 },
   { name: "Emergency fund", score: 62 }
 ];
+
+const fallbackHealth: DerivedHealthScoreResponse = {
+  score: 74,
+  band: "Stable",
+  components: healthRows.map((row) => ({
+    name: row.name,
+    score: row.score,
+    weight: 0.25,
+    note: ""
+  })),
+  monthly_income: 3240,
+  monthly_spend: 2415,
+  savings_rate: 0.2546,
+  rent_to_income: 0.3333,
+  emergency_fund_months: 2.5,
+  spending_volatility: 0,
+  benchmarks: [],
+  notes: []
+};
 
 function toneClass(tone: Metric["tone"]) {
   if (tone === "good") return "text-teal";
@@ -152,13 +192,14 @@ export function DashboardShell() {
     chart: inflationImpact
   });
   const [rateImpact, setRateImpact] = useState<RateImpactResponse>(fallbackRateImpact);
+  const [healthScore, setHealthScore] = useState<DerivedHealthScoreResponse>(fallbackHealth);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadLiveCostOfLiving() {
       try {
-        const [inflationResponse, rateResponse] = await Promise.all([
+        const [inflationResponse, rateResponse, healthResponse] = await Promise.all([
           calculatePersonalInflation(demoInflationTransactions),
           calculateRateImpact({
             savings_balance: 6000,
@@ -167,6 +208,11 @@ export function DashboardShell() {
             mortgage_years_remaining: 22,
             current_mortgage_rate_pct: 5,
             bank_rate_change_pct_points: 0.25
+          }),
+          calculateDerivedHealthScore({
+            transactions: demoHealthTransactions,
+            liquid_savings: 6000,
+            monthly_debt_payment: 120
           })
         ]);
         if (!isMounted) return;
@@ -185,6 +231,7 @@ export function DashboardShell() {
             }))
         });
         setRateImpact(rateResponse);
+        setHealthScore(healthResponse);
       } catch {
         if (!isMounted) return;
       }
@@ -218,6 +265,12 @@ export function DashboardShell() {
   const mortgageImpact = rateImpact.lines.find((line) => line.name === "Repayment mortgage");
   const savingsImpact = rateImpact.lines.find((line) => line.name === "Savings interest");
   const debtImpact = rateImpact.lines.find((line) => line.name === "Variable debt cost");
+  const dashboardMetrics = metrics.map((metric) =>
+    metric.label === "Health score"
+      ? { ...metric, value: Math.round(healthScore.score).toString(), delta: healthScore.band }
+      : metric
+  );
+  const housingBenchmark = healthScore.benchmarks.find((benchmark) => benchmark.coicop_code === "04");
 
   return (
     <main className="min-h-screen bg-paper">
@@ -256,7 +309,7 @@ export function DashboardShell() {
       <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6 lg:grid-cols-[1.6fr_1fr]">
         <section className="grid gap-5">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {metrics.map((metric) => (
+            {dashboardMetrics.map((metric) => (
               <div key={metric.label} className="rounded-md border border-slate-200 bg-panel p-4 shadow-soft">
                 <div className="flex items-start justify-between gap-3">
                   <p className="text-sm font-medium text-slate-500">{metric.label}</p>
@@ -327,18 +380,20 @@ export function DashboardShell() {
               <Gauge className="text-teal" size={22} aria-hidden="true" />
             </div>
             <div className="flex items-end gap-3">
-              <span className="text-6xl font-semibold tracking-normal text-ink">74</span>
-              <span className="pb-2 text-sm font-semibold text-amber">Stable</span>
+              <span className="text-6xl font-semibold tracking-normal text-ink">
+                {Math.round(healthScore.score)}
+              </span>
+              <span className="pb-2 text-sm font-semibold text-amber">{healthScore.band}</span>
             </div>
             <div className="mt-6 grid gap-4">
-              {healthRows.map((row) => (
-                <div key={row.name}>
+              {healthScore.components.slice(0, 4).map((component) => (
+                <div key={component.name}>
                   <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="font-medium text-slate-600">{row.name}</span>
-                    <span className="font-semibold text-ink">{row.score}</span>
+                    <span className="font-medium text-slate-600">{component.name}</span>
+                    <span className="font-semibold text-ink">{Math.round(component.score)}</span>
                   </div>
                   <div className="h-2 rounded-sm bg-slate-100">
-                    <div className="h-2 rounded-sm bg-teal" style={{ width: `${row.score}%` }} />
+                    <div className="h-2 rounded-sm bg-teal" style={{ width: `${component.score}%` }} />
                   </div>
                 </div>
               ))}
@@ -353,15 +408,21 @@ export function DashboardShell() {
             <div className="grid gap-3">
               <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
                 <span className="text-sm font-medium text-slate-600">Rent-to-income</span>
-                <span className="text-sm font-semibold text-ink">29%</span>
+                <span className="text-sm font-semibold text-ink">
+                  {Math.round(healthScore.rent_to_income * 100)}%
+                </span>
               </div>
               <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
-                <span className="text-sm font-medium text-slate-600">Subscription leakage</span>
-                <span className="text-sm font-semibold text-ink">GBP 54</span>
+                <span className="text-sm font-medium text-slate-600">Emergency fund</span>
+                <span className="text-sm font-semibold text-ink">
+                  {healthScore.emergency_fund_months.toFixed(1)} months
+                </span>
               </div>
               <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
-                <span className="text-sm font-medium text-slate-600">Food inflation gap</span>
-                <span className="text-sm font-semibold text-rose">+0.9 pp</span>
+                <span className="text-sm font-medium text-slate-600">Housing vs ONS</span>
+                <span className="text-sm font-semibold text-rose">
+                  {housingBenchmark ? `${housingBenchmark.difference_pct_points.toFixed(1)} pp` : "n/a"}
+                </span>
               </div>
             </div>
           </section>

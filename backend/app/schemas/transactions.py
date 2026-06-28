@@ -61,6 +61,33 @@ class HealthScoreResponse(BaseModel):
     components: list[ScoreComponent]
 
 
+class SpendingBenchmark(BaseModel):
+    coicop_code: str
+    ons_category: str
+    user_share: float
+    benchmark_share: float
+    difference_pct_points: float
+    note: str
+
+
+class DerivedHealthScoreRequest(TransactionBatch):
+    monthly_income: float | None = Field(default=None, gt=0)
+    liquid_savings: float = Field(default=0, ge=0)
+    monthly_debt_payment: float = Field(default=0, ge=0)
+    rent_or_mortgage: float | None = Field(default=None, ge=0)
+
+
+class DerivedHealthScoreResponse(HealthScoreResponse):
+    monthly_income: float
+    monthly_spend: float
+    savings_rate: float
+    rent_to_income: float
+    emergency_fund_months: float
+    spending_volatility: float
+    benchmarks: list[SpendingBenchmark]
+    notes: list[str]
+
+
 class ScenarioRequest(BaseModel):
     monthly_income: float = Field(gt=0)
     monthly_spend: float = Field(ge=0)

@@ -1,4 +1,17 @@
-from app.schemas.transactions import HealthScoreRequest, HealthScoreResponse, ScoreComponent
+from __future__ import annotations
+
+import pandas as pd
+
+from app.schemas.transactions import (
+    DerivedHealthScoreRequest,
+    DerivedHealthScoreResponse,
+    HealthScoreRequest,
+    HealthScoreResponse,
+    ScoreComponent,
+    SpendingBenchmark,
+    TransactionIn,
+)
+from app.services.cost_of_living import coicop_code_from_mapping
 
 
 def clamp(value: float, minimum: float = 0, maximum: float = 100) -> float:
@@ -63,3 +76,124 @@ def calculate_health_score(request: HealthScoreRequest) -> HealthScoreResponse:
         band = "At risk"
 
     return HealthScoreResponse(score=round(total, 1), band=band, components=components)
+
+
+def transactions_frame(transactions: list[TransactionIn]) -> pd.DataFrame:
+    rows = [transaction.model_dump() for transaction in transactions]
+    frame = pd.DataFrame(rows)
+    if frame.empty:
+        return pd.DataFrame(columns=["date", "amount", "category", "month"])
+
+    frame["date"] = pd.to_datetime(frame["date"], errors="coerce")
+    frame["amount"] = pd.to_numeric(frame["amount"], errors="coerce")
+    frame["category"] = frame["category"].fillna("uncategorised")
+    frame["month"] = frame["date"].dt.to_period("M").astype(str)
+    return frame
+
+
+def average_monthly_amount(frame: pd.DataFrame, mask: pd.Series) -> float:
+    if frame.empty:
+        return 0.0
+    months = max(int(frame["month"].nunique()), 1)
+    return float(frame.loc[mask, "amount"].abs().sum()) / months
+
+
+def benchmark_comparisons(
+    frame: pd.DataFrame,
+    category_mapping: dict[str, str | None],
+    benchmarks: pd.DataFrame,
+) -> list[SpendingBenchmark]:
+    expenses = frame.loc[frame["amount"] < 0].copy()
+    if expenses.empty or benchmarks.empty:
+        return []
+
+    expenses["coicop_code"] = expenses["category"].map(category_mapping).map(coicop_code_from_mapping)
+    mapped = expenses.loc[expenses["coicop_code"].notna()].copy()
+    if mapped.empty:
+        return []
+
+    spend_by_code = mapped.groupby("coicop_code")["amount"].sum().abs()
+    total_spend = float(spend_by_code.sum())
+    results: list[SpendingBenchmark] = []
+
+    for coicop_code, spend in spend_by_code.items():
+        benchmark = benchmarks.loc[benchmarks["coicop_code"].eq(coicop_code)]
+        if benchmark.empty:
+            continue
+        benchmark_row = benchmark.iloc[0]
+        user_share = float(spend) / total_spend if total_spend else 0.0
+        benchmark_share = float(benchmark_row["benchmark_share"])
+        difference = (user_share - benchmark_share) * 100
+        results.append(
+            SpendingBenchmark(
+                coicop_code=str(coicop_code),
+                ons_category=str(benchmark_row["category"]),
+                user_share=round(user_share, 4),
+                benchmark_share=round(benchmark_share, 4),
+                difference_pct_points=round(difference, 2),
+                note="Positive means this budget is more concentrated than the ONS all-household benchmark.",
+            )
+        )
+
+    return sorted(results, key=lambda item: abs(item.difference_pct_points), reverse=True)
+
+
+def derive_health_score(
+    request: DerivedHealthScoreRequest,
+    category_mapping: dict[str, str | None],
+    benchmarks: pd.DataFrame,
+) -> DerivedHealthScoreResponse:
+    frame = transactions_frame(request.transactions)
+    notes: list[str] = []
+
+    income_mask = frame["amount"] > 0
+    expense_mask = frame["amount"] < 0
+    monthly_income = (
+        request.monthly_income
+        if request.monthly_income is not None
+        else average_monthly_amount(frame, income_mask)
+    )
+    if monthly_income <= 0:
+        monthly_income = 1.0
+        notes.append("Monthly income was missing, so ratios use 1.0 to avoid division by zero.")
+
+    monthly_spend = average_monthly_amount(frame, expense_mask)
+    housing_mask = expense_mask & frame["category"].isin(["housing", "rent", "mortgage"])
+    rent_or_mortgage = (
+        request.rent_or_mortgage
+        if request.rent_or_mortgage is not None
+        else average_monthly_amount(frame, housing_mask)
+    )
+    subscriptions = average_monthly_amount(frame, expense_mask & frame["category"].eq("subscriptions"))
+
+    monthly_totals = frame.loc[expense_mask].groupby("month")["amount"].sum().abs()
+    spend_volatility = float(monthly_totals.std(ddof=0)) if len(monthly_totals) > 1 else 0.0
+
+    score_request = HealthScoreRequest(
+        monthly_income=monthly_income,
+        monthly_spend=monthly_spend,
+        rent_or_mortgage=rent_or_mortgage,
+        monthly_debt_payment=request.monthly_debt_payment,
+        liquid_savings=request.liquid_savings,
+        subscriptions=subscriptions,
+        spend_volatility=spend_volatility,
+    )
+    score = calculate_health_score(score_request)
+
+    savings_rate = (monthly_income - monthly_spend) / monthly_income
+    rent_to_income = rent_or_mortgage / monthly_income
+    emergency_fund_months = request.liquid_savings / max(monthly_spend, 1)
+
+    return DerivedHealthScoreResponse(
+        score=score.score,
+        band=score.band,
+        components=score.components,
+        monthly_income=round(monthly_income, 2),
+        monthly_spend=round(monthly_spend, 2),
+        savings_rate=round(savings_rate, 4),
+        rent_to_income=round(rent_to_income, 4),
+        emergency_fund_months=round(emergency_fund_months, 2),
+        spending_volatility=round(spend_volatility, 2),
+        benchmarks=benchmark_comparisons(frame, category_mapping, benchmarks),
+        notes=notes,
+    )

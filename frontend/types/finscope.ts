@@ -90,3 +90,41 @@ export type RateImpactResponse = {
   lines: RateImpactLine[];
   notes: string[];
 };
+
+export type ScoreComponent = {
+  name: string;
+  score: number;
+  weight: number;
+  note: string;
+};
+
+export type SpendingBenchmark = {
+  coicop_code: string;
+  ons_category: string;
+  user_share: number;
+  benchmark_share: number;
+  difference_pct_points: number;
+  note: string;
+};
+
+export type DerivedHealthScoreRequest = {
+  transactions: TransactionPayload[];
+  monthly_income?: number | null;
+  liquid_savings?: number;
+  monthly_debt_payment?: number;
+  rent_or_mortgage?: number | null;
+};
+
+export type DerivedHealthScoreResponse = {
+  score: number;
+  band: string;
+  components: ScoreComponent[];
+  monthly_income: number;
+  monthly_spend: number;
+  savings_rate: number;
+  rent_to_income: number;
+  emergency_fund_months: number;
+  spending_volatility: number;
+  benchmarks: SpendingBenchmark[];
+  notes: string[];
+};
