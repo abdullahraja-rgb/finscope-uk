@@ -45,6 +45,21 @@ npm run dev
 
 The default frontend API target is `http://localhost:8000`. Override it with `NEXT_PUBLIC_API_BASE_URL`.
 
+## Quality Checks
+
+I run these checks before a commit:
+
+```powershell
+cd backend
+python -m pytest
+cd ..\frontend
+npm run lint
+npm run typecheck
+npm run build
+```
+
+GitHub Actions runs the same backend and frontend checks on push and pull request.
+
 ## Data Policy
 
 I am not committing real bank statements or raw downloaded datasets. I keep raw files in `data/raw/`, which is ignored by Git, and use synthetic or heavily anonymised samples for public demos.
@@ -74,3 +89,4 @@ The backend now has a first cost-of-living engine:
 - `POST /api/v1/cost-of-living/personal-inflation` calculates personal inflation from transaction categories.
 - `POST /api/v1/cost-of-living/rate-impact` estimates Bank Rate effects on savings, debt, and repayment mortgages.
 - `POST /api/v1/score/from-transactions` derives a financial-health score and ONS spending benchmarks from transactions.
+- `POST /api/v1/recommendations` turns calculated outputs into traceable next actions.

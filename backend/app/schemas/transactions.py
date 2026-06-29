@@ -236,9 +236,29 @@ class RateImpactResponse(BaseModel):
     notes: list[str]
 
 
+class Recommendation(BaseModel):
+    title: str
+    detail: str
+    action: str
+    priority: str
+    source: str
+
+
+class RecommendationsRequest(BaseModel):
+    forecast: ForecastResponse | None = None
+    personal_inflation: PersonalInflationResponse | None = None
+    health_score: DerivedHealthScoreResponse | None = None
+    rate_impact: RateImpactResponse | None = None
+
+
+class RecommendationsResponse(BaseModel):
+    recommendations: list[Recommendation]
+
+
 class TransactionAnalysisResponse(TransactionPreviewResponse):
     transactions: list[CategorisedTransaction]
     forecast: ForecastResponse
     personal_inflation: PersonalInflationResponse | None = None
     health_score: DerivedHealthScoreResponse | None = None
+    recommendations: list[Recommendation] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)

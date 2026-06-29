@@ -6,8 +6,11 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   Banknote,
+  CheckCircle2,
+  CircleAlert,
   Gauge,
   Home,
+  LoaderCircle,
   PiggyBank,
   ReceiptText,
   Upload
@@ -31,6 +34,7 @@ import type {
   InflationImpact,
   Metric,
   RateImpactResponse,
+  Recommendation,
   TransactionPayload
 } from "@/types/finscope";
 import {
@@ -38,6 +42,7 @@ import {
   calculateForecast,
   calculatePersonalInflation,
   calculateRateImpact,
+  getRecommendations,
   uploadTransactions
 } from "@/lib/api";
 
@@ -204,6 +209,30 @@ const fallbackHealth: DerivedHealthScoreResponse = {
   notes: []
 };
 
+const fallbackRecommendations: Recommendation[] = [
+  {
+    title: "Build the emergency buffer first",
+    detail: "Emergency savings cover 2.5 months of spend.",
+    action: "Move GBP 150 to savings after payday until this reaches three months.",
+    priority: "high",
+    source: "Health score"
+  },
+  {
+    title: "Review subscriptions",
+    detail: "Recurring payments are visible in the monthly spend mix.",
+    action: "Cancel one low-use subscription before the next billing date.",
+    priority: "medium",
+    source: "Health score"
+  },
+  {
+    title: "Set a grocery alert",
+    detail: "The forecast expects groceries to stay near GBP 440 next month.",
+    action: "Use the forecast as next month's alert level.",
+    priority: "medium",
+    source: "Forecast"
+  }
+];
+
 function toneClass(tone: Metric["tone"]) {
   if (tone === "good") return "text-teal";
   if (tone === "risk") return "text-rose";
@@ -252,11 +281,60 @@ function forecastRowsFromResponse(forecast: ForecastResponse, transactions: Tran
   }));
 }
 
+type UploadState = {
+  state: "idle" | "loading" | "success" | "error";
+  message: string;
+};
+
+type UploadSummary = {
+  rows: number;
+  totalSpend: number;
+  categoryCount: number;
+  forecastCount: number;
+  healthScore: number | null;
+  personalInflation: number | null;
+  notes: string[];
+};
+
+const uploadStateStyles: Record<UploadState["state"], string> = {
+  idle: "border-slate-200 bg-panel text-slate-600",
+  loading: "border-cobalt/30 bg-blue-50 text-cobalt",
+  success: "border-teal/30 bg-emerald-50 text-teal",
+  error: "border-rose/30 bg-rose-50 text-rose"
+};
+
+function uploadIcon(state: UploadState["state"]) {
+  if (state === "loading") return <LoaderCircle className="animate-spin" size={18} aria-hidden="true" />;
+  if (state === "success") return <CheckCircle2 size={18} aria-hidden="true" />;
+  if (state === "error") return <CircleAlert size={18} aria-hidden="true" />;
+  return <Upload size={18} aria-hidden="true" />;
+}
+
+function uploadSummaryFromResult(result: Awaited<ReturnType<typeof uploadTransactions>>): UploadSummary {
+  const categories = new Set(
+    result.transactions.map((transaction) => transaction.category ?? transaction.predicted_category)
+  );
+
+  return {
+    rows: result.rows,
+    totalSpend: result.total_spend,
+    categoryCount: categories.size,
+    forecastCount: result.forecast.forecasts.length,
+    healthScore: result.health_score?.score ?? null,
+    personalInflation: result.personal_inflation?.personal_inflation_pct ?? null,
+    notes: result.notes
+  };
+}
+
+function priorityTone(priority: string) {
+  if (priority === "high") return "text-rose";
+  if (priority === "medium") return "text-amber";
+  return "text-teal";
+}
+
 export function DashboardShell() {
-  const [uploadStatus, setUploadStatus] = useState<{
-    state: "idle" | "loading" | "success" | "error";
-    message: string;
-  }>({ state: "idle", message: "" });
+  const [uploadStatus, setUploadStatus] = useState<UploadState>({ state: "idle", message: "" });
+  const [uploadSummary, setUploadSummary] = useState<UploadSummary | null>(null);
   const [costOfLiving, setCostOfLiving] = useState<{
     period: string;
     personalRate: number;
@@ -272,6 +350,7 @@ export function DashboardShell() {
   const [healthScore, setHealthScore] = useState<DerivedHealthScoreResponse>(fallbackHealth);
   const [forecastRows, setForecastRows] = useState<CategorySpend[]>(fallbackCategorySpend);
   const [forecastPeriod, setForecastPeriod] = useState("Demo");
+  const [recommendations, setRecommendations] = useState<Recommendation[]>(fallbackRecommendations);
 
   useEffect(() => {
     let isMounted = true;
@@ -314,6 +393,14 @@ export function DashboardShell() {
         setHealthScore(healthResponse);
         setForecastPeriod(forecastResponse.period);
         setForecastRows(forecastRowsFromResponse(forecastResponse, demoForecastTransactions));
+        const recommendationResponse = await getRecommendations({
+          forecast: forecastResponse,
+          personal_inflation: inflationResponse,
+          health_score: healthResponse,
+          rate_impact: rateResponse
+        });
+        if (!isMounted) return;
+        setRecommendations(recommendationResponse.recommendations);
       } catch {
         if (!isMounted) return;
       }
@@ -330,12 +417,14 @@ export function DashboardShell() {
     if (!file) return;
 
     setUploadStatus({ state: "loading", message: "Reading CSV" });
+    setUploadSummary(null);
     try {
       const result = await uploadTransactions(file);
       setUploadStatus({
         state: "success",
         message: `${result.rows} rows, GBP ${Number(result.total_spend).toLocaleString()} spend`
       });
+      setUploadSummary(uploadSummaryFromResult(result));
 
       if (result.forecast.forecasts.length > 0) {
         setForecastPeriod(result.forecast.period);
@@ -361,7 +450,12 @@ export function DashboardShell() {
       if (result.health_score) {
         setHealthScore(result.health_score);
       }
+
+      if (result.recommendations.length > 0) {
+        setRecommendations(result.recommendations);
+      }
     } catch (error) {
+      setUploadSummary(null);
       setUploadStatus({
         state: "error",
         message: error instanceof Error ? error.message : "Upload failed"
@@ -397,21 +491,69 @@ export function DashboardShell() {
                 className="sr-only"
                 type="file"
                 accept=".csv"
-                onChange={(event) => void handleUpload(event.target.files?.[0])}
+                onChange={(event) => {
+                  void handleUpload(event.target.files?.[0]);
+                  event.currentTarget.value = "";
+                }}
               />
             </label>
-            {uploadStatus.state !== "idle" ? (
-              <p
-                className={`text-sm font-medium ${
-                  uploadStatus.state === "error" ? "text-rose" : "text-slate-600"
-                }`}
-              >
-                {uploadStatus.message}
-              </p>
-            ) : null}
           </div>
         </div>
       </header>
+
+      {uploadStatus.state !== "idle" ? (
+        <section
+          className={`border-b ${uploadStateStyles[uploadStatus.state]}`}
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <div className="mx-auto grid max-w-7xl gap-3 px-5 py-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+              {uploadIcon(uploadStatus.state)}
+              <span className="truncate">{uploadStatus.message}</span>
+            </div>
+            {uploadSummary ? (
+              <dl className="grid grid-cols-2 gap-x-5 gap-y-2 text-sm sm:grid-cols-3 lg:flex lg:items-center">
+                <div>
+                  <dt className="text-slate-500">Rows</dt>
+                  <dd className="font-semibold text-ink">{uploadSummary.rows.toLocaleString()}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Spend</dt>
+                  <dd className="font-semibold text-ink">
+                    GBP {Math.round(uploadSummary.totalSpend).toLocaleString()}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Categories</dt>
+                  <dd className="font-semibold text-ink">{uploadSummary.categoryCount}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Forecasts</dt>
+                  <dd className="font-semibold text-ink">{uploadSummary.forecastCount}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Health</dt>
+                  <dd className="font-semibold text-ink">
+                    {uploadSummary.healthScore === null ? "n/a" : Math.round(uploadSummary.healthScore)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Inflation</dt>
+                  <dd className="font-semibold text-ink">
+                    {uploadSummary.personalInflation === null
+                      ? "n/a"
+                      : `${uploadSummary.personalInflation.toFixed(1)}%`}
+                  </dd>
+                </div>
+              </dl>
+            ) : null}
+          </div>
+          {uploadSummary?.notes.length ? (
+            <div className="mx-auto max-w-7xl px-5 pb-3 text-sm text-slate-600">{uploadSummary.notes[0]}</div>
+          ) : null}
+        </section>
+      ) : null}
 
       <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6 lg:grid-cols-[1.6fr_1fr]">
         <section className="grid gap-5">
@@ -576,9 +718,18 @@ export function DashboardShell() {
               <PiggyBank className="text-teal" size={22} aria-hidden="true" />
             </div>
             <ul className="grid gap-3 text-sm text-slate-600">
-              <li>Move GBP 150 to emergency savings after payday.</li>
-              <li>Review duplicate streaming subscriptions.</li>
-              <li>Set grocery alert at GBP 440 for next month.</li>
+              {recommendations.slice(0, 4).map((recommendation) => (
+                <li key={`${recommendation.source}-${recommendation.title}`} className="grid gap-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="font-semibold text-ink">{recommendation.title}</span>
+                    <span className={`text-xs font-semibold uppercase ${priorityTone(recommendation.priority)}`}>
+                      {recommendation.priority}
+                    </span>
+                  </div>
+                  <span>{recommendation.detail}</span>
+                  <span className="font-medium text-slate-700">{recommendation.action}</span>
+                </li>
+              ))}
             </ul>
           </section>
         </aside>

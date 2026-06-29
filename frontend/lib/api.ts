@@ -9,6 +9,8 @@ import type {
   PersonalInflationResponse,
   RateImpactRequest,
   RateImpactResponse,
+  RecommendationsRequest,
+  RecommendationsResponse,
   TransactionAnalysisResponse,
   TransactionPayload
 } from "@/types/finscope";
@@ -181,4 +183,20 @@ export async function calculateDerivedHealthScore(request: DerivedHealthScoreReq
   }
 
   return response.json() as Promise<DerivedHealthScoreResponse>;
+}
+
+export async function getRecommendations(request: RecommendationsRequest) {
+  const response = await fetch(`${API_BASE_URL}/api/v1/recommendations`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    throw new Error("Recommendations calculation failed");
+  }
+
+  return response.json() as Promise<RecommendationsResponse>;
 }

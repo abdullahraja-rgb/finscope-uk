@@ -32,8 +32,8 @@ I use this log as my interview prep. For each topic, I write what it is, why I u
 
 ## Phase 7 - FastAPI
 
-- I will add this after the first endpoint tests pass.
+- I now have FastAPI endpoints for upload analysis, categorisation, forecasting, personal inflation, Bank Rate scenarios, and financial-health scoring. The main engineering lesson is that the API needs typed request and response shapes, not just working functions. I also added CI so every push runs backend tests plus frontend lint, typecheck, and build.
 
 ## Phase 8 - Next.js Dashboard
 
-- I connected the upload flow to the real analysis stack instead of stopping at CSV preview. The important design choice was to analyse the file once on the backend, then return the preview, categorised transactions, forecast, personal inflation, and health score together. That keeps the frontend simpler and avoids slightly different category assumptions leaking into different dashboard panels.
+- I connected the upload flow to the real analysis stack instead of stopping at CSV preview. The important design choice was to analyse the file once on the backend, then return the preview, categorised transactions, forecast, personal inflation, health score, and recommendations together. That keeps the frontend simpler and avoids slightly different category assumptions leaking into different dashboard panels. For recommendations, I started with deterministic rules so every action can be traced back to a calculated value before I add any LLM layer.

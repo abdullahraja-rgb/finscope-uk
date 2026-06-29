@@ -15,6 +15,7 @@ from app.schemas.transactions import (
 from app.services.categorisation import categorisation_model_path, categorise_transactions
 from app.services.cost_of_living import calculate_personal_inflation, load_category_mapping
 from app.services.forecasting import forecast_next_month
+from app.services.recommendations import generate_recommendations
 from app.services.scoring import derive_health_score
 
 router = APIRouter()
@@ -161,5 +162,10 @@ async def analyse_transactions(
         forecast=forecast,
         personal_inflation=personal_inflation,
         health_score=health_score,
+        recommendations=generate_recommendations(
+            forecast=forecast,
+            personal_inflation=personal_inflation,
+            health_score=health_score,
+        ).recommendations,
         notes=notes,
     )

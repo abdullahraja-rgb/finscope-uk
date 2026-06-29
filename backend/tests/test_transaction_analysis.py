@@ -124,6 +124,7 @@ def test_transactions_analyse_runs_dashboard_services(monkeypatch) -> None:
     assert payload["forecast"]["forecasts"]
     assert payload["personal_inflation"]["personal_inflation_pct"] > 0
     assert payload["health_score"]["monthly_income"] == 3200
+    assert payload["recommendations"]
 
 
 def test_transactions_analyse_rejects_bad_rows() -> None:

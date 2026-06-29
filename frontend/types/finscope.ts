@@ -217,10 +217,30 @@ export type DerivedHealthScoreResponse = {
   notes: string[];
 };
 
+export type Recommendation = {
+  title: string;
+  detail: string;
+  action: string;
+  priority: "high" | "medium" | "low" | string;
+  source: string;
+};
+
+export type RecommendationsRequest = {
+  forecast?: ForecastResponse | null;
+  personal_inflation?: PersonalInflationResponse | null;
+  health_score?: DerivedHealthScoreResponse | null;
+  rate_impact?: RateImpactResponse | null;
+};
+
+export type RecommendationsResponse = {
+  recommendations: Recommendation[];
+};
+
 export type TransactionAnalysisResponse = TransactionPreviewResponse & {
   transactions: CategorisedTransaction[];
   forecast: ForecastResponse;
   personal_inflation: PersonalInflationResponse | null;
   health_score: DerivedHealthScoreResponse | null;
+  recommendations: Recommendation[];
   notes: string[];
 };
