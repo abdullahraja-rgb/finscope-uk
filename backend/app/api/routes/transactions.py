@@ -5,6 +5,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.core.config import settings
 from app.data import latest_ons_category_inflation, load_family_spending_benchmarks
+from app.data.fallbacks import demo_family_spending_benchmarks, demo_latest_inflation
 from app.schemas.transactions import (
     CategorisedTransaction,
     DerivedHealthScoreRequest,
@@ -124,18 +125,34 @@ async def analyse_transactions(
 
     try:
         inflation = latest_ons_category_inflation(settings.data_dir, index_type="cpih")
+        used_demo_inflation = False
+    except (FileNotFoundError, ValueError):
+        inflation = demo_latest_inflation(index_type="cpih")
+        used_demo_inflation = True
+
+    try:
         personal_inflation = calculate_personal_inflation(
             transactions=enriched_transactions,
             inflation=inflation,
             category_mapping=mapping,
             index_type="cpih",
         )
+        if used_demo_inflation:
+            personal_inflation.notes.append(
+                "Using bundled demo inflation data because the raw ONS workbook is unavailable."
+            )
     except Exception as exc:
         personal_inflation = None
         notes.append(f"Personal inflation skipped: {exc}")
 
     try:
         benchmarks = load_family_spending_benchmarks(settings.data_dir)
+        used_demo_benchmarks = False
+    except (FileNotFoundError, ValueError):
+        benchmarks = demo_family_spending_benchmarks()
+        used_demo_benchmarks = True
+
+    try:
         health_score = derive_health_score(
             DerivedHealthScoreRequest(
                 transactions=enriched_transactions,
@@ -145,6 +162,10 @@ async def analyse_transactions(
             category_mapping=mapping,
             benchmarks=benchmarks,
         )
+        if used_demo_benchmarks:
+            health_score.notes.append(
+                "Using bundled demo spending benchmarks because the raw ONS Family Spending workbook is unavailable."
+            )
     except Exception as exc:
         health_score = None
         notes.append(f"Financial health score skipped: {exc}")

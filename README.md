@@ -60,6 +60,12 @@ npm run build
 
 GitHub Actions runs the same backend and frontend checks on push and pull request.
 
+## Deployment
+
+I deploy the backend as a Dockerised FastAPI service and the frontend as a Vercel Next.js app. The backend image includes sample data and uses clearly labelled demo macro fallbacks when raw ONS or Bank of England files are not present.
+
+See `docs/deployment.md` for the deploy checklist and environment variables.
+
 ## Data Policy
 
 I am not committing real bank statements or raw downloaded datasets. I keep raw files in `data/raw/`, which is ignored by Git, and use synthetic or heavily anonymised samples for public demos.

@@ -37,3 +37,7 @@ I use this log as my interview prep. For each topic, I write what it is, why I u
 ## Phase 8 - Next.js Dashboard
 
 - I connected the upload flow to the real analysis stack instead of stopping at CSV preview. The important design choice was to analyse the file once on the backend, then return the preview, categorised transactions, forecast, personal inflation, health score, and recommendations together. That keeps the frontend simpler and avoids slightly different category assumptions leaking into different dashboard panels. For recommendations, I started with deterministic rules so every action can be traced back to a calculated value before I add any LLM layer.
+
+## Phase 10 - Deployment
+
+- I added a Docker backend path, Render config, frontend environment notes, and a deployment checklist. The key decision was to keep raw official datasets out of the image and use labelled demo fallbacks for hosted demos, while preserving the full official-data workflow locally through `data/raw`.

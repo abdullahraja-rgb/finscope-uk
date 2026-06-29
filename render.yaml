@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: finscope-uk-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: DATA_DIR
+        value: /app/data
+      - key: CONFIG_DIR
+        value: /app/config
+      - key: CORS_ORIGINS
+        sync: false

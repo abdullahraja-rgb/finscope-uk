@@ -9,6 +9,7 @@ from app.data import (
     load_synthetic_transactions,
     load_uk_hpi,
 )
+from app.data.fallbacks import demo_bank_rate_history, demo_latest_inflation, demo_uk_hpi
 
 router = APIRouter()
 
@@ -29,9 +30,25 @@ def datasets_status() -> dict[str, object]:
 @router.get("/datasets/summary")
 def datasets_summary() -> dict[str, object]:
     transactions = load_synthetic_transactions(settings.data_dir)
-    bank_rate = load_bank_rate_history(settings.data_dir)
-    uk_hpi = load_uk_hpi(settings.data_dir)
-    cpih = latest_ons_category_inflation(settings.data_dir, index_type="cpih")
+    notes: list[str] = []
+
+    try:
+        bank_rate = load_bank_rate_history(settings.data_dir)
+    except (FileNotFoundError, ValueError):
+        bank_rate = demo_bank_rate_history()
+        notes.append("Bank Rate summary uses bundled demo data.")
+
+    try:
+        uk_hpi = load_uk_hpi(settings.data_dir)
+    except (FileNotFoundError, ValueError):
+        uk_hpi = demo_uk_hpi()
+        notes.append("UK HPI summary uses bundled demo data.")
+
+    try:
+        cpih = latest_ons_category_inflation(settings.data_dir, index_type="cpih")
+    except (FileNotFoundError, ValueError):
+        cpih = demo_latest_inflation(index_type="cpih")
+        notes.append("CPIH summary uses bundled demo data.")
 
     latest_rate = bank_rate.sort_values("date").iloc[-1]
     latest_hpi_date = uk_hpi["date"].max()
@@ -59,15 +76,23 @@ def datasets_summary() -> dict[str, object]:
             "categories": int(len(cpih)),
             "division_categories": int(cpih["category_level"].eq("division").sum()),
         },
+        "notes": notes,
     }
 
 
 @router.get("/datasets/inflation/latest")
 def latest_inflation(index_type: str = "cpih") -> dict[str, object]:
-    frame = latest_ons_category_inflation(settings.data_dir, index_type=index_type)
+    notes: list[str] = []
+    try:
+        frame = latest_ons_category_inflation(settings.data_dir, index_type=index_type)
+    except (FileNotFoundError, ValueError):
+        frame = demo_latest_inflation(index_type=index_type)
+        notes.append("Using bundled demo inflation data because the raw ONS workbook is unavailable.")
+
     divisions = frame.loc[frame["category_level"].eq("division")].copy()
     return {
         "index_type": index_type.lower(),
         "date": frame["date"].max().date().isoformat() if not frame.empty else None,
         "categories": dataframe_records(divisions),
+        "notes": notes,
     }
