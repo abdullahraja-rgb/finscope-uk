@@ -17,6 +17,23 @@ export type InflationImpact = {
   national: number;
 };
 
+export type OnboardingProfile = {
+  monthlyIncome: number;
+  liquidSavings: number;
+  monthlyDebtPayment: number;
+  rentOrMortgage: number;
+  investmentBalance: number;
+  pensionBalance: number;
+  propertyValue: number;
+  mortgageBalance: number;
+  creditCardBalance: number;
+  loanBalance: number;
+  averageDebtApr: number;
+  emergencyFundTarget: number;
+  savingsGoalTarget: number;
+  monthlyGoalContribution: number;
+};
+
 export type TransactionPayload = {
   date: string;
   description: string;

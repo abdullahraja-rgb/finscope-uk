@@ -96,3 +96,5 @@ The backend now has a first cost-of-living engine:
 - `POST /api/v1/cost-of-living/rate-impact` estimates Bank Rate effects on savings, debt, and repayment mortgages.
 - `POST /api/v1/score/from-transactions` derives a financial-health score and ONS spending benchmarks from transactions.
 - `POST /api/v1/recommendations` turns calculated outputs into traceable next actions.
+
+The frontend starts with a short local onboarding flow for cash flow, assets, debts, and savings goals. The dashboard is split into clearer sections for overview, spending, cost of living, net worth, debt payoff, savings goals, and next actions. See `docs/onboarding-flow.md` and `docs/dashboard-data-flow.md`.

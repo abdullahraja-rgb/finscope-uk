@@ -15,6 +15,7 @@ import {
   ReceiptText,
   Upload
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -33,6 +34,7 @@ import type {
   ForecastResponse,
   InflationImpact,
   Metric,
+  OnboardingProfile,
   RateImpactResponse,
   Recommendation,
   TransactionPayload
@@ -45,13 +47,7 @@ import {
   getRecommendations,
   uploadTransactions
 } from "@/lib/api";
-
-const metrics: Metric[] = [
-  { label: "Monthly income", value: "GBP 3,240", delta: "+2.1%", tone: "good" },
-  { label: "Monthly spend", value: "GBP 2,415", delta: "-4.8%", tone: "good" },
-  { label: "Disposable", value: "GBP 825", delta: "+11.2%", tone: "good" },
-  { label: "Health score", value: "74", delta: "Stable", tone: "watch" }
-];
+import { OnboardingFlow } from "@/components/onboarding-flow";
 
 const fallbackCategorySpend: CategorySpend[] = [
   { category: "Groceries", spend: 410, forecast: 442 },
@@ -106,16 +102,6 @@ const demoInflationTransactions = [
     amount: -54,
     category: "subscriptions"
   }
-];
-
-const demoHealthTransactions = [
-  {
-    date: "2026-06-25",
-    description: "Salary Payroll",
-    amount: 3240,
-    category: "income"
-  },
-  ...demoInflationTransactions
 ];
 
 const forecastMonths = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"];
@@ -233,6 +219,68 @@ const fallbackRecommendations: Recommendation[] = [
   }
 ];
 
+type DashboardView = "overview" | "spending" | "costs" | "net-worth" | "debt" | "goals" | "actions";
+
+const dashboardViews: Array<{
+  id: DashboardView;
+  label: string;
+  helper: string;
+  icon: LucideIcon;
+}> = [
+  { id: "overview", label: "Overview", helper: "Cash flow and score", icon: Gauge },
+  { id: "spending", label: "Spending", helper: "Monthly spend and forecast", icon: ReceiptText },
+  { id: "costs", label: "Cost of living", helper: "Inflation and rate pressure", icon: Activity },
+  { id: "net-worth", label: "Net worth", helper: "Assets and liabilities", icon: Banknote },
+  { id: "debt", label: "Debt payoff", helper: "Balances and payoff time", icon: CircleAlert },
+  { id: "goals", label: "Savings goals", helper: "Emergency and target progress", icon: PiggyBank },
+  { id: "actions", label: "Next actions", helper: "Recommendations and scenario", icon: CheckCircle2 }
+];
+
+function formatGBP(value: number) {
+  return `GBP ${Math.round(value).toLocaleString()}`;
+}
+
+function formatPercent(value: number, digits = 0) {
+  return `${value.toFixed(digits)}%`;
+}
+
+function clampPercentage(value: number) {
+  return Math.max(0, Math.min(100, value));
+}
+
+function progressPercentage(current: number, target: number) {
+  if (target <= 0) return 100;
+  return clampPercentage((current / target) * 100);
+}
+
+function formatMonths(months: number | null) {
+  if (months === null) return "Not moving yet";
+  if (months <= 0) return "Cleared";
+
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+
+  if (years === 0) return `${remainingMonths} mo`;
+  if (remainingMonths === 0) return `${years} yr`;
+  return `${years} yr ${remainingMonths} mo`;
+}
+
+function payoffEstimate(balance: number, monthlyPayment: number, apr: number) {
+  if (balance <= 0) return { months: 0, interest: 0 };
+  if (monthlyPayment <= 0) return { months: null, interest: null };
+
+  const monthlyRate = Math.max(apr, 0) / 100 / 12;
+  if (monthlyRate === 0) {
+    const months = Math.ceil(balance / monthlyPayment);
+    return { months, interest: Math.max(months * monthlyPayment - balance, 0) };
+  }
+
+  if (monthlyPayment <= balance * monthlyRate) return { months: null, interest: null };
+
+  const months = Math.ceil(-Math.log(1 - (monthlyRate * balance) / monthlyPayment) / Math.log(1 + monthlyRate));
+  return { months, interest: Math.max(months * monthlyPayment - balance, 0) };
+}
+
 function toneClass(tone: Metric["tone"]) {
   if (tone === "good") return "text-teal";
   if (tone === "risk") return "text-rose";
@@ -332,7 +380,29 @@ function priorityTone(priority: string) {
   return "text-teal";
 }
 
+function demoSpendingTransactionsForProfile(profile: OnboardingProfile) {
+  return demoInflationTransactions.map((transaction) =>
+    transaction.category === "housing" ? { ...transaction, amount: -profile.rentOrMortgage } : transaction
+  );
+}
+
+function demoHealthTransactionsForProfile(profile: OnboardingProfile) {
+  const demoSpendingTransactions = demoSpendingTransactionsForProfile(profile);
+  return [
+    {
+      date: "2026-06-25",
+      description: "Salary Payroll",
+      amount: profile.monthlyIncome,
+      category: "income"
+    },
+    ...demoSpendingTransactions
+  ];
+}
+
 export function DashboardShell() {
+  const [activeProfile, setActiveProfile] = useState<OnboardingProfile | null>(null);
+  const [activeView, setActiveView] = useState<DashboardView>("overview");
+  const [dataMode, setDataMode] = useState<"demo" | "uploaded">("demo");
   const [uploadStatus, setUploadStatus] = useState<UploadState>({ state: "idle", message: "" });
   const [uploadSummary, setUploadSummary] = useState<UploadSummary | null>(null);
   const [costOfLiving, setCostOfLiving] = useState<{
@@ -353,24 +423,32 @@ export function DashboardShell() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>(fallbackRecommendations);
 
   useEffect(() => {
+    if (!activeProfile) return;
     let isMounted = true;
 
     async function loadLiveCostOfLiving() {
+      if (!activeProfile) return;
+
+      const demoHealthTransactions = demoHealthTransactionsForProfile(activeProfile);
+      const demoSpendingTransactions = demoSpendingTransactionsForProfile(activeProfile);
+      const variableDebtBalance = activeProfile.creditCardBalance + activeProfile.loanBalance;
       try {
         const [inflationResponse, rateResponse, healthResponse, forecastResponse] = await Promise.all([
-          calculatePersonalInflation(demoInflationTransactions),
+          calculatePersonalInflation(demoSpendingTransactions),
           calculateRateImpact({
-            savings_balance: 6000,
-            variable_debt_balance: 2400,
-            mortgage_balance: 180000,
+            savings_balance: activeProfile.liquidSavings,
+            variable_debt_balance: variableDebtBalance > 0 ? variableDebtBalance : activeProfile.monthlyDebtPayment * 20,
+            mortgage_balance: activeProfile.mortgageBalance > 0 ? activeProfile.mortgageBalance : undefined,
             mortgage_years_remaining: 22,
             current_mortgage_rate_pct: 5,
             bank_rate_change_pct_points: 0.25
           }),
           calculateDerivedHealthScore({
             transactions: demoHealthTransactions,
-            liquid_savings: 6000,
-            monthly_debt_payment: 120
+            monthly_income: activeProfile.monthlyIncome,
+            liquid_savings: activeProfile.liquidSavings,
+            monthly_debt_payment: activeProfile.monthlyDebtPayment,
+            rent_or_mortgage: activeProfile.rentOrMortgage
           }),
           calculateForecast(demoForecastTransactions)
         ]);
@@ -411,7 +489,7 @@ export function DashboardShell() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [activeProfile]);
 
   async function handleUpload(file: File | undefined) {
     if (!file) return;
@@ -419,12 +497,14 @@ export function DashboardShell() {
     setUploadStatus({ state: "loading", message: "Reading CSV" });
     setUploadSummary(null);
     try {
-      const result = await uploadTransactions(file);
+      const result = await uploadTransactions(file, activeProfile ?? undefined);
       setUploadStatus({
         state: "success",
         message: `${result.rows} rows, GBP ${Number(result.total_spend).toLocaleString()} spend`
       });
       setUploadSummary(uploadSummaryFromResult(result));
+      setDataMode("uploaded");
+      setActiveView("overview");
 
       if (result.forecast.forecasts.length > 0) {
         setForecastPeriod(result.forecast.period);
@@ -466,12 +546,80 @@ export function DashboardShell() {
   const mortgageImpact = rateImpact.lines.find((line) => line.name === "Repayment mortgage");
   const savingsImpact = rateImpact.lines.find((line) => line.name === "Savings interest");
   const debtImpact = rateImpact.lines.find((line) => line.name === "Variable debt cost");
-  const dashboardMetrics = metrics.map((metric) =>
-    metric.label === "Health score"
-      ? { ...metric, value: Math.round(healthScore.score).toString(), delta: healthScore.band }
-      : metric
-  );
+  const income = activeProfile?.monthlyIncome ?? fallbackHealth.monthly_income;
+  const spend = healthScore.monthly_spend;
+  const disposable = income - spend;
+  const dashboardMetrics: Metric[] = [
+    {
+      label: "Monthly income",
+      value: `GBP ${Math.round(income).toLocaleString()}`,
+      delta: "From setup",
+      tone: "neutral"
+    },
+    {
+      label: "Monthly spend",
+      value: `GBP ${Math.round(spend).toLocaleString()}`,
+      delta: `${Math.round((spend / Math.max(income, 1)) * 100)}% of income`,
+      tone: spend / Math.max(income, 1) < 0.85 ? "good" : "watch"
+    },
+    {
+      label: "Disposable",
+      value: `GBP ${Math.round(disposable).toLocaleString()}`,
+      delta: disposable >= 0 ? "After spending" : "Overspent",
+      tone: disposable >= 0 ? "good" : "risk"
+    },
+    {
+      label: "Health score",
+      value: Math.round(healthScore.score).toString(),
+      delta: healthScore.band,
+      tone: healthScore.score >= 80 ? "good" : healthScore.score >= 60 ? "watch" : "risk"
+    }
+  ];
   const housingBenchmark = healthScore.benchmarks.find((benchmark) => benchmark.coicop_code === "04");
+  const dataModeLabel = dataMode === "uploaded" ? "Uploaded CSV" : "Demo baseline";
+  const dataModeDetail =
+    dataMode === "uploaded"
+      ? "Spend, forecast, inflation, health score, and actions are using the latest CSV analysis."
+      : "Spend, forecast, inflation, health score, and actions are using demo transactions until a CSV is uploaded.";
+  const totalAssets =
+    (activeProfile?.liquidSavings ?? 0) +
+    (activeProfile?.investmentBalance ?? 0) +
+    (activeProfile?.pensionBalance ?? 0) +
+    (activeProfile?.propertyValue ?? 0);
+  const consumerDebt = (activeProfile?.creditCardBalance ?? 0) + (activeProfile?.loanBalance ?? 0);
+  const totalLiabilities = (activeProfile?.mortgageBalance ?? 0) + consumerDebt;
+  const netWorth = totalAssets - totalLiabilities;
+  const netWorthRows = [
+    { label: "Cash savings", value: activeProfile?.liquidSavings ?? 0, tone: "text-teal" },
+    { label: "Investments", value: activeProfile?.investmentBalance ?? 0, tone: "text-cobalt" },
+    { label: "Pension", value: activeProfile?.pensionBalance ?? 0, tone: "text-amber" },
+    { label: "Property", value: activeProfile?.propertyValue ?? 0, tone: "text-slate-600" },
+    { label: "Mortgage", value: -(activeProfile?.mortgageBalance ?? 0), tone: "text-rose" },
+    { label: "Cards and loans", value: -consumerDebt, tone: "text-rose" }
+  ];
+  const payoff = payoffEstimate(
+    consumerDebt,
+    activeProfile?.monthlyDebtPayment ?? 0,
+    activeProfile?.averageDebtApr ?? 0
+  );
+  const monthlyDebtToIncome = ((activeProfile?.monthlyDebtPayment ?? 0) / Math.max(income, 1)) * 100;
+  const interestOnlyPayment = consumerDebt * ((activeProfile?.averageDebtApr ?? 0) / 100 / 12);
+  const emergencyProgress = progressPercentage(activeProfile?.liquidSavings ?? 0, activeProfile?.emergencyFundTarget ?? 0);
+  const emergencyGap = Math.max((activeProfile?.emergencyFundTarget ?? 0) - (activeProfile?.liquidSavings ?? 0), 0);
+  const goalStartingBalance = Math.max(
+    (activeProfile?.liquidSavings ?? 0) - (activeProfile?.emergencyFundTarget ?? 0),
+    0
+  );
+  const goalProgress = progressPercentage(goalStartingBalance, activeProfile?.savingsGoalTarget ?? 0);
+  const goalGap = Math.max((activeProfile?.savingsGoalTarget ?? 0) - goalStartingBalance, 0);
+  const monthlyGoalContribution = activeProfile?.monthlyGoalContribution ?? 0;
+  const monthsToEmergency =
+    emergencyGap <= 0 ? 0 : monthlyGoalContribution > 0 ? Math.ceil(emergencyGap / monthlyGoalContribution) : null;
+  const monthsToGoal = goalGap <= 0 ? 0 : monthlyGoalContribution > 0 ? Math.ceil(goalGap / monthlyGoalContribution) : null;
+
+  if (!activeProfile) {
+    return <OnboardingFlow onReady={setActiveProfile} />;
+  }
 
   return (
     <main className="min-h-screen bg-paper">
@@ -482,21 +630,48 @@ export function DashboardShell() {
             <h1 className="mt-1 text-2xl font-semibold tracking-normal text-ink sm:text-3xl">
               Personal finance dashboard
             </h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{dataModeDetail}</p>
           </div>
           <div className="flex flex-col items-start gap-2 sm:items-end">
-            <label className="focus-ring inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white shadow-soft transition hover:bg-slate-800">
-              <Upload size={18} aria-hidden="true" />
-              <span>Upload CSV</span>
-              <input
-                className="sr-only"
-                type="file"
-                accept=".csv"
-                onChange={(event) => {
-                  void handleUpload(event.target.files?.[0]);
-                  event.currentTarget.value = "";
+            <div className="flex flex-wrap justify-end gap-2">
+              <label className="focus-ring inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white shadow-soft transition hover:bg-slate-800">
+                <Upload size={18} aria-hidden="true" />
+                <span>Upload CSV</span>
+                <input
+                  className="sr-only"
+                  type="file"
+                  accept=".csv"
+                  onChange={(event) => {
+                    void handleUpload(event.target.files?.[0]);
+                    event.currentTarget.value = "";
+                  }}
+                />
+              </label>
+              <button
+                className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-600"
+                type="button"
+                onClick={() => {
+                  setActiveProfile(null);
+                  setActiveView("overview");
+                  setDataMode("demo");
+                  setUploadSummary(null);
+                  setUploadStatus({ state: "idle", message: "" });
                 }}
-              />
-            </label>
+              >
+                <Gauge size={18} aria-hidden="true" />
+                Change details
+              </button>
+            </div>
+            <p className="flex flex-wrap items-center justify-end gap-2 text-sm font-medium text-slate-500">
+              <span
+                className={`rounded-sm px-2 py-1 text-xs font-semibold uppercase ${
+                  dataMode === "uploaded" ? "bg-emerald-50 text-teal" : "bg-blue-50 text-cobalt"
+                }`}
+              >
+                {dataModeLabel}
+              </span>
+              <span>Income {formatGBP(activeProfile.monthlyIncome)}</span>
+            </p>
           </div>
         </div>
       </header>
@@ -555,26 +730,95 @@ export function DashboardShell() {
         </section>
       ) : null}
 
-      <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6 lg:grid-cols-[1.6fr_1fr]">
-        <section className="grid gap-5">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {dashboardMetrics.map((metric) => (
-              <div key={metric.label} className="rounded-md border border-slate-200 bg-panel p-4 shadow-soft">
-                <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm font-medium text-slate-500">{metric.label}</p>
-                  {metric.tone === "good" ? (
-                    <ArrowUpRight className="text-teal" size={18} aria-hidden="true" />
-                  ) : (
-                    <ArrowDownRight className={toneClass(metric.tone)} size={18} aria-hidden="true" />
-                  )}
-                </div>
-                <p className="mt-3 text-2xl font-semibold tracking-normal text-ink">{metric.value}</p>
-                <p className={`mt-1 text-sm font-medium ${toneClass(metric.tone)}`}>{metric.delta}</p>
-              </div>
-            ))}
-          </div>
+      <nav className="border-b border-slate-200 bg-panel">
+        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-5 py-3">
+          {dashboardViews.map((view) => {
+            const ViewIcon = view.icon;
+            const isActive = activeView === view.id;
 
-          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+            return (
+              <button
+                key={view.id}
+                className={`focus-ring flex min-w-[160px] items-center gap-3 rounded-md border px-3 py-3 text-left transition ${
+                  isActive
+                    ? "border-ink bg-ink text-white"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-cobalt"
+                }`}
+                type="button"
+                onClick={() => setActiveView(view.id)}
+              >
+                <ViewIcon size={19} aria-hidden="true" />
+                <span className="grid gap-0.5">
+                  <span className="text-sm font-semibold">{view.label}</span>
+                  <span className={`text-xs ${isActive ? "text-white/70" : "text-slate-500"}`}>{view.helper}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
+      {["overview", "spending", "costs", "actions"].includes(activeView) ? (
+        <div
+          className={`mx-auto grid max-w-7xl gap-5 px-5 py-6 ${
+            activeView === "overview" || activeView === "costs" ? "lg:grid-cols-[1.6fr_1fr]" : "lg:grid-cols-1"
+          }`}
+        >
+        <section className="grid gap-5">
+          {activeView === "overview" ? (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {dashboardMetrics.map((metric) => (
+                  <div key={metric.label} className="rounded-md border border-slate-200 bg-panel p-4 shadow-soft">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-sm font-medium text-slate-500">{metric.label}</p>
+                      {metric.tone === "good" ? (
+                        <ArrowUpRight className="text-teal" size={18} aria-hidden="true" />
+                      ) : (
+                        <ArrowDownRight className={toneClass(metric.tone)} size={18} aria-hidden="true" />
+                      )}
+                    </div>
+                    <p className="mt-3 text-2xl font-semibold tracking-normal text-ink">{metric.value}</p>
+                    <p className={`mt-1 text-sm font-medium ${toneClass(metric.tone)}`}>{metric.delta}</p>
+                  </div>
+                ))}
+              </div>
+
+              <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+                <div className="mb-5 flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-semibold tracking-normal text-ink">Data status</h2>
+                    <p className="text-sm text-slate-500">What the dashboard is using right now</p>
+                  </div>
+                  <ReceiptText className="text-cobalt" size={22} aria-hidden="true" />
+                </div>
+                <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                  <div className="rounded-md border border-slate-200 p-3">
+                    <dt className="text-slate-500">Analysis source</dt>
+                    <dd className="mt-1 font-semibold text-ink">{dataModeLabel}</dd>
+                  </div>
+                  <div className="rounded-md border border-slate-200 p-3">
+                    <dt className="text-slate-500">Setup profile</dt>
+                    <dd className="mt-1 font-semibold text-ink">{formatGBP(activeProfile.monthlyIncome)} income</dd>
+                  </div>
+                  <div className="rounded-md border border-slate-200 p-3">
+                    <dt className="text-slate-500">CSV rows</dt>
+                    <dd className="mt-1 font-semibold text-ink">
+                      {uploadSummary ? uploadSummary.rows.toLocaleString() : "No upload yet"}
+                    </dd>
+                  </div>
+                  <div className="rounded-md border border-slate-200 p-3">
+                    <dt className="text-slate-500">Forecast period</dt>
+                    <dd className="mt-1 font-semibold text-ink">{forecastPeriod}</dd>
+                  </div>
+                </dl>
+                <p className="mt-4 text-sm leading-6 text-slate-600">{dataModeDetail}</p>
+              </section>
+            </>
+          ) : null}
+
+          {activeView === "spending" ? (
+            <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold tracking-normal text-ink">Spending and forecast</h2>
@@ -595,8 +839,51 @@ export function DashboardShell() {
               </ResponsiveContainer>
             </div>
           </section>
+          ) : null}
 
-          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+          {activeView === "spending" ? (
+            <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold tracking-normal text-ink">Category detail</h2>
+                  <p className="text-sm text-slate-500">Spend and next-month expectation by category</p>
+                </div>
+                <Activity className="text-teal" size={22} aria-hidden="true" />
+              </div>
+              <div className="overflow-x-auto rounded-md border border-slate-200">
+                <table className="min-w-full divide-y divide-slate-200 text-sm">
+                  <thead className="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
+                    <tr>
+                      <th className="px-4 py-3">Category</th>
+                      <th className="px-4 py-3">Current spend</th>
+                      <th className="px-4 py-3">Forecast</th>
+                      <th className="px-4 py-3">Change</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 bg-white">
+                    {forecastRows.map((row) => {
+                      const change = row.forecast - row.spend;
+
+                      return (
+                        <tr key={row.category}>
+                          <td className="px-4 py-3 font-medium text-ink">{row.category}</td>
+                          <td className="px-4 py-3 text-slate-600">{formatGBP(row.spend)}</td>
+                          <td className="px-4 py-3 text-slate-600">{formatGBP(row.forecast)}</td>
+                          <td className={`px-4 py-3 font-semibold ${change <= 0 ? "text-teal" : "text-amber"}`}>
+                            {change >= 0 ? "+" : ""}
+                            {formatGBP(change)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          ) : null}
+
+          {activeView === "costs" ? (
+            <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold tracking-normal text-ink">Cost-of-living impact</h2>
@@ -620,10 +907,12 @@ export function DashboardShell() {
               </ResponsiveContainer>
             </div>
           </section>
+          ) : null}
         </section>
 
         <aside className="grid content-start gap-5">
-          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+          {activeView === "overview" ? (
+            <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
             <div className="mb-5 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold tracking-normal text-ink">Financial health</h2>
               <Gauge className="text-teal" size={22} aria-hidden="true" />
@@ -648,8 +937,10 @@ export function DashboardShell() {
               ))}
             </div>
           </section>
+          ) : null}
 
-          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+          {activeView === "overview" || activeView === "costs" ? (
+            <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold tracking-normal text-ink">Pressure points</h2>
               <Home className="text-cobalt" size={22} aria-hidden="true" />
@@ -675,8 +966,10 @@ export function DashboardShell() {
               </div>
             </div>
           </section>
+          ) : null}
 
-          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+          {activeView === "costs" || activeView === "actions" ? (
+            <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold tracking-normal text-ink">Scenario snapshot</h2>
               <Banknote className="text-amber" size={22} aria-hidden="true" />
@@ -711,8 +1004,10 @@ export function DashboardShell() {
               </div>
             </div>
           </section>
+          ) : null}
 
-          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+          {activeView === "overview" || activeView === "actions" ? (
+            <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold tracking-normal text-ink">Next actions</h2>
               <PiggyBank className="text-teal" size={22} aria-hidden="true" />
@@ -732,8 +1027,204 @@ export function DashboardShell() {
               ))}
             </ul>
           </section>
+          ) : null}
         </aside>
-      </div>
+        </div>
+      ) : null}
+
+      {activeView === "net-worth" ? (
+        <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+              <p className="text-sm font-medium text-slate-500">Total assets</p>
+              <p className="mt-3 text-3xl font-semibold tracking-normal text-ink">{formatGBP(totalAssets)}</p>
+            </section>
+            <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+              <p className="text-sm font-medium text-slate-500">Total liabilities</p>
+              <p className="mt-3 text-3xl font-semibold tracking-normal text-rose">
+                {formatGBP(totalLiabilities)}
+              </p>
+            </section>
+            <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+              <p className="text-sm font-medium text-slate-500">Net worth</p>
+              <p className={`mt-3 text-3xl font-semibold tracking-normal ${netWorth >= 0 ? "text-teal" : "text-rose"}`}>
+                {formatGBP(netWorth)}
+              </p>
+            </section>
+          </div>
+
+          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold tracking-normal text-ink">Assets and liabilities</h2>
+                <p className="text-sm text-slate-500">Setup balances grouped into the net-worth view</p>
+              </div>
+              <Banknote className="text-cobalt" size={22} aria-hidden="true" />
+            </div>
+            <div className="grid gap-4">
+              {netWorthRows.map((row) => (
+                <div key={row.label} className="grid gap-2">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="font-medium text-slate-600">{row.label}</span>
+                    <span className={`font-semibold ${row.tone}`}>{formatGBP(row.value)}</span>
+                  </div>
+                  <div className="h-3 rounded-sm bg-slate-100">
+                    <div
+                      className={`h-3 rounded-sm ${row.value >= 0 ? "bg-teal" : "bg-rose"}`}
+                      style={{
+                        width: `${progressPercentage(Math.abs(row.value), Math.max(totalAssets, totalLiabilities, 1))}%`
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {activeView === "debt" ? (
+        <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6 lg:grid-cols-[1fr_1fr]">
+          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold tracking-normal text-ink">Debt payoff</h2>
+                <p className="text-sm text-slate-500">Credit cards and loans, excluding mortgage balance</p>
+              </div>
+              <CircleAlert className="text-amber" size={22} aria-hidden="true" />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-md border border-slate-200 p-4">
+                <p className="text-sm text-slate-500">Consumer debt</p>
+                <p className="mt-2 text-2xl font-semibold text-ink">{formatGBP(consumerDebt)}</p>
+              </div>
+              <div className="rounded-md border border-slate-200 p-4">
+                <p className="text-sm text-slate-500">Monthly payment</p>
+                <p className="mt-2 text-2xl font-semibold text-ink">{formatGBP(activeProfile.monthlyDebtPayment)}</p>
+              </div>
+              <div className="rounded-md border border-slate-200 p-4">
+                <p className="text-sm text-slate-500">Payoff time</p>
+                <p className="mt-2 text-2xl font-semibold text-ink">{formatMonths(payoff.months)}</p>
+              </div>
+              <div className="rounded-md border border-slate-200 p-4">
+                <p className="text-sm text-slate-500">Estimated interest</p>
+                <p className="mt-2 text-2xl font-semibold text-ink">
+                  {payoff.interest === null ? "n/a" : formatGBP(payoff.interest)}
+                </p>
+              </div>
+            </div>
+            <div className="mt-5 rounded-md border border-slate-200 p-4 text-sm text-slate-600">
+              {payoff.months === null ? (
+                <p>The current payment is below the estimated monthly interest of {formatGBP(interestOnlyPayment)}.</p>
+              ) : (
+                <p>
+                  At {formatPercent(activeProfile.averageDebtApr, 1)} APR, this payment clears the consumer debt in{" "}
+                  {formatMonths(payoff.months)}.
+                </p>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold tracking-normal text-ink">Debt mix</h2>
+                <p className="text-sm text-slate-500">Balances from setup</p>
+              </div>
+              <ReceiptText className="text-cobalt" size={22} aria-hidden="true" />
+            </div>
+            <div className="grid gap-3 text-sm">
+              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
+                <span className="text-slate-600">Credit cards</span>
+                <span className="font-semibold text-ink">{formatGBP(activeProfile.creditCardBalance)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
+                <span className="text-slate-600">Loans and overdraft</span>
+                <span className="font-semibold text-ink">{formatGBP(activeProfile.loanBalance)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
+                <span className="text-slate-600">Mortgage</span>
+                <span className="font-semibold text-ink">{formatGBP(activeProfile.mortgageBalance)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
+                <span className="text-slate-600">Payment-to-income</span>
+                <span className="font-semibold text-ink">{formatPercent(monthlyDebtToIncome, 1)}</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {activeView === "goals" ? (
+        <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6 lg:grid-cols-[1fr_1fr]">
+          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold tracking-normal text-ink">Emergency fund</h2>
+                <p className="text-sm text-slate-500">Cash savings against your emergency target</p>
+              </div>
+              <PiggyBank className="text-teal" size={22} aria-hidden="true" />
+            </div>
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-sm text-slate-500">Current cash</p>
+                <p className="mt-2 text-3xl font-semibold text-ink">{formatGBP(activeProfile.liquidSavings)}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-slate-500">Target</p>
+                <p className="mt-2 text-xl font-semibold text-ink">{formatGBP(activeProfile.emergencyFundTarget)}</p>
+              </div>
+            </div>
+            <div className="mt-5 h-3 rounded-sm bg-slate-100">
+              <div className="h-3 rounded-sm bg-teal" style={{ width: `${emergencyProgress}%` }} />
+            </div>
+            <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+              <div className="rounded-md border border-slate-200 p-3">
+                <p className="text-slate-500">Gap</p>
+                <p className="mt-1 font-semibold text-ink">{formatGBP(emergencyGap)}</p>
+              </div>
+              <div className="rounded-md border border-slate-200 p-3">
+                <p className="text-slate-500">Time at current contribution</p>
+                <p className="mt-1 font-semibold text-ink">{formatMonths(monthsToEmergency)}</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold tracking-normal text-ink">Savings goal</h2>
+                <p className="text-sm text-slate-500">Progress after protecting the emergency fund</p>
+              </div>
+              <CheckCircle2 className="text-cobalt" size={22} aria-hidden="true" />
+            </div>
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-sm text-slate-500">Available for goal</p>
+                <p className="mt-2 text-3xl font-semibold text-ink">{formatGBP(goalStartingBalance)}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-slate-500">Target</p>
+                <p className="mt-2 text-xl font-semibold text-ink">{formatGBP(activeProfile.savingsGoalTarget)}</p>
+              </div>
+            </div>
+            <div className="mt-5 h-3 rounded-sm bg-slate-100">
+              <div className="h-3 rounded-sm bg-cobalt" style={{ width: `${goalProgress}%` }} />
+            </div>
+            <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+              <div className="rounded-md border border-slate-200 p-3">
+                <p className="text-slate-500">Gap</p>
+                <p className="mt-1 font-semibold text-ink">{formatGBP(goalGap)}</p>
+              </div>
+              <div className="rounded-md border border-slate-200 p-3">
+                <p className="text-slate-500">Time at current contribution</p>
+                <p className="mt-1 font-semibold text-ink">{formatMonths(monthsToGoal)}</p>
+              </div>
+            </div>
+            <p className="mt-4 text-sm text-slate-600">Monthly contribution: {formatGBP(monthlyGoalContribution)}.</p>
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 }

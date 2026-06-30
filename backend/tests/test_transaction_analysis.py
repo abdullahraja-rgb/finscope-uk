@@ -113,7 +113,12 @@ def test_transactions_analyse_runs_dashboard_services(monkeypatch) -> None:
     response = client.post(
         "/api/v1/transactions/analyse",
         files={"file": ("transactions.csv", upload_csv(), "text/csv")},
-        data={"liquid_savings": "4800", "monthly_debt_payment": "100"},
+        data={
+            "monthly_income": "4000",
+            "liquid_savings": "4800",
+            "monthly_debt_payment": "100",
+            "rent_or_mortgage": "900",
+        },
     )
 
     assert response.status_code == 200
@@ -123,7 +128,8 @@ def test_transactions_analyse_runs_dashboard_services(monkeypatch) -> None:
     assert payload["transactions"][2]["category"] == "groceries"
     assert payload["forecast"]["forecasts"]
     assert payload["personal_inflation"]["personal_inflation_pct"] > 0
-    assert payload["health_score"]["monthly_income"] == 3200
+    assert payload["health_score"]["monthly_income"] == 4000
+    assert payload["health_score"]["rent_to_income"] == 0.225
     assert payload["recommendations"]
 
 

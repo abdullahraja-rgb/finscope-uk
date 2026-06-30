@@ -108,8 +108,10 @@ async def preview_transactions(file: UploadFile = File(...)) -> TransactionPrevi
 @router.post("/transactions/analyse", response_model=TransactionAnalysisResponse)
 async def analyse_transactions(
     file: UploadFile = File(...),
+    monthly_income: float | None = Form(default=None),
     liquid_savings: float = Form(default=0),
     monthly_debt_payment: float = Form(default=0),
+    rent_or_mortgage: float | None = Form(default=None),
 ) -> TransactionAnalysisResponse:
     raw = await uploaded_csv_frame(file)
     clean = clean_transaction_frame(raw)
@@ -156,8 +158,10 @@ async def analyse_transactions(
         health_score = derive_health_score(
             DerivedHealthScoreRequest(
                 transactions=enriched_transactions,
+                monthly_income=monthly_income,
                 liquid_savings=liquid_savings,
                 monthly_debt_payment=monthly_debt_payment,
+                rent_or_mortgage=rent_or_mortgage,
             ),
             category_mapping=mapping,
             benchmarks=benchmarks,

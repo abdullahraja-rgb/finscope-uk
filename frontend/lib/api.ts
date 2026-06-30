@@ -6,6 +6,7 @@ import type {
   ForecastBacktestResponse,
   ForecastResponse,
   LatestInflationResponse,
+  OnboardingProfile,
   PersonalInflationResponse,
   RateImpactRequest,
   RateImpactResponse,
@@ -29,9 +30,15 @@ export async function getHealth() {
   return response.json() as Promise<{ status: string }>;
 }
 
-export async function uploadTransactions(file: File) {
+export async function uploadTransactions(file: File, profile?: OnboardingProfile) {
   const formData = new FormData();
   formData.append("file", file);
+  if (profile) {
+    formData.append("monthly_income", profile.monthlyIncome.toString());
+    formData.append("liquid_savings", profile.liquidSavings.toString());
+    formData.append("monthly_debt_payment", profile.monthlyDebtPayment.toString());
+    formData.append("rent_or_mortgage", profile.rentOrMortgage.toString());
+  }
 
   const response = await fetch(`${API_BASE_URL}/api/v1/transactions/analyse`, {
     method: "POST",
