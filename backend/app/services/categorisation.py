@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+import re
 
 import joblib
 import pandas as pd
@@ -24,28 +25,156 @@ from app.schemas.transactions import (
 
 
 KEYWORDS: dict[str, tuple[str, ...]] = {
-    "groceries": ("tesco", "sainsbury", "aldi", "lidl", "asda", "morrisons"),
-    "eating_out": ("pret", "costa", "deliveroo", "uber eats", "nando"),
-    "transport": ("tfl", "trainline", "uber", "shell", "bp", "rail"),
-    "housing": ("rent", "mortgage", "council tax"),
-    "utilities": ("octopus", "british gas", "thames water", "water", "energy"),
-    "subscriptions": ("netflix", "spotify", "disney", "prime"),
-    "shopping": ("amazon", "argos", "ikea", "john lewis"),
-    "health": ("boots", "superdrug", "pharmacy"),
-    "income": ("salary", "payroll", "interest"),
+    "income": (
+        "salary",
+        "payroll",
+        "wages",
+        "employer",
+        "hmrc",
+        "universal credit",
+        "dividend",
+        "savings interest",
+    ),
+    "groceries": (
+        "tesco",
+        "sainsbury",
+        "sainsburys",
+        "aldi",
+        "lidl",
+        "asda",
+        "morrisons",
+        "waitrose",
+        "ocado",
+        "co-op",
+        "coop",
+        "m and s food",
+        "marks and spencer food",
+        "iceland",
+        "farmfoods",
+    ),
+    "eating_out": (
+        "pret",
+        "costa",
+        "starbucks",
+        "greggs",
+        "deliveroo",
+        "uber eats",
+        "just eat",
+        "nando",
+        "mcdonald",
+        "kfc",
+        "restaurant",
+        "coffee",
+        "cafe",
+    ),
+    "transport": (
+        "tfl",
+        "transport for london",
+        "oyster",
+        "trainline",
+        "national rail",
+        "rail",
+        "bus",
+        "uber trip",
+        "bolt",
+        "shell",
+        "bp",
+        "esso",
+        "petrol",
+        "parking",
+    ),
+    "housing": (
+        "rent",
+        "mortgage",
+        "council tax",
+        "letting",
+        "estate agent",
+        "service charge",
+        "ground rent",
+    ),
+    "utilities": (
+        "octopus",
+        "british gas",
+        "thames water",
+        "water bill",
+        "energy",
+        "electricity",
+        "gas bill",
+        "edf",
+        "eon",
+        "e.on",
+        "ovo",
+        "bulb",
+        "broadband",
+        "virgin media",
+        "sky",
+        "vodafone",
+        "ee mobile",
+        "o2",
+        "three mobile",
+    ),
+    "subscriptions": (
+        "netflix",
+        "spotify",
+        "disney",
+        "amazon prime",
+        "prime video",
+        "apple icloud",
+        "icloud",
+        "audible",
+        "now tv",
+        "youtube premium",
+        "patreon",
+        "notion",
+    ),
+    "shopping": (
+        "amazon",
+        "argos",
+        "ikea",
+        "john lewis",
+        "ebay",
+        "etsy",
+        "asos",
+        "zara",
+        "h and m",
+        "hm.com",
+        "primark",
+        "currys",
+    ),
+    "health": (
+        "boots",
+        "superdrug",
+        "pharmacy",
+        "dentist",
+        "optician",
+        "specsavers",
+        "nhs",
+    ),
 }
 
 MODEL_FILENAME = "categorisation_model.joblib"
 
 
+def normalise_description(description: str) -> str:
+    text = description.lower().replace("&", " and ")
+    text = text.replace("m&s", "m and s")
+    text = re.sub(r"[^a-z0-9.+ ]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def predict_category(description: str, amount: float) -> tuple[str, float]:
-    text = description.lower()
+    text = normalise_description(description)
     for category, keywords in KEYWORDS.items():
+        if category == "income" and amount < 0:
+            continue
         if any(keyword in text for keyword in keywords):
-            return category, 0.82
+            confidence = 0.9 if category == "income" else 0.86
+            if amount > 0 and category != "income":
+                confidence = 0.68
+            return category, confidence
     if amount > 0:
-        return "income", 0.65
-    return "uncategorised", 0.35
+        return "income", 0.62
+    return "uncategorised", 0.28
 
 
 def categorisation_model_path(data_dir: str | Path) -> Path:

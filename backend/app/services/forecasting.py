@@ -201,7 +201,7 @@ def prediction_interval(
         variance = sum((error - mean_error) ** 2 for error in residuals) / len(residuals)
         margin = max(abs(mean_error), 1.96 * math.sqrt(variance), 5.0)
     else:
-        margin = max(expected * 0.15, 10.0)
+        margin = max(expected * 0.25, 15.0)
 
     lower = max(expected - margin, 0.0)
     upper = expected + margin
@@ -220,12 +220,14 @@ def forecast_next_month(transactions: list[TransactionIn]) -> ForecastResponse:
         )
 
     forecasts: list[ForecastPoint] = []
+    used_fallback_interval = False
     for category, series in sorted(series_by_category.items()):
         values = [float(value) for value in series.tolist()]
         model_name, metric, predictions = best_model_for_series(category, series, min_train_months=4)
         expected = max(FORECASTERS[model_name](values), 0.0)
         baseline_expected = max(last_month_naive(values), 0.0)
         lower, upper, margin = prediction_interval(expected, predictions)
+        used_fallback_interval = used_fallback_interval or metric is None
 
         forecasts.append(
             ForecastPoint(
@@ -242,16 +244,21 @@ def forecast_next_month(transactions: list[TransactionIn]) -> ForecastResponse:
             )
         )
 
-    month_count = len(next(iter(series_by_category.values())).index)
+    forecasts.sort(key=lambda item: item.expected_spend, reverse=True)
+    month_count = max(len(series.index) for series in series_by_category.values())
+    notes = [
+        "Forecasts are based only on earlier months in each rolling backtest window.",
+        "Intervals use backtest residuals where available and a simple fallback margin otherwise.",
+    ]
+    if used_fallback_interval:
+        notes.append("Some categories have too little history for backtesting, so their intervals are deliberately wider.")
+
     return ForecastResponse(
         period=period,
         forecasts=forecasts,
         baseline=BASELINE_MODEL,
         generated_from_months=month_count,
-        notes=[
-            "Forecasts are based only on earlier months in each rolling backtest window.",
-            "Intervals use backtest residuals where available and a simple fallback margin otherwise.",
-        ],
+        notes=notes,
     )
 
 

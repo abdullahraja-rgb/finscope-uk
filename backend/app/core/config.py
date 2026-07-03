@@ -1,15 +1,19 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     app_name: str = "FinScope UK"
-    data_dir: str = Field(default="../data", alias="DATA_DIR")
-    config_dir: str = Field(default="../config", alias="CONFIG_DIR")
+    data_dir: str = Field(default=str(PROJECT_ROOT / "data"), alias="DATA_DIR")
+    config_dir: str = Field(default=str(PROJECT_ROOT / "config"), alias="CONFIG_DIR")
     cors_origins_raw: str = Field(default="http://localhost:3000", alias="CORS_ORIGINS")
 
     @property

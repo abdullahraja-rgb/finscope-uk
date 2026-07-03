@@ -20,6 +20,28 @@ def monthly_transactions() -> list[TransactionIn]:
     ]
 
 
+def multi_category_transactions() -> list[TransactionIn]:
+    rows: list[TransactionIn] = []
+    for month in range(1, 7):
+        rows.extend(
+            [
+                TransactionIn(
+                    date=date(2026, month, 1),
+                    description="Rent Payment",
+                    amount=-1000,
+                    category="housing",
+                ),
+                TransactionIn(
+                    date=date(2026, month, 3),
+                    description="Tesco",
+                    amount=-(90 + month),
+                    category="groceries",
+                ),
+            ]
+        )
+    return rows
+
+
 def test_monthly_spend_frame_fills_missing_months() -> None:
     frame = monthly_spend_frame(
         [
@@ -56,6 +78,27 @@ def test_forecast_next_month_reports_interval_and_backtest_context() -> None:
         "seasonal naive",
     }
     assert grocery.baseline_expected_spend == 145
+
+
+def test_forecast_next_month_orders_largest_expected_spend_first() -> None:
+    response = forecast_next_month(multi_category_transactions())
+
+    assert [point.category for point in response.forecasts] == ["housing", "groceries"]
+    assert response.forecasts[0].expected_spend > response.forecasts[1].expected_spend
+
+
+def test_forecast_short_history_uses_wider_fallback_interval() -> None:
+    response = forecast_next_month(
+        [
+            TransactionIn(date=date(2026, 1, 3), description="Tesco", amount=-100, category="groceries"),
+            TransactionIn(date=date(2026, 2, 3), description="Tesco", amount=-120, category="groceries"),
+        ]
+    )
+    grocery = response.forecasts[0]
+
+    assert grocery.backtest_mae is None
+    assert grocery.upper_bound - grocery.expected_spend >= 15
+    assert any("too little history" in note for note in response.notes)
 
 
 def test_backtest_forecasts_returns_time_aware_metrics() -> None:
