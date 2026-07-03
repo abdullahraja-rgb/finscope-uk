@@ -34,7 +34,9 @@ export async function uploadTransactions(file: File, profile?: OnboardingProfile
   const formData = new FormData();
   formData.append("file", file);
   if (profile) {
-    formData.append("monthly_income", profile.monthlyIncome.toString());
+    if (profile.monthlyIncome > 0) {
+      formData.append("monthly_income", profile.monthlyIncome.toString());
+    }
     formData.append("liquid_savings", profile.liquidSavings.toString());
     formData.append("monthly_debt_payment", profile.monthlyDebtPayment.toString());
     formData.append("rent_or_mortgage", profile.rentOrMortgage.toString());

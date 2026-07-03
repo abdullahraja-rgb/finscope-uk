@@ -1,201 +1,199 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowRight, Gauge } from "lucide-react";
+import { FormEvent, useEffect, useState } from "react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Gauge } from "lucide-react";
 
+import { emptyProfile, profileFieldGroups } from "@/components/profile-form";
 import type { OnboardingProfile } from "@/types/finscope";
 
 type OnboardingFlowProps = {
-  onReady: (profile: OnboardingProfile) => void;
+  onReady: (profile: OnboardingProfile, name: string) => void;
 };
 
-const defaultProfile: OnboardingProfile = {
-  monthlyIncome: 3240,
-  liquidSavings: 6000,
-  monthlyDebtPayment: 120,
-  rentOrMortgage: 1080,
-  investmentBalance: 2500,
-  pensionBalance: 12000,
-  propertyValue: 0,
-  mortgageBalance: 0,
-  creditCardBalance: 800,
-  loanBalance: 1800,
-  averageDebtApr: 19.9,
-  emergencyFundTarget: 9000,
-  savingsGoalTarget: 15000,
-  monthlyGoalContribution: 250
-};
+const nameCacheKey = "finscope:onboarding-name";
+const nameCacheTtlMs = 1000 * 60 * 60 * 6;
 
-type ProfileField = {
-  label: string;
-  key: keyof OnboardingProfile;
-  helper: string;
-  suffix?: string;
-};
+function readCachedName() {
+  if (typeof window === "undefined") return "";
 
-const fieldGroups: Array<{ title: string; intro: string; fields: ProfileField[] }> = [
-  {
-    title: "Cash flow",
-    intro: "The regular monthly numbers I use for the health score.",
-    fields: [
-      {
-        label: "Monthly income",
-        key: "monthlyIncome",
-        helper: "Salary, freelance income, benefits, and regular income."
-      },
-      {
-        label: "Rent or mortgage",
-        key: "rentOrMortgage",
-        helper: "Your regular housing payment before other bills."
-      },
-      {
-        label: "Monthly debt payment",
-        key: "monthlyDebtPayment",
-        helper: "Credit cards, loans, overdrafts, and other monthly debt costs."
-      }
-    ]
-  },
-  {
-    title: "Assets",
-    intro: "Balances I use for net worth and emergency cover.",
-    fields: [
-      {
-        label: "Liquid savings",
-        key: "liquidSavings",
-        helper: "Cash or easy-access savings you could use in an emergency."
-      },
-      {
-        label: "Investments",
-        key: "investmentBalance",
-        helper: "ISAs, general investments, or other non-pension investments."
-      },
-      {
-        label: "Pension balance",
-        key: "pensionBalance",
-        helper: "A rough current pension balance is enough for the dashboard."
-      },
-      {
-        label: "Property value",
-        key: "propertyValue",
-        helper: "Use 0 if you rent or do not want property included."
-      }
-    ]
-  },
-  {
-    title: "Debts",
-    intro: "Balances I use for payoff and rate-pressure estimates.",
-    fields: [
-      {
-        label: "Mortgage balance",
-        key: "mortgageBalance",
-        helper: "Use 0 if this does not apply."
-      },
-      {
-        label: "Credit card balance",
-        key: "creditCardBalance",
-        helper: "Current balance across cards."
-      },
-      {
-        label: "Loan balance",
-        key: "loanBalance",
-        helper: "Personal loans, car finance, overdraft, or similar debt."
-      },
-      {
-        label: "Average debt APR",
-        key: "averageDebtApr",
-        helper: "Approximate APR for credit cards and loans.",
-        suffix: "%"
-      }
-    ]
-  },
-  {
-    title: "Goals",
-    intro: "Targets I use to make the savings page practical.",
-    fields: [
-      {
-        label: "Emergency target",
-        key: "emergencyFundTarget",
-        helper: "Your preferred emergency fund target."
-      },
-      {
-        label: "Savings goal",
-        key: "savingsGoalTarget",
-        helper: "Deposit, travel, car, course fees, or another major target."
-      },
-      {
-        label: "Monthly goal contribution",
-        key: "monthlyGoalContribution",
-        helper: "How much you expect to put towards these goals each month."
-      }
-    ]
+  try {
+    const cached = window.sessionStorage.getItem(nameCacheKey);
+    if (!cached) return "";
+
+    const parsed = JSON.parse(cached) as { value?: string; savedAt?: number };
+    if (!parsed.value || !parsed.savedAt || Date.now() - parsed.savedAt > nameCacheTtlMs) {
+      window.sessionStorage.removeItem(nameCacheKey);
+      return "";
+    }
+
+    return parsed.value;
+  } catch {
+    window.sessionStorage.removeItem(nameCacheKey);
+    return "";
   }
-];
+}
+
+function cacheName(name: string) {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(nameCacheKey, JSON.stringify({ value: name, savedAt: Date.now() }));
+}
+
+function profileFieldValue(value: number) {
+  return value > 0 ? String(value) : "";
+}
+
+function parseProfileFieldValue(value: string) {
+  if (value.trim() === "") return 0;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
 
 export function OnboardingFlow({ onReady }: OnboardingFlowProps) {
-  const [profile, setProfile] = useState<OnboardingProfile>(defaultProfile);
+  const [profile, setProfile] = useState<OnboardingProfile>(emptyProfile);
+  const [name, setName] = useState("");
+  const [stepIndex, setStepIndex] = useState(0);
+
+  useEffect(() => {
+    const cachedName = readCachedName();
+    if (!cachedName) return;
+
+    setName(cachedName);
+    setStepIndex(1);
+  }, []);
+
+  const trimmedName = name.trim();
+  const totalSteps = profileFieldGroups.length + 1;
+  const progress = ((stepIndex + 1) / totalSteps) * 100;
+  const group = profileFieldGroups[stepIndex - 1];
+  const isNameStep = stepIndex === 0;
+  const isFinalStep = stepIndex === totalSteps - 1;
+
+  function goNext() {
+    if (isNameStep) {
+      if (!trimmedName) return;
+      cacheName(trimmedName);
+      setStepIndex(1);
+      return;
+    }
+
+    if (isFinalStep) {
+      onReady(profile, trimmedName || "there");
+      return;
+    }
+
+    setStepIndex((current) => current + 1);
+  }
+
+  function goBack() {
+    setStepIndex((current) => Math.max(current - 1, 0));
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    goNext();
+  }
 
   return (
-    <main className="min-h-screen bg-paper px-5 py-8">
-      <section className="mx-auto grid max-w-5xl gap-6 rounded-md border border-slate-200 bg-panel p-5 shadow-soft sm:p-6">
+    <main className="grid min-h-screen place-items-center bg-paper px-5 py-8">
+      <section
+        aria-labelledby="onboarding-title"
+        className="grid w-full max-w-3xl gap-6 rounded-md border border-slate-200 bg-panel p-5 shadow-soft sm:p-6"
+        role="dialog"
+      >
         <div className="flex items-start gap-3">
-          <Gauge className="mt-1 text-cobalt" size={26} aria-hidden="true" />
+          <Gauge className="mt-1 shrink-0 text-cobalt" size={26} aria-hidden="true" />
           <div>
             <p className="text-sm font-semibold uppercase tracking-normal text-cobalt">FinScope UK</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-normal text-ink">Set your starting position</h1>
+            <h1 id="onboarding-title" className="mt-1 text-2xl font-semibold tracking-normal text-ink">
+              {isNameStep ? "What's your name?" : `Hello ${trimmedName || "there"}, let's set ${group.title.toLowerCase()}`}
+            </h1>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Add the numbers the CSV may not show clearly. These feed the health score, scenario snapshot,
-              and upload analysis.
+              {isNameStep
+                ? "I use this only to make the setup feel less anonymous while this browser session is active."
+                : group.intro}
             </p>
           </div>
         </div>
 
-        <div className="grid gap-5">
-          {fieldGroups.map((group) => (
-            <section key={group.title} className="grid gap-4 border-t border-slate-200 pt-5">
-              <div>
-                <h2 className="text-base font-semibold tracking-normal text-ink">{group.title}</h2>
-                <p className="mt-1 text-sm text-slate-500">{group.intro}</p>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                {group.fields.map((field) => (
-                  <label key={field.key} className="grid gap-2 text-sm font-medium text-slate-600">
-                    {field.label}
-                    <div className="flex h-11 items-center rounded-md border border-slate-200 bg-white focus-within:border-cobalt">
-                      <input
-                        className="min-w-0 flex-1 bg-transparent px-3 text-ink outline-none"
-                        min="0"
-                        step={field.key === "averageDebtApr" ? "0.1" : "1"}
-                        type="number"
-                        value={profile[field.key]}
-                        onChange={(event) =>
-                          setProfile((current) => ({
-                            ...current,
-                            [field.key]: Number(event.target.value)
-                          }))
-                        }
-                      />
-                      {field.suffix ? (
-                        <span className="border-l border-slate-200 px-3 text-xs font-semibold text-slate-500">
-                          {field.suffix}
-                        </span>
-                      ) : null}
-                    </div>
-                    <span className="text-xs font-normal leading-5 text-slate-500">{field.helper}</span>
-                  </label>
-                ))}
-              </div>
-            </section>
-          ))}
+        <div className="grid gap-2">
+          <div className="flex items-center justify-between text-xs font-semibold uppercase text-slate-500">
+            <span>Step {stepIndex + 1} of {totalSteps}</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="h-2 rounded-sm bg-slate-100">
+            <div className="h-2 rounded-sm bg-cobalt" style={{ width: `${progress}%` }} />
+          </div>
         </div>
 
-        <button
-          className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white"
-          type="button"
-          onClick={() => onReady(profile)}
-        >
-          Open dashboard
-          <ArrowRight size={18} aria-hidden="true" />
-        </button>
+        <form className="grid gap-6" onSubmit={handleSubmit}>
+          {isNameStep ? (
+            <label className="grid gap-2 text-sm font-medium text-slate-600">
+              Name
+              <input
+                autoComplete="given-name"
+                autoFocus
+                className="h-12 rounded-md border border-slate-200 bg-white px-3 text-base text-ink outline-none focus:border-cobalt"
+                placeholder="Abdullah"
+                type="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
+              <span className="text-xs font-normal leading-5 text-slate-500">
+                I cache it in this tab for a few hours, then ask again.
+              </span>
+            </label>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {group.fields.map((field) => (
+                <label key={field.key} className="grid gap-2 text-sm font-medium text-slate-600">
+                  {field.label}
+                  <div className="flex h-11 items-center rounded-md border border-slate-200 bg-white focus-within:border-cobalt">
+                    <input
+                      className="min-w-0 flex-1 bg-transparent px-3 text-ink outline-none"
+                      min="0"
+                      placeholder={field.placeholder}
+                      step={field.key === "averageDebtApr" ? "0.1" : "1"}
+                      type="number"
+                      value={profileFieldValue(profile[field.key])}
+                      onChange={(event) =>
+                        setProfile((current) => ({
+                          ...current,
+                          [field.key]: parseProfileFieldValue(event.target.value)
+                        }))
+                      }
+                    />
+                    {field.suffix ? (
+                      <span className="border-l border-slate-200 px-3 text-xs font-semibold text-slate-500">
+                        {field.suffix}
+                      </span>
+                    ) : null}
+                  </div>
+                  <span className="text-xs font-normal leading-5 text-slate-500">{field.helper}</span>
+                </label>
+              ))}
+            </div>
+          )}
+
+          <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={stepIndex === 0}
+              type="button"
+              onClick={goBack}
+            >
+              <ArrowLeft size={18} aria-hidden="true" />
+              Back
+            </button>
+            <button
+              className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isNameStep && !trimmedName}
+              type="submit"
+            >
+              {isFinalStep ? "Open dashboard" : "Continue"}
+              {isFinalStep ? <CheckCircle2 size={18} aria-hidden="true" /> : <ArrowRight size={18} aria-hidden="true" />}
+            </button>
+          </div>
+        </form>
       </section>
     </main>
   );

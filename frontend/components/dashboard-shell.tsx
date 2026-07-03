@@ -11,8 +11,13 @@ import {
   Gauge,
   Home,
   LoaderCircle,
+  Pencil,
   PiggyBank,
+  Plus,
   ReceiptText,
+  RotateCcw,
+  Settings,
+  SlidersHorizontal,
   Upload
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -39,187 +44,85 @@ import type {
   Recommendation,
   TransactionPayload
 } from "@/types/finscope";
-import {
-  calculateDerivedHealthScore,
-  calculateForecast,
-  calculatePersonalInflation,
-  calculateRateImpact,
-  getRecommendations,
-  uploadTransactions
-} from "@/lib/api";
+import { calculateRateImpact, uploadTransactions } from "@/lib/api";
 import { OnboardingFlow } from "@/components/onboarding-flow";
-
-const fallbackCategorySpend: CategorySpend[] = [
-  { category: "Groceries", spend: 410, forecast: 442 },
-  { category: "Housing", spend: 1080, forecast: 1080 },
-  { category: "Transport", spend: 165, forecast: 188 },
-  { category: "Eating out", spend: 225, forecast: 214 },
-  { category: "Bills", spend: 285, forecast: 302 },
-  { category: "Subscriptions", spend: 54, forecast: 54 }
-];
-
-const inflationImpact: InflationImpact[] = [
-  { category: "Food", personal: 4.8, national: 3.9 },
-  { category: "Housing", personal: 5.2, national: 4.4 },
-  { category: "Transport", personal: 2.1, national: 2.8 },
-  { category: "Energy", personal: 3.6, national: 3.2 }
-];
-
-const demoInflationTransactions = [
-  {
-    date: "2026-06-01",
-    description: "Tesco Superstore",
-    amount: -410,
-    category: "groceries"
-  },
-  {
-    date: "2026-06-01",
-    description: "Rent Payment",
-    amount: -1080,
-    category: "housing"
-  },
-  {
-    date: "2026-06-03",
-    description: "TfL Travel Charge",
-    amount: -165,
-    category: "transport"
-  },
-  {
-    date: "2026-06-04",
-    description: "Deliveroo",
-    amount: -225,
-    category: "eating_out"
-  },
-  {
-    date: "2026-06-08",
-    description: "Octopus Energy",
-    amount: -285,
-    category: "utilities"
-  },
-  {
-    date: "2026-06-11",
-    description: "Netflix",
-    amount: -54,
-    category: "subscriptions"
-  }
-];
-
-const forecastMonths = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"];
-
-const demoForecastTransactions: TransactionPayload[] = forecastMonths.flatMap((month, index) => [
-  {
-    date: `${month}-03`,
-    description: "Tesco Superstore",
-    amount: -(390 + index * 8),
-    category: "groceries"
-  },
-  {
-    date: `${month}-01`,
-    description: "Rent Payment",
-    amount: -1080,
-    category: "housing"
-  },
-  {
-    date: `${month}-05`,
-    description: "TfL Travel Charge",
-    amount: -(145 + index * 4),
-    category: "transport"
-  },
-  {
-    date: `${month}-10`,
-    description: "Deliveroo",
-    amount: -(200 + index * 5),
-    category: "eating_out"
-  },
-  {
-    date: `${month}-08`,
-    description: "Octopus Energy",
-    amount: -(260 + index * 6),
-    category: "utilities"
-  },
-  {
-    date: `${month}-11`,
-    description: "Netflix",
-    amount: -54,
-    category: "subscriptions"
-  }
-]);
+import {
+  emptyProfile,
+  normaliseProfile,
+  ProfileForm,
+  profileHasValues,
+  type ProfileSectionId
+} from "@/components/profile-form";
+import { TransactionEntryModal, type TransactionDraftPreset } from "@/components/transaction-entry-modal";
 
 const fallbackRateImpact: RateImpactResponse = {
-  current_bank_rate_pct: 3.75,
-  scenario_bank_rate_pct: 4,
-  bank_rate_change_pct_points: 0.25,
-  effective_rate_change_pct_points: 0.25,
-  monthly_net_cashflow_delta: -27,
-  annual_net_cashflow_delta: -324,
-  lines: [
-    {
-      name: "Repayment mortgage",
-      monthly_delta: -28,
-      annual_delta: -336,
-      note: "Negative means the monthly repayment rises."
-    },
-    {
-      name: "Savings interest",
-      monthly_delta: 1,
-      annual_delta: 12,
-      note: "Positive means the savings balance earns more interest."
-    }
-  ],
+  current_bank_rate_pct: 0,
+  scenario_bank_rate_pct: 0,
+  bank_rate_change_pct_points: 0,
+  effective_rate_change_pct_points: 0,
+  monthly_net_cashflow_delta: 0,
+  annual_net_cashflow_delta: 0,
+  lines: [],
   notes: []
 };
 
-const healthRows = [
-  { name: "Savings rate", score: 73 },
-  { name: "Housing burden", score: 68 },
-  { name: "Debt load", score: 91 },
-  { name: "Emergency fund", score: 62 }
-];
-
-const fallbackHealth: DerivedHealthScoreResponse = {
-  score: 74,
-  band: "Stable",
-  components: healthRows.map((row) => ({
-    name: row.name,
-    score: row.score,
-    weight: 0.25,
-    note: ""
-  })),
-  monthly_income: 3240,
-  monthly_spend: 2415,
-  savings_rate: 0.2546,
-  rent_to_income: 0.3333,
-  emergency_fund_months: 2.5,
-  spending_volatility: 0,
-  benchmarks: [],
-  notes: []
-};
-
-const fallbackRecommendations: Recommendation[] = [
+const categoryPrompts: Record<
+  string,
   {
-    title: "Build the emergency buffer first",
-    detail: "Emergency savings cover 2.5 months of spend.",
-    action: "Move GBP 150 to savings after payday until this reaches three months.",
-    priority: "high",
-    source: "Health score"
-  },
-  {
-    title: "Review subscriptions",
-    detail: "Recurring payments are visible in the monthly spend mix.",
-    action: "Cancel one low-use subscription before the next billing date.",
-    priority: "medium",
-    source: "Health score"
-  },
-  {
-    title: "Set a grocery alert",
-    detail: "The forecast expects groceries to stay near GBP 440 next month.",
-    action: "Use the forecast as next month's alert level.",
-    priority: "medium",
-    source: "Forecast"
+    amount: string;
+    description: string;
+    intro: string;
+    title: string;
   }
-];
+> = {
+  groceries: {
+    amount: "45.00",
+    description: "Tesco Superstore",
+    intro: "Add a grocery row so food spending, inflation, and simulator estimates have real input.",
+    title: "Add grocery spending"
+  },
+  transport: {
+    amount: "25.00",
+    description: "TfL Travel Charge",
+    intro: "Add a transport row so travel costs can appear in spending, inflation, and forecast views.",
+    title: "Add transport spending"
+  },
+  utilities: {
+    amount: "90.00",
+    description: "Octopus Energy",
+    intro: "Add a utility or bills row so household bills are included in pressure and simulator views.",
+    title: "Add bills spending"
+  },
+  housing: {
+    amount: "1000.00",
+    description: "Rent Payment",
+    intro: "Add a housing row so rent or mortgage spending is represented in the analysis.",
+    title: "Add housing spending"
+  },
+  subscriptions: {
+    amount: "10.99",
+    description: "Netflix",
+    intro: "Add a subscription row so recurring costs can be included in the recommendations.",
+    title: "Add subscription spending"
+  },
+  eating_out: {
+    amount: "18.00",
+    description: "Pret A Manger",
+    intro: "Add an eating-out row so discretionary spending is included in the analysis.",
+    title: "Add eating-out spending"
+  }
+};
 
-type DashboardView = "overview" | "spending" | "costs" | "net-worth" | "debt" | "goals" | "actions";
+type DashboardView =
+  | "overview"
+  | "spending"
+  | "costs"
+  | "net-worth"
+  | "debt"
+  | "goals"
+  | "simulator"
+  | "actions"
+  | "profile";
 
 const dashboardViews: Array<{
   id: DashboardView;
@@ -233,8 +136,12 @@ const dashboardViews: Array<{
   { id: "net-worth", label: "Net worth", helper: "Assets and liabilities", icon: Banknote },
   { id: "debt", label: "Debt payoff", helper: "Balances and payoff time", icon: CircleAlert },
   { id: "goals", label: "Savings goals", helper: "Emergency and target progress", icon: PiggyBank },
-  { id: "actions", label: "Next actions", helper: "Recommendations and scenario", icon: CheckCircle2 }
+  { id: "simulator", label: "Simulator", helper: "What-if changes", icon: SlidersHorizontal },
+  { id: "actions", label: "Next actions", helper: "Recommendations and scenario", icon: CheckCircle2 },
+  { id: "profile", label: "Profile", helper: "Setup and targets", icon: Settings }
 ];
+
+const profileStorageKey = "finscope:financial-profile:v1";
 
 function formatGBP(value: number) {
   return `GBP ${Math.round(value).toLocaleString()}`;
@@ -251,6 +158,29 @@ function clampPercentage(value: number) {
 function progressPercentage(current: number, target: number) {
   if (target <= 0) return 100;
   return clampPercentage((current / target) * 100);
+}
+
+function readStoredProfile() {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const stored = window.localStorage.getItem(profileStorageKey);
+    if (!stored) return null;
+    return normaliseProfile(JSON.parse(stored) as Partial<Record<keyof OnboardingProfile, unknown>>);
+  } catch {
+    window.localStorage.removeItem(profileStorageKey);
+    return null;
+  }
+}
+
+function writeStoredProfile(profile: OnboardingProfile) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(profileStorageKey, JSON.stringify(profile));
+}
+
+function clearStoredProfile() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(profileStorageKey);
 }
 
 function formatMonths(months: number | null) {
@@ -374,35 +304,87 @@ function uploadSummaryFromResult(result: Awaited<ReturnType<typeof uploadTransac
   };
 }
 
+function emptyHealthScore(profile?: OnboardingProfile | null): DerivedHealthScoreResponse {
+  const income = profile?.monthlyIncome ?? 0;
+  return {
+    score: 0,
+    band: "Needs transactions",
+    components: [],
+    monthly_income: income,
+    monthly_spend: 0,
+    savings_rate: 0,
+    rent_to_income: income > 0 && profile ? profile.rentOrMortgage / income : 0,
+    emergency_fund_months: 0,
+    spending_volatility: 0,
+    benchmarks: [],
+    notes: []
+  };
+}
+
+function emptyCostOfLiving() {
+  return {
+    period: "No transaction data",
+    personalRate: 0,
+    nationalRate: 0,
+    chart: [] as InflationImpact[]
+  };
+}
+
+function csvEscape(value: string | number | null | undefined) {
+  const text = value === null || value === undefined ? "" : String(value);
+  if (/[",\n]/.test(text)) return `"${text.replaceAll('"', '""')}"`;
+  return text;
+}
+
+function transactionRowsToCsv(rows: TransactionPayload[]) {
+  const columns: Array<keyof TransactionPayload> = [
+    "date",
+    "description",
+    "amount",
+    "category",
+    "transaction_type",
+    "account"
+  ];
+  return [
+    columns.join(","),
+    ...rows.map((row) => columns.map((column) => csvEscape(row[column])).join(","))
+  ].join("\n");
+}
+
+function transactionRowsToFile(rows: TransactionPayload[]) {
+  return new File([transactionRowsToCsv(rows)], "form_transactions.csv", { type: "text/csv" });
+}
+
 function priorityTone(priority: string) {
   if (priority === "high") return "text-rose";
   if (priority === "medium") return "text-amber";
   return "text-teal";
 }
 
-function demoSpendingTransactionsForProfile(profile: OnboardingProfile) {
-  return demoInflationTransactions.map((transaction) =>
-    transaction.category === "housing" ? { ...transaction, amount: -profile.rentOrMortgage } : transaction
-  );
-}
-
-function demoHealthTransactionsForProfile(profile: OnboardingProfile) {
-  const demoSpendingTransactions = demoSpendingTransactionsForProfile(profile);
-  return [
-    {
-      date: "2026-06-25",
-      description: "Salary Payroll",
-      amount: profile.monthlyIncome,
-      category: "income"
-    },
-    ...demoSpendingTransactions
-  ];
-}
-
 export function DashboardShell() {
   const [activeProfile, setActiveProfile] = useState<OnboardingProfile | null>(null);
+  const [profileDraft, setProfileDraft] = useState<OnboardingProfile>(emptyProfile);
+  const [profileSectionFocus, setProfileSectionFocus] = useState<ProfileSectionId | null>(null);
+  const [hasCheckedStoredProfile, setHasCheckedStoredProfile] = useState(false);
+  const [displayName, setDisplayName] = useState("");
   const [activeView, setActiveView] = useState<DashboardView>("overview");
-  const [dataMode, setDataMode] = useState<"demo" | "uploaded">("demo");
+  const [dataMode, setDataMode] = useState<"empty" | "uploaded" | "manual">("empty");
+  const [scenario, setScenario] = useState({
+    rentChangePct: 8,
+    foodChangePct: 10,
+    billsChangePct: 6,
+    extraDebtPayment: 50,
+    extraSavings: 100
+  });
+  const [manualRows, setManualRows] = useState<TransactionPayload[]>([]);
+  const [transactionRows, setTransactionRows] = useState<TransactionPayload[]>([]);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [transactionPreset, setTransactionPreset] = useState<TransactionDraftPreset | null>(null);
+  const [transactionPrompt, setTransactionPrompt] = useState<{
+    intro: string;
+    title: string;
+  } | null>(null);
+  const [hasPromptedForSpendingData, setHasPromptedForSpendingData] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<UploadState>({ state: "idle", message: "" });
   const [uploadSummary, setUploadSummary] = useState<UploadSummary | null>(null);
   const [costOfLiving, setCostOfLiving] = useState<{
@@ -410,151 +392,194 @@ export function DashboardShell() {
     personalRate: number;
     nationalRate: number;
     chart: InflationImpact[];
-  }>({
-    period: "Demo",
-    personalRate: 4.1,
-    nationalRate: 3.9,
-    chart: inflationImpact
-  });
+  }>(emptyCostOfLiving());
   const [rateImpact, setRateImpact] = useState<RateImpactResponse>(fallbackRateImpact);
-  const [healthScore, setHealthScore] = useState<DerivedHealthScoreResponse>(fallbackHealth);
-  const [forecastRows, setForecastRows] = useState<CategorySpend[]>(fallbackCategorySpend);
-  const [forecastPeriod, setForecastPeriod] = useState("Demo");
-  const [recommendations, setRecommendations] = useState<Recommendation[]>(fallbackRecommendations);
+  const [healthScore, setHealthScore] = useState<DerivedHealthScoreResponse>(emptyHealthScore());
+  const [forecastRows, setForecastRows] = useState<CategorySpend[]>([]);
+  const [forecastPeriod, setForecastPeriod] = useState("No forecast yet");
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+
+  useEffect(() => {
+    const storedProfile = readStoredProfile();
+    if (storedProfile) {
+      setActiveProfile(storedProfile);
+      setProfileDraft(storedProfile);
+      setHealthScore(emptyHealthScore(storedProfile));
+    }
+    setHasCheckedStoredProfile(true);
+  }, []);
 
   useEffect(() => {
     if (!activeProfile) return;
     let isMounted = true;
 
-    async function loadLiveCostOfLiving() {
+    async function loadRateImpact() {
       if (!activeProfile) return;
 
-      const demoHealthTransactions = demoHealthTransactionsForProfile(activeProfile);
-      const demoSpendingTransactions = demoSpendingTransactionsForProfile(activeProfile);
       const variableDebtBalance = activeProfile.creditCardBalance + activeProfile.loanBalance;
       try {
-        const [inflationResponse, rateResponse, healthResponse, forecastResponse] = await Promise.all([
-          calculatePersonalInflation(demoSpendingTransactions),
-          calculateRateImpact({
-            savings_balance: activeProfile.liquidSavings,
-            variable_debt_balance: variableDebtBalance > 0 ? variableDebtBalance : activeProfile.monthlyDebtPayment * 20,
-            mortgage_balance: activeProfile.mortgageBalance > 0 ? activeProfile.mortgageBalance : undefined,
-            mortgage_years_remaining: 22,
-            current_mortgage_rate_pct: 5,
-            bank_rate_change_pct_points: 0.25
-          }),
-          calculateDerivedHealthScore({
-            transactions: demoHealthTransactions,
-            monthly_income: activeProfile.monthlyIncome,
-            liquid_savings: activeProfile.liquidSavings,
-            monthly_debt_payment: activeProfile.monthlyDebtPayment,
-            rent_or_mortgage: activeProfile.rentOrMortgage
-          }),
-          calculateForecast(demoForecastTransactions)
-        ]);
-        if (!isMounted) return;
-
-        setCostOfLiving({
-          period: inflationResponse.period,
-          personalRate: inflationResponse.personal_inflation_pct,
-          nationalRate: inflationResponse.national_inflation_pct,
-          chart: inflationResponse.categories
-            .filter((category) => category.annual_change_pct !== null)
-            .slice(0, 6)
-            .map((category) => ({
-              category: shortCategory(category.ons_category ?? category.app_category),
-              personal: category.annual_change_pct ?? 0,
-              national: inflationResponse.national_inflation_pct
-            }))
+        const rateResponse = await calculateRateImpact({
+          savings_balance: activeProfile.liquidSavings,
+          variable_debt_balance: variableDebtBalance,
+          mortgage_balance: activeProfile.mortgageBalance > 0 ? activeProfile.mortgageBalance : undefined,
+          mortgage_years_remaining: 22,
+          current_mortgage_rate_pct: 5,
+          bank_rate_change_pct_points: 0.25
         });
+        if (!isMounted) return;
         setRateImpact(rateResponse);
-        setHealthScore(healthResponse);
-        setForecastPeriod(forecastResponse.period);
-        setForecastRows(forecastRowsFromResponse(forecastResponse, demoForecastTransactions));
-        const recommendationResponse = await getRecommendations({
-          forecast: forecastResponse,
-          personal_inflation: inflationResponse,
-          health_score: healthResponse,
-          rate_impact: rateResponse
-        });
-        if (!isMounted) return;
-        setRecommendations(recommendationResponse.recommendations);
       } catch {
         if (!isMounted) return;
       }
     }
 
-    void loadLiveCostOfLiving();
+    if (dataMode === "empty") {
+      setHealthScore(emptyHealthScore(activeProfile));
+    }
+    void loadRateImpact();
 
     return () => {
       isMounted = false;
     };
-  }, [activeProfile]);
+  }, [activeProfile, dataMode]);
 
-  async function handleUpload(file: File | undefined) {
-    if (!file) return;
+  useEffect(() => {
+    if (!activeProfile || activeView !== "spending" || dataMode !== "empty" || hasPromptedForSpendingData) return;
+    setIsTransactionModalOpen(true);
+    setHasPromptedForSpendingData(true);
+  }, [activeProfile, activeView, dataMode, hasPromptedForSpendingData]);
 
-    setUploadStatus({ state: "loading", message: "Reading CSV" });
+  async function analyseTransactionFile(
+    file: File,
+    source: "uploaded" | "manual",
+    profileOverride?: OnboardingProfile,
+    nextView: DashboardView = "overview"
+  ) {
+    const profileForAnalysis = profileOverride ?? activeProfile ?? undefined;
+    const sourceLabel = source === "uploaded" ? "CSV" : "form rows";
+    setUploadStatus({ state: "loading", message: `Analysing ${sourceLabel}` });
     setUploadSummary(null);
     try {
-      const result = await uploadTransactions(file, activeProfile ?? undefined);
+      const result = await uploadTransactions(file, profileForAnalysis);
       setUploadStatus({
         state: "success",
         message: `${result.rows} rows, GBP ${Number(result.total_spend).toLocaleString()} spend`
       });
       setUploadSummary(uploadSummaryFromResult(result));
-      setDataMode("uploaded");
-      setActiveView("overview");
+      setDataMode(source);
+      setActiveView(nextView);
+      setTransactionRows(
+        result.transactions.map((transaction) => ({
+          date: transaction.date,
+          description: transaction.description,
+          amount: transaction.amount,
+          category: transaction.category ?? transaction.predicted_category,
+          transaction_type: transaction.transaction_type,
+          account: transaction.account
+        }))
+      );
 
-      if (result.forecast.forecasts.length > 0) {
-        setForecastPeriod(result.forecast.period);
-        setForecastRows(forecastRowsFromResponse(result.forecast, result.transactions));
-      }
+      setForecastPeriod(result.forecast.period);
+      setForecastRows(
+        result.forecast.forecasts.length > 0 ? forecastRowsFromResponse(result.forecast, result.transactions) : []
+      );
 
-      if (result.personal_inflation) {
-        setCostOfLiving({
-          period: result.personal_inflation.period,
-          personalRate: result.personal_inflation.personal_inflation_pct,
-          nationalRate: result.personal_inflation.national_inflation_pct,
-          chart: result.personal_inflation.categories
-            .filter((category) => category.annual_change_pct !== null)
-            .slice(0, 6)
-            .map((category) => ({
-              category: shortCategory(category.ons_category ?? category.app_category),
-              personal: category.annual_change_pct ?? 0,
-              national: result.personal_inflation?.national_inflation_pct ?? 0
-            }))
-        });
-      }
+      setCostOfLiving(
+        result.personal_inflation
+          ? {
+              period: result.personal_inflation.period,
+              personalRate: result.personal_inflation.personal_inflation_pct,
+              nationalRate: result.personal_inflation.national_inflation_pct,
+              chart: result.personal_inflation.categories
+                .filter((category) => category.annual_change_pct !== null)
+                .slice(0, 6)
+                .map((category) => ({
+                  category: shortCategory(category.ons_category ?? category.app_category),
+                  personal: category.annual_change_pct ?? 0,
+                  national: result.personal_inflation?.national_inflation_pct ?? 0
+                }))
+            }
+          : emptyCostOfLiving()
+      );
 
-      if (result.health_score) {
-        setHealthScore(result.health_score);
-      }
-
-      if (result.recommendations.length > 0) {
-        setRecommendations(result.recommendations);
-      }
+      setHealthScore(result.health_score ?? emptyHealthScore(profileForAnalysis));
+      setRecommendations(result.recommendations);
     } catch (error) {
       setUploadSummary(null);
       setUploadStatus({
         state: "error",
-        message: error instanceof Error ? error.message : "Upload failed"
+        message: error instanceof Error ? error.message : "Transaction analysis failed"
       });
     }
   }
 
+  async function handleUpload(file: File | undefined) {
+    if (!file) return;
+    await analyseTransactionFile(file, "uploaded");
+  }
+
+  async function handleManualAnalyse(rows: TransactionPayload[]) {
+    setManualRows(rows);
+    await analyseTransactionFile(transactionRowsToFile(rows), "manual");
+    setIsTransactionModalOpen(false);
+    setTransactionPreset(null);
+    setTransactionPrompt(null);
+  }
+
+  async function handleProfileSave(profile: OnboardingProfile) {
+    writeStoredProfile(profile);
+    setActiveProfile(profile);
+    setProfileDraft(profile);
+    setProfileSectionFocus(null);
+
+    if (dataMode === "empty" || transactionRows.length === 0) {
+      setHealthScore(emptyHealthScore(profile));
+      return;
+    }
+
+    await analyseTransactionFile(transactionRowsToFile(transactionRows), dataMode, profile, activeView);
+  }
+
+  function openProfileEditor(section?: ProfileSectionId) {
+    if (!activeProfile) return;
+    setProfileDraft(activeProfile);
+    setProfileSectionFocus(section ?? null);
+    setActiveView("profile");
+  }
+
+  function resetProfileAndData() {
+    clearStoredProfile();
+    setActiveProfile(null);
+    setProfileDraft(emptyProfile);
+    setProfileSectionFocus(null);
+    setActiveView("overview");
+    setDataMode("empty");
+    setManualRows([]);
+    setUploadSummary(null);
+    setTransactionRows([]);
+    setForecastRows([]);
+    setForecastPeriod("No forecast yet");
+    setCostOfLiving(emptyCostOfLiving());
+    setHealthScore(emptyHealthScore());
+    setRecommendations([]);
+    setUploadStatus({ state: "idle", message: "" });
+  }
+
+  const isAnalysingTransactions = uploadStatus.state === "loading";
   const mortgageImpact = rateImpact.lines.find((line) => line.name === "Repayment mortgage");
   const savingsImpact = rateImpact.lines.find((line) => line.name === "Savings interest");
   const debtImpact = rateImpact.lines.find((line) => line.name === "Variable debt cost");
-  const income = activeProfile?.monthlyIncome ?? fallbackHealth.monthly_income;
+  const hasFinancialSetup = activeProfile ? profileHasValues(activeProfile) : false;
+  const needsIncome = (activeProfile?.monthlyIncome ?? 0) <= 0;
+  const income = activeProfile?.monthlyIncome ?? healthScore.monthly_income;
   const spend = healthScore.monthly_spend;
   const disposable = income - spend;
   const dashboardMetrics: Metric[] = [
     {
       label: "Monthly income",
-      value: `GBP ${Math.round(income).toLocaleString()}`,
-      delta: "From setup",
-      tone: "neutral"
+      value: income > 0 ? `GBP ${Math.round(income).toLocaleString()}` : "Not set",
+      delta: income > 0 ? "From setup" : "Add it in Profile",
+      tone: income > 0 ? "neutral" : "watch"
     },
     {
       label: "Monthly spend",
@@ -576,11 +601,16 @@ export function DashboardShell() {
     }
   ];
   const housingBenchmark = healthScore.benchmarks.find((benchmark) => benchmark.coicop_code === "04");
-  const dataModeLabel = dataMode === "uploaded" ? "Uploaded CSV" : "Demo baseline";
+  const dataModeLabel =
+    dataMode === "uploaded" ? "Uploaded CSV" : dataMode === "manual" ? "Form entries" : "No transactions";
   const dataModeDetail =
-    dataMode === "uploaded"
+    !hasFinancialSetup
+      ? "Start with your own setup values, then add transactions to unlock spend, forecast, inflation, and action insights."
+      : dataMode === "uploaded"
       ? "Spend, forecast, inflation, health score, and actions are using the latest CSV analysis."
-      : "Spend, forecast, inflation, health score, and actions are using demo transactions until a CSV is uploaded.";
+      : dataMode === "manual"
+        ? "Spend, forecast, inflation, health score, and actions are using the transaction rows entered in the form."
+        : "Add transactions with the form or upload a CSV to unlock spending, forecast, inflation, and action insights.";
   const totalAssets =
     (activeProfile?.liquidSavings ?? 0) +
     (activeProfile?.investmentBalance ?? 0) +
@@ -589,14 +619,6 @@ export function DashboardShell() {
   const consumerDebt = (activeProfile?.creditCardBalance ?? 0) + (activeProfile?.loanBalance ?? 0);
   const totalLiabilities = (activeProfile?.mortgageBalance ?? 0) + consumerDebt;
   const netWorth = totalAssets - totalLiabilities;
-  const netWorthRows = [
-    { label: "Cash savings", value: activeProfile?.liquidSavings ?? 0, tone: "text-teal" },
-    { label: "Investments", value: activeProfile?.investmentBalance ?? 0, tone: "text-cobalt" },
-    { label: "Pension", value: activeProfile?.pensionBalance ?? 0, tone: "text-amber" },
-    { label: "Property", value: activeProfile?.propertyValue ?? 0, tone: "text-slate-600" },
-    { label: "Mortgage", value: -(activeProfile?.mortgageBalance ?? 0), tone: "text-rose" },
-    { label: "Cards and loans", value: -consumerDebt, tone: "text-rose" }
-  ];
   const payoff = payoffEstimate(
     consumerDebt,
     activeProfile?.monthlyDebtPayment ?? 0,
@@ -616,9 +638,259 @@ export function DashboardShell() {
   const monthsToEmergency =
     emergencyGap <= 0 ? 0 : monthlyGoalContribution > 0 ? Math.ceil(emergencyGap / monthlyGoalContribution) : null;
   const monthsToGoal = goalGap <= 0 ? 0 : monthlyGoalContribution > 0 ? Math.ceil(goalGap / monthlyGoalContribution) : null;
+  const spendToIncome = (spend / Math.max(income, 1)) * 100;
+  const forecastSpendTotal = forecastRows.reduce((total, row) => total + row.forecast, 0);
+  const forecastToIncome = (forecastSpendTotal / Math.max(income, 1)) * 100;
+  const personalInflationGap = costOfLiving.personalRate - costOfLiving.nationalRate;
+  const groceriesForecast = forecastRows.find((row) => row.category.toLowerCase().includes("grocer"))?.forecast ?? 0;
+  const utilitiesForecast =
+    forecastRows.find((row) => row.category.toLowerCase().includes("util"))?.forecast ??
+    forecastRows.find((row) => row.category.toLowerCase().includes("bill"))?.forecast ??
+    0;
+  const housingBase = activeProfile?.rentOrMortgage ?? 0;
+  const rentScenarioDelta = housingBase * (scenario.rentChangePct / 100);
+  const foodScenarioDelta = groceriesForecast * (scenario.foodChangePct / 100);
+  const billsScenarioDelta = utilitiesForecast * (scenario.billsChangePct / 100);
+  const scenarioPressure =
+    rentScenarioDelta +
+    foodScenarioDelta +
+    billsScenarioDelta +
+    scenario.extraDebtPayment +
+    scenario.extraSavings;
+  const scenarioCashLeft = disposable - scenarioPressure;
+  const scenarioMonthlyGoalContribution = Math.max(monthlyGoalContribution + scenario.extraSavings, 0);
+  const scenarioMonthsToEmergency =
+    emergencyGap <= 0
+      ? 0
+      : scenarioMonthlyGoalContribution > 0
+        ? Math.ceil(emergencyGap / scenarioMonthlyGoalContribution)
+        : null;
+  const pressurePoints = [
+    {
+      label: "Spend-to-income",
+      value: formatPercent(spendToIncome, 0),
+      detail: `${formatGBP(spend)} monthly spend`,
+      tone: spendToIncome < 75 ? "good" : spendToIncome < 90 ? "watch" : "risk",
+      bar: spendToIncome
+    },
+    {
+      label: "Housing burden",
+      value: formatPercent(healthScore.rent_to_income * 100, 0),
+      detail: `${formatGBP(activeProfile?.rentOrMortgage ?? 0)} rent or mortgage`,
+      tone: healthScore.rent_to_income < 0.3 ? "good" : healthScore.rent_to_income < 0.4 ? "watch" : "risk",
+      bar: healthScore.rent_to_income * 100
+    },
+    {
+      label: "Emergency cover",
+      value: `${healthScore.emergency_fund_months.toFixed(1)} months`,
+      detail: `${formatGBP(activeProfile?.liquidSavings ?? 0)} liquid savings`,
+      tone: healthScore.emergency_fund_months >= 3 ? "good" : healthScore.emergency_fund_months >= 1 ? "watch" : "risk",
+      bar: progressPercentage(healthScore.emergency_fund_months, 6)
+    },
+    {
+      label: "Debt payment load",
+      value: formatPercent(monthlyDebtToIncome, 1),
+      detail: `${formatGBP(activeProfile?.monthlyDebtPayment ?? 0)} paid each month`,
+      tone: monthlyDebtToIncome < 10 ? "good" : monthlyDebtToIncome < 20 ? "watch" : "risk",
+      bar: monthlyDebtToIncome
+    },
+    {
+      label: "Next forecast pressure",
+      value: formatPercent(forecastToIncome, 0),
+      detail: `${formatGBP(forecastSpendTotal)} forecast spend`,
+      tone: forecastToIncome < 75 ? "good" : forecastToIncome < 90 ? "watch" : "risk",
+      bar: forecastToIncome
+    },
+    {
+      label: "Personal inflation gap",
+      value: `${personalInflationGap >= 0 ? "+" : ""}${personalInflationGap.toFixed(1)} pp`,
+      detail: `${costOfLiving.personalRate.toFixed(1)}% personal vs ${costOfLiving.nationalRate.toFixed(1)}% UK`,
+      tone: personalInflationGap <= 0 ? "good" : personalInflationGap <= 1 ? "watch" : "risk",
+      bar: Math.abs(personalInflationGap) * 25
+    }
+  ] satisfies Array<{
+    label: string;
+    value: string;
+    detail: string;
+    tone: Metric["tone"];
+    bar: number;
+  }>;
+  const scenarioRows = [
+    {
+      label: "Rent or mortgage",
+      base: housingBase,
+      assumption: `${scenario.rentChangePct >= 0 ? "+" : ""}${scenario.rentChangePct}%`,
+      delta: rentScenarioDelta
+    },
+    {
+      label: "Food and groceries",
+      base: groceriesForecast,
+      assumption: `${scenario.foodChangePct >= 0 ? "+" : ""}${scenario.foodChangePct}%`,
+      delta: foodScenarioDelta
+    },
+    {
+      label: "Bills and utilities",
+      base: utilitiesForecast,
+      assumption: `${scenario.billsChangePct >= 0 ? "+" : ""}${scenario.billsChangePct}%`,
+      delta: billsScenarioDelta
+    },
+    {
+      label: "Extra debt payment",
+      base: activeProfile?.monthlyDebtPayment ?? 0,
+      assumption: formatGBP(scenario.extraDebtPayment),
+      delta: scenario.extraDebtPayment
+    },
+    {
+      label: "Extra savings",
+      base: monthlyGoalContribution,
+      assumption: formatGBP(scenario.extraSavings),
+      delta: scenario.extraSavings
+    }
+  ];
+  const scenarioControls = [
+    {
+      label: "Rent or mortgage change",
+      field: "rentChangePct",
+      value: scenario.rentChangePct,
+      min: -20,
+      max: 30,
+      step: 1,
+      suffix: "%",
+      detail: `${formatGBP(housingBase)} current housing cost`
+    },
+    {
+      label: "Food price change",
+      field: "foodChangePct",
+      value: scenario.foodChangePct,
+      min: -20,
+      max: 30,
+      step: 1,
+      suffix: "%",
+      detail: `${formatGBP(groceriesForecast)} forecast groceries`
+    },
+    {
+      label: "Bills price change",
+      field: "billsChangePct",
+      value: scenario.billsChangePct,
+      min: -20,
+      max: 30,
+      step: 1,
+      suffix: "%",
+      detail: `${formatGBP(utilitiesForecast)} forecast utilities`
+    },
+    {
+      label: "Extra debt payment",
+      field: "extraDebtPayment",
+      value: scenario.extraDebtPayment,
+      min: 0,
+      max: 500,
+      step: 10,
+      suffix: "GBP",
+      detail: "Additional monthly debt overpayment"
+    },
+    {
+      label: "Extra savings",
+      field: "extraSavings",
+      value: scenario.extraSavings,
+      min: 0,
+      max: 500,
+      step: 10,
+      suffix: "GBP",
+      detail: "Additional monthly savings contribution"
+    }
+  ] satisfies Array<{
+    label: string;
+    field: keyof typeof scenario;
+    value: number;
+    min: number;
+    max: number;
+    step: number;
+    suffix: "%" | "GBP";
+    detail: string;
+  }>;
+  const netWorthRows = [
+    { label: "Cash savings", value: activeProfile?.liquidSavings ?? 0, tone: "text-teal" },
+    { label: "Investments", value: activeProfile?.investmentBalance ?? 0, tone: "text-cobalt" },
+    { label: "Pension", value: activeProfile?.pensionBalance ?? 0, tone: "text-amber" },
+    { label: "Property", value: activeProfile?.propertyValue ?? 0, tone: "text-slate-600" },
+    { label: "Mortgage", value: -(activeProfile?.mortgageBalance ?? 0), tone: "text-rose" },
+    { label: "Cards and loans", value: -consumerDebt, tone: "text-rose" }
+  ];
+
+  function updateScenario(key: keyof typeof scenario, value: number) {
+    setScenario((current) => ({
+      ...current,
+      [key]: value
+    }));
+  }
+
+  function hasCategory(category: string) {
+    return transactionRows.some((transaction) => transaction.category === category);
+  }
+
+  function openTransactionPrompt(category: string) {
+    const prompt = categoryPrompts[category] ?? {
+      amount: "25.00",
+      description: displayCategory(category),
+      intro: `Add a ${displayCategory(category).toLowerCase()} row so this section can use it in the analysis.`,
+      title: `Add ${displayCategory(category).toLowerCase()} spending`
+    };
+
+    setTransactionPreset({
+      amount: prompt.amount,
+      category,
+      description: prompt.description,
+      transaction_type: category === "income" ? "income" : "expense",
+      account: "current"
+    });
+    setTransactionPrompt({
+      intro: prompt.intro,
+      title: prompt.title
+    });
+    setIsTransactionModalOpen(true);
+  }
+
+  const missingCostOfLivingCategories = ["groceries", "transport", "utilities", "housing"].filter(
+    (category) => !hasCategory(category)
+  );
+  const missingSpendingCategories = ["groceries", "transport", "utilities", "subscriptions", "eating_out"].filter(
+    (category) => !hasCategory(category)
+  );
+  const missingSimulatorCategories = ["groceries", "utilities", "housing"].filter((category) => !hasCategory(category));
+  const missingRecommendationCategories = ["subscriptions", "eating_out", "transport"].filter(
+    (category) => !hasCategory(category)
+  );
+
+  if (!hasCheckedStoredProfile) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-paper px-5 py-8">
+        <div className="flex items-center gap-3 rounded-md border border-slate-200 bg-panel px-4 py-3 text-sm font-semibold text-slate-600 shadow-soft">
+          <LoaderCircle className="animate-spin text-cobalt" size={18} aria-hidden="true" />
+          Loading your setup
+        </div>
+      </main>
+    );
+  }
 
   if (!activeProfile) {
-    return <OnboardingFlow onReady={setActiveProfile} />;
+    return (
+      <OnboardingFlow
+        onReady={(profile, name) => {
+          setDisplayName(name);
+          writeStoredProfile(profile);
+          setProfileDraft(profile);
+          setDataMode("empty");
+          setUploadSummary(null);
+          setForecastRows([]);
+          setTransactionRows([]);
+          setForecastPeriod("No forecast yet");
+          setCostOfLiving(emptyCostOfLiving());
+          setHealthScore(emptyHealthScore(profile));
+          setRecommendations([]);
+          setActiveProfile(profile);
+        }}
+      />
+    );
   }
 
   return (
@@ -628,13 +900,25 @@ export function DashboardShell() {
           <div>
             <p className="text-sm font-semibold uppercase tracking-normal text-cobalt">FinScope UK</p>
             <h1 className="mt-1 text-2xl font-semibold tracking-normal text-ink sm:text-3xl">
-              Personal finance dashboard
+              {displayName ? `Hello, ${displayName}` : "Personal finance dashboard"}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{dataModeDetail}</p>
           </div>
           <div className="flex flex-col items-start gap-2 sm:items-end">
             <div className="flex flex-wrap justify-end gap-2">
-              <label className="focus-ring inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white shadow-soft transition hover:bg-slate-800">
+              <button
+                className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white shadow-soft transition hover:bg-slate-800"
+                type="button"
+                onClick={() => {
+                  setTransactionPreset(null);
+                  setTransactionPrompt(null);
+                  setIsTransactionModalOpen(true);
+                }}
+              >
+                <Plus size={18} aria-hidden="true" />
+                Add transaction
+              </button>
+              <label className="focus-ring inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:border-cobalt">
                 <Upload size={18} aria-hidden="true" />
                 <span>Upload CSV</span>
                 <input
@@ -650,31 +934,45 @@ export function DashboardShell() {
               <button
                 className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-600"
                 type="button"
-                onClick={() => {
-                  setActiveProfile(null);
-                  setActiveView("overview");
-                  setDataMode("demo");
-                  setUploadSummary(null);
-                  setUploadStatus({ state: "idle", message: "" });
-                }}
+                onClick={() => openProfileEditor()}
               >
-                <Gauge size={18} aria-hidden="true" />
-                Change details
+                <Settings size={18} aria-hidden="true" />
+                Profile setup
               </button>
             </div>
             <p className="flex flex-wrap items-center justify-end gap-2 text-sm font-medium text-slate-500">
               <span
                 className={`rounded-sm px-2 py-1 text-xs font-semibold uppercase ${
-                  dataMode === "uploaded" ? "bg-emerald-50 text-teal" : "bg-blue-50 text-cobalt"
+                  dataMode === "uploaded"
+                    ? "bg-emerald-50 text-teal"
+                    : dataMode === "manual"
+                      ? "bg-amber/10 text-amber"
+                      : "bg-blue-50 text-cobalt"
                 }`}
               >
                 {dataModeLabel}
               </span>
-              <span>Income {formatGBP(activeProfile.monthlyIncome)}</span>
+              <span>{activeProfile.monthlyIncome > 0 ? `Income ${formatGBP(activeProfile.monthlyIncome)}` : "Income not set"}</span>
             </p>
           </div>
         </div>
       </header>
+
+      <TransactionEntryModal
+        initialDraft={transactionPreset}
+        intro={transactionPrompt?.intro}
+        isAnalysing={isAnalysingTransactions}
+        open={isTransactionModalOpen}
+        rows={manualRows}
+        title={transactionPrompt?.title}
+        onAnalyse={handleManualAnalyse}
+        onClose={() => {
+          setIsTransactionModalOpen(false);
+          setTransactionPreset(null);
+          setTransactionPrompt(null);
+        }}
+        onRowsChange={setManualRows}
+      />
 
       {uploadStatus.state !== "idle" ? (
         <section
@@ -767,6 +1065,27 @@ export function DashboardShell() {
         <section className="grid gap-5">
           {activeView === "overview" ? (
             <>
+              {!hasFinancialSetup || needsIncome ? (
+                <section className="rounded-md border border-dashed border-slate-300 bg-panel p-5 shadow-soft">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold tracking-normal text-ink">Finish financial setup</h2>
+                      <p className="mt-1 text-sm leading-6 text-slate-500">
+                        Add your own income, balances, debts, and targets so these numbers are based on you.
+                      </p>
+                    </div>
+                    <button
+                      className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white"
+                      type="button"
+                      onClick={() => openProfileEditor(needsIncome ? "cash-flow" : undefined)}
+                    >
+                      <Settings size={18} aria-hidden="true" />
+                      Open setup
+                    </button>
+                  </div>
+                </section>
+              ) : null}
+
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {dashboardMetrics.map((metric) => (
                   <div key={metric.label} className="rounded-md border border-slate-200 bg-panel p-4 shadow-soft">
@@ -787,37 +1106,37 @@ export function DashboardShell() {
               <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
                 <div className="mb-5 flex items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-semibold tracking-normal text-ink">Data status</h2>
-                    <p className="text-sm text-slate-500">What the dashboard is using right now</p>
+                    <h2 className="text-lg font-semibold tracking-normal text-ink">Pressure points</h2>
+                    <p className="text-sm text-slate-500">The main signals that can squeeze monthly cash flow</p>
                   </div>
-                  <ReceiptText className="text-cobalt" size={22} aria-hidden="true" />
+                  <Home className="text-cobalt" size={22} aria-hidden="true" />
                 </div>
-                <dl className="grid gap-3 text-sm sm:grid-cols-2">
-                  <div className="rounded-md border border-slate-200 p-3">
-                    <dt className="text-slate-500">Analysis source</dt>
-                    <dd className="mt-1 font-semibold text-ink">{dataModeLabel}</dd>
-                  </div>
-                  <div className="rounded-md border border-slate-200 p-3">
-                    <dt className="text-slate-500">Setup profile</dt>
-                    <dd className="mt-1 font-semibold text-ink">{formatGBP(activeProfile.monthlyIncome)} income</dd>
-                  </div>
-                  <div className="rounded-md border border-slate-200 p-3">
-                    <dt className="text-slate-500">CSV rows</dt>
-                    <dd className="mt-1 font-semibold text-ink">
-                      {uploadSummary ? uploadSummary.rows.toLocaleString() : "No upload yet"}
-                    </dd>
-                  </div>
-                  <div className="rounded-md border border-slate-200 p-3">
-                    <dt className="text-slate-500">Forecast period</dt>
-                    <dd className="mt-1 font-semibold text-ink">{forecastPeriod}</dd>
-                  </div>
-                </dl>
-                <p className="mt-4 text-sm leading-6 text-slate-600">{dataModeDetail}</p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {pressurePoints.map((point) => (
+                    <div key={point.label} className="rounded-md border border-slate-200 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-ink">{point.label}</p>
+                          <p className="mt-1 text-xs leading-5 text-slate-500">{point.detail}</p>
+                        </div>
+                        <span className={`text-sm font-semibold ${toneClass(point.tone)}`}>{point.value}</span>
+                      </div>
+                      <div className="mt-4 h-2 rounded-sm bg-slate-100">
+                        <div
+                          className={`h-2 rounded-sm ${
+                            point.tone === "good" ? "bg-teal" : point.tone === "watch" ? "bg-amber" : "bg-rose"
+                          }`}
+                          style={{ width: `${clampPercentage(point.bar)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </section>
             </>
           ) : null}
 
-          {activeView === "spending" ? (
+          {activeView === "spending" && forecastRows.length > 0 ? (
             <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
@@ -841,7 +1160,48 @@ export function DashboardShell() {
           </section>
           ) : null}
 
-          {activeView === "spending" ? (
+          {activeView === "spending" && forecastRows.length === 0 ? (
+            <section className="rounded-md border border-dashed border-slate-300 bg-panel p-6 shadow-soft">
+              <div className="mx-auto grid max-w-2xl gap-4 text-center">
+                <ReceiptText className="mx-auto text-cobalt" size={30} aria-hidden="true" />
+                <div>
+                  <h2 className="text-xl font-semibold tracking-normal text-ink">Add spending rows</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    Spending, forecasts, inflation, and recommendations stay empty until transactions are added.
+                  </p>
+                </div>
+                <div className="flex flex-col justify-center gap-3 sm:flex-row">
+                  <button
+                    className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white"
+                    type="button"
+                    onClick={() => {
+                      setTransactionPreset(null);
+                      setTransactionPrompt(null);
+                      setIsTransactionModalOpen(true);
+                    }}
+                  >
+                    <Plus size={18} aria-hidden="true" />
+                    Enter transactions
+                  </button>
+                  <label className="focus-ring inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-600">
+                    <Upload size={18} aria-hidden="true" />
+                    Upload CSV
+                    <input
+                      className="sr-only"
+                      type="file"
+                      accept=".csv"
+                      onChange={(event) => {
+                        void handleUpload(event.target.files?.[0]);
+                        event.currentTarget.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {activeView === "spending" && forecastRows.length > 0 ? (
             <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
@@ -879,6 +1239,31 @@ export function DashboardShell() {
                   </tbody>
                 </table>
               </div>
+              {missingSpendingCategories.length > 0 ? (
+                <div className="mt-4 rounded-md border border-dashed border-slate-300 p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-ink">Add more spending coverage</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">
+                        These categories are missing from the current transaction set.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {missingSpendingCategories.slice(0, 4).map((category) => (
+                        <button
+                          key={category}
+                          className="focus-ring inline-flex h-9 items-center justify-center gap-2 rounded-md border border-slate-200 px-3 text-xs font-semibold text-slate-600"
+                          type="button"
+                          onClick={() => openTransactionPrompt(category)}
+                        >
+                          <Plus size={15} aria-hidden="true" />
+                          {displayCategory(category)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </section>
           ) : null}
 
@@ -906,6 +1291,31 @@ export function DashboardShell() {
                 </LineChart>
               </ResponsiveContainer>
             </div>
+            {missingCostOfLivingCategories.length > 0 ? (
+              <div className="mt-4 rounded-md border border-dashed border-slate-300 p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-ink">Missing cost-of-living inputs</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                      Add these rows to improve personal inflation and category pressure.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {missingCostOfLivingCategories.map((category) => (
+                      <button
+                        key={category}
+                        className="focus-ring inline-flex h-9 items-center justify-center gap-2 rounded-md border border-slate-200 px-3 text-xs font-semibold text-slate-600"
+                        type="button"
+                        onClick={() => openTransactionPrompt(category)}
+                      >
+                        <Plus size={15} aria-hidden="true" />
+                        {displayCategory(category)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </section>
           ) : null}
         </section>
@@ -939,7 +1349,7 @@ export function DashboardShell() {
           </section>
           ) : null}
 
-          {activeView === "overview" || activeView === "costs" ? (
+          {activeView === "costs" ? (
             <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold tracking-normal text-ink">Pressure points</h2>
@@ -1006,34 +1416,165 @@ export function DashboardShell() {
           </section>
           ) : null}
 
-          {activeView === "overview" || activeView === "actions" ? (
+          {activeView === "actions" ? (
             <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold tracking-normal text-ink">Next actions</h2>
               <PiggyBank className="text-teal" size={22} aria-hidden="true" />
             </div>
-            <ul className="grid gap-3 text-sm text-slate-600">
-              {recommendations.slice(0, 4).map((recommendation) => (
-                <li key={`${recommendation.source}-${recommendation.title}`} className="grid gap-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="font-semibold text-ink">{recommendation.title}</span>
-                    <span className={`text-xs font-semibold uppercase ${priorityTone(recommendation.priority)}`}>
-                      {recommendation.priority}
-                    </span>
-                  </div>
-                  <span>{recommendation.detail}</span>
-                  <span className="font-medium text-slate-700">{recommendation.action}</span>
-                </li>
-              ))}
-            </ul>
+            {recommendations.length > 0 ? (
+              <ul className="grid gap-3 text-sm text-slate-600">
+                {recommendations.slice(0, 4).map((recommendation) => (
+                  <li key={`${recommendation.source}-${recommendation.title}`} className="grid gap-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="font-semibold text-ink">{recommendation.title}</span>
+                      <span className={`text-xs font-semibold uppercase ${priorityTone(recommendation.priority)}`}>
+                        {recommendation.priority}
+                      </span>
+                    </div>
+                    <span>{recommendation.detail}</span>
+                    <span className="font-medium text-slate-700">{recommendation.action}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="rounded-md border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+                Add transaction rows to generate recommendations.
+              </div>
+            )}
+            {missingRecommendationCategories.length > 0 ? (
+              <div className="mt-4 rounded-md border border-dashed border-slate-300 p-4">
+                <p className="text-sm font-semibold text-ink">Improve recommendation coverage</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  These rows help the app spot travel, subscription, and discretionary actions.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {missingRecommendationCategories.map((category) => (
+                    <button
+                      key={category}
+                      className="focus-ring inline-flex h-9 items-center justify-center gap-2 rounded-md border border-slate-200 px-3 text-xs font-semibold text-slate-600"
+                      type="button"
+                      onClick={() => openTransactionPrompt(category)}
+                    >
+                      <Plus size={15} aria-hidden="true" />
+                      {displayCategory(category)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </section>
           ) : null}
         </aside>
         </div>
       ) : null}
 
+      {activeView === "profile" ? (
+        <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6 lg:grid-cols-[0.75fr_1.25fr]">
+          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold tracking-normal text-ink">Financial setup</h2>
+                <p className="text-sm text-slate-500">Saved in this browser and used across the dashboard</p>
+              </div>
+              <Settings className="text-cobalt" size={22} aria-hidden="true" />
+            </div>
+
+            <div className="grid gap-3 text-sm">
+              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
+                <span className="text-slate-600">Setup status</span>
+                <span className={`font-semibold ${hasFinancialSetup ? "text-teal" : "text-amber"}`}>
+                  {hasFinancialSetup ? "Started" : "Empty"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
+                <span className="text-slate-600">Monthly income</span>
+                <span className="font-semibold text-ink">
+                  {activeProfile.monthlyIncome > 0 ? formatGBP(activeProfile.monthlyIncome) : "Not set"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
+                <span className="text-slate-600">Assets</span>
+                <span className="font-semibold text-ink">{formatGBP(totalAssets)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
+                <span className="text-slate-600">Liabilities</span>
+                <span className="font-semibold text-ink">{formatGBP(totalLiabilities)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-slate-200 p-3">
+                <span className="text-slate-600">Goal contribution</span>
+                <span className="font-semibold text-ink">{formatGBP(monthlyGoalContribution)}</span>
+              </div>
+            </div>
+
+            {needsIncome ? (
+              <div className="mt-4 rounded-md border border-dashed border-amber/50 bg-amber/5 p-4 text-sm text-slate-600">
+                Add monthly income when you can. Without it, spend-to-income and health-score signals stay limited.
+              </div>
+            ) : null}
+
+            <button
+              className="focus-ring mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-rose/30 px-4 text-sm font-semibold text-rose"
+              type="button"
+              onClick={resetProfileAndData}
+            >
+              <RotateCcw size={18} aria-hidden="true" />
+              Start setup again
+            </button>
+          </section>
+
+          <div className="grid gap-4">
+            <div className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold tracking-normal text-ink">Edit setup values</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-500">
+                    These values power net worth, debt payoff, savings goals, rate impact, and the health score.
+                  </p>
+                </div>
+                {profileSectionFocus ? (
+                  <span className="rounded-sm bg-blue-50 px-2 py-1 text-xs font-semibold uppercase text-cobalt">
+                    Editing {profileSectionFocus.replace("-", " ")}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            <ProfileForm
+              cancelLabel="Undo edits"
+              highlightedSection={profileSectionFocus}
+              profile={profileDraft}
+              saveLabel={dataMode === "empty" ? "Save setup" : "Save and refresh analysis"}
+              onCancel={() => {
+                setProfileDraft(activeProfile);
+                setProfileSectionFocus(null);
+              }}
+              onProfileChange={setProfileDraft}
+              onSave={() => {
+                void handleProfileSave(profileDraft);
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
+
       {activeView === "net-worth" ? (
         <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold tracking-normal text-ink">Net worth</h2>
+              <p className="mt-1 text-sm text-slate-500">Assets minus mortgage, cards, loans, and overdraft balances</p>
+            </div>
+            <button
+              className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 bg-panel px-4 text-sm font-semibold text-slate-600"
+              type="button"
+              onClick={() => openProfileEditor("assets")}
+            >
+              <Pencil size={18} aria-hidden="true" />
+              Edit assets
+            </button>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-3">
             <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
               <p className="text-sm font-medium text-slate-500">Total assets</p>
@@ -1085,6 +1626,21 @@ export function DashboardShell() {
 
       {activeView === "debt" ? (
         <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6 lg:grid-cols-[1fr_1fr]">
+          <div className="flex flex-col gap-3 lg:col-span-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold tracking-normal text-ink">Debt payoff</h2>
+              <p className="mt-1 text-sm text-slate-500">Consumer debt payoff using your balance, payment, and APR</p>
+            </div>
+            <button
+              className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 bg-panel px-4 text-sm font-semibold text-slate-600"
+              type="button"
+              onClick={() => openProfileEditor("debts")}
+            >
+              <Pencil size={18} aria-hidden="true" />
+              Edit debts
+            </button>
+          </div>
+
           <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
@@ -1157,6 +1713,21 @@ export function DashboardShell() {
 
       {activeView === "goals" ? (
         <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6 lg:grid-cols-[1fr_1fr]">
+          <div className="flex flex-col gap-3 lg:col-span-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold tracking-normal text-ink">Savings goals</h2>
+              <p className="mt-1 text-sm text-slate-500">Emergency cover first, then progress towards the next target</p>
+            </div>
+            <button
+              className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 bg-panel px-4 text-sm font-semibold text-slate-600"
+              type="button"
+              onClick={() => openProfileEditor("goals")}
+            >
+              <Pencil size={18} aria-hidden="true" />
+              Edit goals
+            </button>
+          </div>
+
           <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
@@ -1222,6 +1793,146 @@ export function DashboardShell() {
               </div>
             </div>
             <p className="mt-4 text-sm text-slate-600">Monthly contribution: {formatGBP(monthlyGoalContribution)}.</p>
+          </section>
+        </div>
+      ) : null}
+
+      {activeView === "simulator" ? (
+        <div className="mx-auto grid max-w-7xl gap-5 px-5 py-6 lg:grid-cols-[1fr_0.9fr]">
+          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold tracking-normal text-ink">What-if controls</h2>
+                <p className="text-sm text-slate-500">Adjust the monthly assumptions and watch the cash impact</p>
+              </div>
+              <SlidersHorizontal className="text-cobalt" size={22} aria-hidden="true" />
+            </div>
+            <div className="grid gap-5">
+              {scenarioControls.map((control) => (
+                <div key={control.field} className="grid gap-3 rounded-md border border-slate-200 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-ink">{control.label}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">{control.detail}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-ink">
+                      {control.suffix === "%" ? `${control.value}%` : formatGBP(control.value)}
+                    </span>
+                  </div>
+                  <input
+                    className="w-full accent-cobalt"
+                    max={control.max}
+                    min={control.min}
+                    step={control.step}
+                    type="range"
+                    value={control.value}
+                    onChange={(event) => updateScenario(control.field, Number(event.target.value))}
+                  />
+                  <div className="flex items-center gap-3">
+                    <input
+                      className="h-10 w-28 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-ink outline-none focus:border-cobalt"
+                      max={control.max}
+                      min={control.min}
+                      step={control.step}
+                      type="number"
+                      value={control.value}
+                      onChange={(event) => updateScenario(control.field, Number(event.target.value))}
+                    />
+                    <span className="text-xs font-semibold uppercase text-slate-500">
+                      {control.suffix === "%" ? "percent" : "per month"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {missingSimulatorCategories.length > 0 ? (
+                <div className="rounded-md border border-dashed border-slate-300 p-4">
+                  <p className="text-sm font-semibold text-ink">Missing simulator inputs</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    These rows make the rent, food, and bills scenario more useful.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {missingSimulatorCategories.map((category) => (
+                      <button
+                        key={category}
+                        className="focus-ring inline-flex h-9 items-center justify-center gap-2 rounded-md border border-slate-200 px-3 text-xs font-semibold text-slate-600"
+                        type="button"
+                        onClick={() => openTransactionPrompt(category)}
+                      >
+                        <Plus size={15} aria-hidden="true" />
+                        {displayCategory(category)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </section>
+
+          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold tracking-normal text-ink">Scenario result</h2>
+                <p className="text-sm text-slate-500">Monthly position after the selected changes</p>
+              </div>
+              <Banknote className="text-amber" size={22} aria-hidden="true" />
+            </div>
+            <div className="grid gap-4">
+              <div className="rounded-md border border-slate-200 p-4">
+                <p className="text-sm text-slate-500">Extra monthly pressure</p>
+                <p className="mt-2 text-3xl font-semibold text-rose">{formatGBP(scenarioPressure)}</p>
+              </div>
+              <div className="rounded-md border border-slate-200 p-4">
+                <p className="text-sm text-slate-500">Cash left after scenario</p>
+                <p className={`mt-2 text-3xl font-semibold ${scenarioCashLeft >= 0 ? "text-teal" : "text-rose"}`}>
+                  {formatGBP(scenarioCashLeft)}
+                </p>
+              </div>
+              <div className="rounded-md border border-slate-200 p-4">
+                <p className="text-sm text-slate-500">Emergency target time</p>
+                <p className="mt-2 text-3xl font-semibold text-ink">{formatMonths(scenarioMonthsToEmergency)}</p>
+              </div>
+              <div className="rounded-md border border-slate-200 p-4">
+                <p className="text-sm text-slate-500">Monthly goal contribution</p>
+                <p className="mt-2 text-3xl font-semibold text-ink">
+                  {formatGBP(scenarioMonthlyGoalContribution)}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft lg:col-span-2">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold tracking-normal text-ink">Scenario breakdown</h2>
+                <p className="text-sm text-slate-500">How each assumption changes the monthly view</p>
+              </div>
+              <ReceiptText className="text-teal" size={22} aria-hidden="true" />
+            </div>
+            <div className="overflow-x-auto rounded-md border border-slate-200">
+              <table className="min-w-full divide-y divide-slate-200 text-sm">
+                <thead className="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
+                  <tr>
+                    <th className="px-4 py-3">Area</th>
+                    <th className="px-4 py-3">Base</th>
+                    <th className="px-4 py-3">Assumption</th>
+                    <th className="px-4 py-3">Monthly change</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 bg-white">
+                  {scenarioRows.map((row) => (
+                    <tr key={row.label}>
+                      <td className="px-4 py-3 font-medium text-ink">{row.label}</td>
+                      <td className="px-4 py-3 text-slate-600">{formatGBP(row.base)}</td>
+                      <td className="px-4 py-3 text-slate-600">{row.assumption}</td>
+                      <td className="px-4 py-3 font-semibold text-ink">
+                        {row.delta >= 0 ? "+" : ""}
+                        {formatGBP(row.delta)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
         </div>
       ) : null}
