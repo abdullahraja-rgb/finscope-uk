@@ -1,0 +1,85 @@
+date,description,amount,category,transaction_type,account
+2026-01-25,Salary Payroll,3240.00,income,income,current
+2026-01-26,Savings Interest,4.85,income,income,savings
+2026-01-01,Rent Payment,-1080.00,housing,expense,current
+2026-01-03,Tesco Superstore,-74.30,groceries,expense,current
+2026-01-06,TfL Travel Charge,-86.40,transport,expense,current
+2026-01-08,Octopus Energy,-124.20,utilities,expense,current
+2026-01-10,Netflix,-10.99,subscriptions,expense,current
+2026-01-12,Costa Coffee,-8.75,eating_out,expense,current
+2026-01-14,Aldi Stores,-52.60,groceries,expense,current
+2026-01-16,Spotify,-11.99,subscriptions,expense,current
+2026-01-18,Boots Pharmacy,-18.40,health,expense,current
+2026-01-21,Deliveroo,-27.80,eating_out,expense,current
+2026-01-23,Amazon Marketplace,-48.90,shopping,expense,current
+2026-01-29,Sainsburys Local,-61.35,groceries,expense,current
+2026-02-25,Salary Payroll,3240.00,income,income,current
+2026-02-26,Savings Interest,5.10,income,income,savings
+2026-02-01,Rent Payment,-1080.00,housing,expense,current
+2026-02-03,Tesco Superstore,-69.85,groceries,expense,current
+2026-02-05,Trainline,-42.50,transport,expense,current
+2026-02-08,Octopus Energy,-131.40,utilities,expense,current
+2026-02-10,Netflix,-10.99,subscriptions,expense,current
+2026-02-11,Pret A Manger,-9.20,eating_out,expense,current
+2026-02-13,Lidl GB,-47.10,groceries,expense,current
+2026-02-16,Spotify,-11.99,subscriptions,expense,current
+2026-02-17,Superdrug,-15.75,health,expense,current
+2026-02-20,Nandos,-31.60,eating_out,expense,current
+2026-02-23,Argos Online,-82.00,shopping,expense,current
+2026-02-27,Sainsburys Local,-58.45,groceries,expense,current
+2026-03-25,Salary Payroll,3260.00,income,income,current
+2026-03-26,Savings Interest,5.25,income,income,savings
+2026-03-01,Rent Payment,-1080.00,housing,expense,current
+2026-03-03,Tesco Superstore,-77.40,groceries,expense,current
+2026-03-06,TfL Travel Charge,-91.20,transport,expense,current
+2026-03-08,Octopus Energy,-118.70,utilities,expense,current
+2026-03-10,Netflix,-10.99,subscriptions,expense,current
+2026-03-12,Costa Coffee,-7.95,eating_out,expense,current
+2026-03-14,Aldi Stores,-55.25,groceries,expense,current
+2026-03-16,Spotify,-11.99,subscriptions,expense,current
+2026-03-18,Boots Pharmacy,-21.30,health,expense,current
+2026-03-21,Uber Eats,-29.50,eating_out,expense,current
+2026-03-23,Amazon Marketplace,-64.20,shopping,expense,current
+2026-03-29,Sainsburys Local,-63.80,groceries,expense,current
+2026-04-25,Salary Payroll,3260.00,income,income,current
+2026-04-26,Savings Interest,5.40,income,income,savings
+2026-04-01,Rent Payment,-1080.00,housing,expense,current
+2026-04-03,Tesco Superstore,-82.15,groceries,expense,current
+2026-04-05,Shell Service Station,-48.60,transport,expense,current
+2026-04-08,Octopus Energy,-112.35,utilities,expense,current
+2026-04-10,Netflix,-10.99,subscriptions,expense,current
+2026-04-12,Pret A Manger,-10.40,eating_out,expense,current
+2026-04-14,Lidl GB,-53.90,groceries,expense,current
+2026-04-16,Spotify,-11.99,subscriptions,expense,current
+2026-04-18,Superdrug,-12.80,health,expense,current
+2026-04-21,Deliveroo,-34.20,eating_out,expense,current
+2026-04-23,IKEA Online,-96.00,shopping,expense,current
+2026-04-29,Sainsburys Local,-67.25,groceries,expense,current
+2026-05-25,Salary Payroll,3260.00,income,income,current
+2026-05-26,Savings Interest,5.65,income,income,savings
+2026-05-01,Rent Payment,-1080.00,housing,expense,current
+2026-05-03,Tesco Superstore,-79.95,groceries,expense,current
+2026-05-06,TfL Travel Charge,-88.70,transport,expense,current
+2026-05-08,Octopus Energy,-107.90,utilities,expense,current
+2026-05-10,Netflix,-10.99,subscriptions,expense,current
+2026-05-12,Costa Coffee,-8.60,eating_out,expense,current
+2026-05-14,Aldi Stores,-57.45,groceries,expense,current
+2026-05-16,Spotify,-11.99,subscriptions,expense,current
+2026-05-18,Boots Pharmacy,-19.75,health,expense,current
+2026-05-21,Nandos,-36.40,eating_out,expense,current
+2026-05-23,Amazon Marketplace,-72.30,shopping,expense,current
+2026-05-29,Sainsburys Local,-65.50,groceries,expense,current
+2026-06-25,Salary Payroll,3280.00,income,income,current
+2026-06-26,Savings Interest,5.80,income,income,savings
+2026-06-01,Rent Payment,-1080.00,housing,expense,current
+2026-06-03,Tesco Superstore,-84.70,groceries,expense,current
+2026-06-05,Trainline,-46.90,transport,expense,current
+2026-06-08,Octopus Energy,-103.45,utilities,expense,current
+2026-06-10,Netflix,-10.99,subscriptions,expense,current
+2026-06-12,Pret A Manger,-9.85,eating_out,expense,current
+2026-06-14,Lidl GB,-59.20,groceries,expense,current
+2026-06-16,Spotify,-11.99,subscriptions,expense,current
+2026-06-18,Superdrug,-14.60,health,expense,current
+2026-06-21,Uber Eats,-32.70,eating_out,expense,current
+2026-06-23,Argos Online,-88.50,shopping,expense,current
+2026-06-29,Sainsburys Local,-69.15,groceries,expense,current

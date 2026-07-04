@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.routes import (
+    advisor,
     categorise,
     cost_of_living,
     datasets,
@@ -12,6 +13,7 @@ from app.api.routes import (
 )
 
 api_router = APIRouter()
+api_router.include_router(advisor.router, tags=["advisor"])
 api_router.include_router(transactions.router, tags=["transactions"])
 api_router.include_router(datasets.router, tags=["datasets"])
 api_router.include_router(cost_of_living.router, tags=["cost-of-living"])

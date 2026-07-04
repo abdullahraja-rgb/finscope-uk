@@ -4,7 +4,7 @@ I calculate personal inflation by weighting ONS category inflation by the user's
 
 The first version uses:
 
-- User transaction categories from uploaded or demo transactions.
+- User transaction categories from uploaded CSVs or form-entered transaction rows.
 - `config/category_mapping.yml` to map app categories to ONS COICOP divisions.
 - Latest CPIH category inflation from the ONS detailed reference tables.
 

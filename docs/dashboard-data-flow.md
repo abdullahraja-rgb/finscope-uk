@@ -19,13 +19,16 @@ The dashboard currently has three kinds of data.
 - Savings goal target.
 - Monthly goal contribution.
 
-These come from the local onboarding flow before the dashboard opens. They feed the health score, dashboard metric cards, rate scenario assumptions, upload analysis, net-worth page, debt-payoff page, and savings-goals page.
+These come from the local setup flow before the dashboard opens, then stay editable on the Profile page. The values are saved in local storage in this browser and can be cleared by starting setup again.
+
+They feed the health score, dashboard metric cards, rate scenario assumptions, upload analysis, net-worth page, debt-payoff page, savings-goals page, and simulator.
 
 ## Live From The Backend
 
 These update from FastAPI:
 
 - CSV upload analysis.
+- Form-entered transaction analysis.
 - Transaction categorisation.
 - Forecasts and forecast intervals.
 - Personal inflation.
@@ -34,34 +37,36 @@ These update from FastAPI:
 - Recommendations.
 - Bank Rate impact.
 
-When a CSV is uploaded, the dashboard refreshes its main analysis from the uploaded transactions.
+When a CSV is uploaded, the dashboard refreshes its main analysis from the uploaded transactions. When the user enters rows through the form, the frontend converts those rows into the same CSV shape and sends them through the same analysis endpoint.
 
-The header shows whether the dashboard is using the demo baseline or an uploaded CSV. I keep that visible so the page does not feel like unexplained sample numbers.
+The header shows whether the dashboard has no transactions yet, is using uploaded CSV data, or is using form-entered rows. Updating the Profile page refreshes the analysis against the current transaction rows.
 
-## Demo-Seeded
+## Empty Until Transactions
 
-The dashboard still uses demo transactions before the first upload so the page does not open empty. These demo values power:
+The dashboard no longer fills spending, forecasts, inflation, health score, or recommendations with sample transactions before the user provides data.
 
-- First-load spending chart.
-- First-load cost-of-living chart.
-- First-load financial-health score.
-- First-load recommendations.
+Before a CSV upload or form entry:
 
-After upload, those panels switch to the uploaded file where the backend response includes replacement data.
+- Spending shows a prompt to enter transactions or upload a CSV.
+- Forecast, personal inflation, and recommendations stay empty.
+- Setup-only sections such as net worth, debt payoff, savings goals, and rate-impact assumptions still use onboarding inputs.
+- If setup values are also empty, Overview prompts the user to finish financial setup instead of pretending GBP 0 values are meaningful.
 
 ## Dashboard Sections
 
-- Overview: income, spend, disposable cash, health score, data status, pressure points, and first action.
-- Spending: current category spend against the next-month forecast.
+- Overview: income, spend, disposable cash, health score, and a larger pressure-points panel.
+- Spending: current category spend against the next-month forecast, or a transaction-entry prompt when no rows exist.
 - Cost of living: personal inflation against the UK figure and Bank Rate pressure.
 - Net worth: assets, liabilities, and net worth from setup balances.
 - Debt payoff: consumer debt payoff estimate and debt mix.
 - Savings goals: emergency fund progress and the main savings target.
+- Simulator: rent, food, bills, debt-payment, and savings assumptions with a monthly cash-flow impact.
 - Next actions: recommendation list and the rate scenario snapshot.
+- Profile: editable cash-flow, asset, debt, and goal setup values.
 
 ## Not Built Yet
 
 - Authentication.
-- Profile table.
+- Server-side profile table.
 - Persisted uploaded transactions.
 - User-specific dashboard history across devices.

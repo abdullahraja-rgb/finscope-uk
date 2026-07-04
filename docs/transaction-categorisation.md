@@ -2,6 +2,8 @@
 
 I use a rule-based categoriser as the fallback and a supervised model as the upgrade path.
 
+The fallback is deliberately UK merchant-focused. It covers common names such as Tesco, Sainsbury's, Waitrose, TfL, Trainline, Octopus, Virgin Media, Netflix, Spotify, Amazon Prime, Boots, and Specsavers. Positive merchant refunds keep the merchant category with lower confidence, while genuinely unknown spending stays `uncategorised` with low confidence.
+
 The model version uses:
 
 - TF-IDF features from the transaction description.

@@ -86,7 +86,7 @@ See `DATA_DICTIONARY.md` for links, licence notes, and expected usage.
 
 The backend now has a first cost-of-living engine:
 
-- `POST /api/v1/transactions/analyse` powers the upload-to-dashboard flow from a CSV.
+- `POST /api/v1/transactions/analyse` powers the dashboard flow from uploaded CSVs or form-entered transaction rows.
 - `GET /api/v1/datasets/inflation/latest` returns latest ONS CPIH/CPI category rates.
 - `POST /api/v1/categorise` uses a saved ML model when available and falls back to rules.
 - `POST /api/v1/categorise/evaluate` evaluates a labelled transaction batch with F1 and confusion-matrix output.
@@ -96,5 +96,6 @@ The backend now has a first cost-of-living engine:
 - `POST /api/v1/cost-of-living/rate-impact` estimates Bank Rate effects on savings, debt, and repayment mortgages.
 - `POST /api/v1/score/from-transactions` derives a financial-health score and ONS spending benchmarks from transactions.
 - `POST /api/v1/recommendations` turns calculated outputs into traceable next actions.
+- `POST /api/v1/advisor/context` builds the deterministic context pack for the future RAG advisor.
 
-The frontend starts with a short local onboarding flow for cash flow, assets, debts, and savings goals. The dashboard is split into clearer sections for overview, spending, cost of living, net worth, debt payoff, savings goals, and next actions. See `docs/onboarding-flow.md` and `docs/dashboard-data-flow.md`.
+The frontend starts with a short local setup flow for cash flow, assets, debts, and savings goals, then keeps those values editable on the Profile page. The dashboard accepts transaction data through CSV upload or a row-entry form, then splits the analysis into overview, spending, cost of living, net worth, debt payoff, savings goals, simulator, next actions, and profile setup. See `docs/onboarding-flow.md` and `docs/dashboard-data-flow.md`.

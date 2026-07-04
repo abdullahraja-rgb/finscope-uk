@@ -255,6 +255,68 @@ class RecommendationsResponse(BaseModel):
     recommendations: list[Recommendation]
 
 
+class AdvisorProfile(BaseModel):
+    monthly_income: float = Field(default=0, ge=0)
+    rent_or_mortgage: float = Field(default=0, ge=0)
+    monthly_debt_payment: float = Field(default=0, ge=0)
+    liquid_savings: float = Field(default=0, ge=0)
+    investment_balance: float = Field(default=0, ge=0)
+    pension_balance: float = Field(default=0, ge=0)
+    property_value: float = Field(default=0, ge=0)
+    mortgage_balance: float = Field(default=0, ge=0)
+    credit_card_balance: float = Field(default=0, ge=0)
+    loan_balance: float = Field(default=0, ge=0)
+    average_debt_apr: float = Field(default=0, ge=0)
+    emergency_fund_target: float = Field(default=0, ge=0)
+    savings_goal_target: float = Field(default=0, ge=0)
+    monthly_goal_contribution: float = Field(default=0, ge=0)
+
+
+class AdvisorFact(BaseModel):
+    id: str
+    label: str
+    value: float | str | bool | None
+    formatted: str
+    source: str
+    citation: str
+    unit: str | None = None
+
+
+class AdvisorContextSection(BaseModel):
+    id: str
+    title: str
+    facts: list[AdvisorFact] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
+class AdvisorMissingData(BaseModel):
+    key: str
+    label: str
+    reason: str
+    impact: str
+    action: str
+
+
+class AdvisorContextRequest(BaseModel):
+    question: str | None = None
+    profile: AdvisorProfile | None = None
+    transactions: list[TransactionIn] = Field(default_factory=list)
+    forecast: ForecastResponse | None = None
+    personal_inflation: PersonalInflationResponse | None = None
+    health_score: DerivedHealthScoreResponse | None = None
+    rate_impact: RateImpactResponse | None = None
+    recommendations: list[Recommendation] = Field(default_factory=list)
+
+
+class AdvisorContextResponse(BaseModel):
+    context_markdown: str
+    sections: list[AdvisorContextSection]
+    missing_data: list[AdvisorMissingData]
+    allowed_numbers: list[str]
+    source_map: dict[str, str]
+    guardrails: list[str]
+
+
 class TransactionAnalysisResponse(TransactionPreviewResponse):
     transactions: list[CategorisedTransaction]
     forecast: ForecastResponse
