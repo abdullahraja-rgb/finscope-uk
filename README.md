@@ -97,5 +97,6 @@ The backend now has a first cost-of-living engine:
 - `POST /api/v1/score/from-transactions` derives a financial-health score and ONS spending benchmarks from transactions.
 - `POST /api/v1/recommendations` turns calculated outputs into traceable next actions.
 - `POST /api/v1/advisor/context` builds the deterministic context pack for the future RAG advisor.
+- `POST /api/v1/advisor/retrieve` retrieves citation-ready project knowledge chunks for advisor questions.
 
 The frontend starts with a short local setup flow for cash flow, assets, debts, and savings goals, then keeps those values editable on the Profile page. The dashboard accepts transaction data through CSV upload or a row-entry form, then splits the analysis into overview, spending, cost of living, net worth, debt payoff, savings goals, simulator, next actions, and profile setup. See `docs/onboarding-flow.md` and `docs/dashboard-data-flow.md`.

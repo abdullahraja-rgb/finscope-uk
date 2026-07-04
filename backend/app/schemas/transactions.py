@@ -317,6 +317,29 @@ class AdvisorContextResponse(BaseModel):
     guardrails: list[str]
 
 
+class AdvisorRetrieveRequest(BaseModel):
+    question: str = Field(min_length=1)
+    max_chunks: int = Field(default=4, ge=1, le=8)
+    min_score: float = Field(default=0.05, ge=0)
+    sources: list[str] | None = None
+
+
+class AdvisorKnowledgeChunk(BaseModel):
+    id: str
+    title: str
+    source: str
+    heading_path: list[str]
+    text: str
+    score: float
+    tags: list[str] = Field(default_factory=list)
+
+
+class AdvisorRetrieveResponse(BaseModel):
+    query: str
+    chunks: list[AdvisorKnowledgeChunk]
+    notes: list[str] = Field(default_factory=list)
+
+
 class TransactionAnalysisResponse(TransactionPreviewResponse):
     transactions: list[CategorisedTransaction]
     forecast: ForecastResponse
