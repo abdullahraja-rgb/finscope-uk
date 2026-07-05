@@ -1,4 +1,6 @@
 import type {
+  AdvisorAskRequest,
+  AdvisorAskResponse,
   CategorisationEvaluationResponse,
   CategorisationResponse,
   DerivedHealthScoreRequest,
@@ -208,4 +210,20 @@ export async function getRecommendations(request: RecommendationsRequest) {
   }
 
   return response.json() as Promise<RecommendationsResponse>;
+}
+
+export async function askAdvisor(request: AdvisorAskRequest) {
+  const response = await fetch(`${API_BASE_URL}/api/v1/advisor/ask`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    throw new Error("Advisor answer failed");
+  }
+
+  return response.json() as Promise<AdvisorAskResponse>;
 }

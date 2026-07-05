@@ -11,6 +11,7 @@ import {
   Gauge,
   Home,
   LoaderCircle,
+  MessageSquareText,
   Pencil,
   PiggyBank,
   Plus,
@@ -34,17 +35,20 @@ import {
 } from "recharts";
 
 import type {
+  AdvisorAskResponse,
   CategorySpend,
   DerivedHealthScoreResponse,
   ForecastResponse,
   InflationImpact,
   Metric,
   OnboardingProfile,
+  PersonalInflationResponse,
   RateImpactResponse,
   Recommendation,
   TransactionPayload
 } from "@/types/finscope";
-import { calculateRateImpact, uploadTransactions } from "@/lib/api";
+import { askAdvisor, calculateRateImpact, uploadTransactions } from "@/lib/api";
+import { AdvisorPanel } from "@/components/advisor-panel";
 import { OnboardingFlow } from "@/components/onboarding-flow";
 import {
   emptyProfile,
@@ -122,6 +126,7 @@ type DashboardView =
   | "goals"
   | "simulator"
   | "actions"
+  | "advisor"
   | "profile";
 
 const dashboardViews: Array<{
@@ -138,6 +143,7 @@ const dashboardViews: Array<{
   { id: "goals", label: "Savings goals", helper: "Emergency and target progress", icon: PiggyBank },
   { id: "simulator", label: "Simulator", helper: "What-if changes", icon: SlidersHorizontal },
   { id: "actions", label: "Next actions", helper: "Recommendations and scenario", icon: CheckCircle2 },
+  { id: "advisor", label: "Advisor", helper: "Grounded answers", icon: MessageSquareText },
   { id: "profile", label: "Profile", helper: "Setup and targets", icon: Settings }
 ];
 
@@ -361,6 +367,25 @@ function priorityTone(priority: string) {
   return "text-teal";
 }
 
+function advisorProfileFromProfile(profile: OnboardingProfile) {
+  return {
+    monthly_income: profile.monthlyIncome,
+    rent_or_mortgage: profile.rentOrMortgage,
+    monthly_debt_payment: profile.monthlyDebtPayment,
+    liquid_savings: profile.liquidSavings,
+    investment_balance: profile.investmentBalance,
+    pension_balance: profile.pensionBalance,
+    property_value: profile.propertyValue,
+    mortgage_balance: profile.mortgageBalance,
+    credit_card_balance: profile.creditCardBalance,
+    loan_balance: profile.loanBalance,
+    average_debt_apr: profile.averageDebtApr,
+    emergency_fund_target: profile.emergencyFundTarget,
+    savings_goal_target: profile.savingsGoalTarget,
+    monthly_goal_contribution: profile.monthlyGoalContribution
+  };
+}
+
 export function DashboardShell() {
   const [activeProfile, setActiveProfile] = useState<OnboardingProfile | null>(null);
   const [profileDraft, setProfileDraft] = useState<OnboardingProfile>(emptyProfile);
@@ -398,6 +423,11 @@ export function DashboardShell() {
   const [forecastRows, setForecastRows] = useState<CategorySpend[]>([]);
   const [forecastPeriod, setForecastPeriod] = useState("No forecast yet");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [latestForecast, setLatestForecast] = useState<ForecastResponse | null>(null);
+  const [personalInflation, setPersonalInflation] = useState<PersonalInflationResponse | null>(null);
+  const [advisorAnswer, setAdvisorAnswer] = useState<AdvisorAskResponse | null>(null);
+  const [advisorStatus, setAdvisorStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [advisorError, setAdvisorError] = useState("");
 
   useEffect(() => {
     const storedProfile = readStoredProfile();
@@ -468,6 +498,11 @@ export function DashboardShell() {
       setUploadSummary(uploadSummaryFromResult(result));
       setDataMode(source);
       setActiveView(nextView);
+      setLatestForecast(result.forecast);
+      setPersonalInflation(result.personal_inflation);
+      setAdvisorAnswer(null);
+      setAdvisorStatus("idle");
+      setAdvisorError("");
       setTransactionRows(
         result.transactions.map((transaction) => ({
           date: transaction.date,
@@ -531,6 +566,9 @@ export function DashboardShell() {
     setActiveProfile(profile);
     setProfileDraft(profile);
     setProfileSectionFocus(null);
+    setAdvisorAnswer(null);
+    setAdvisorStatus("idle");
+    setAdvisorError("");
 
     if (dataMode === "empty" || transactionRows.length === 0) {
       setHealthScore(emptyHealthScore(profile));
@@ -559,9 +597,14 @@ export function DashboardShell() {
     setTransactionRows([]);
     setForecastRows([]);
     setForecastPeriod("No forecast yet");
+    setLatestForecast(null);
+    setPersonalInflation(null);
     setCostOfLiving(emptyCostOfLiving());
     setHealthScore(emptyHealthScore());
     setRecommendations([]);
+    setAdvisorAnswer(null);
+    setAdvisorStatus("idle");
+    setAdvisorError("");
     setUploadStatus({ state: "idle", message: "" });
   }
 
@@ -850,6 +893,66 @@ export function DashboardShell() {
     setIsTransactionModalOpen(true);
   }
 
+  async function handleAskAdvisor(question: string) {
+    if (!activeProfile) {
+      setAdvisorStatus("error");
+      setAdvisorError("Add your profile setup before asking the advisor.");
+      return;
+    }
+
+    const advisorProfile = advisorProfileFromProfile(activeProfile);
+    setAdvisorStatus("loading");
+    setAdvisorError("");
+
+    try {
+      const response = await askAdvisor({
+        question,
+        max_chunks: 4,
+        profile: advisorProfile,
+        transactions: transactionRows,
+        forecast: latestForecast,
+        personal_inflation: personalInflation,
+        health_score: dataMode === "empty" ? null : healthScore,
+        rate_impact: rateImpact.lines.length > 0 ? rateImpact : null,
+        recommendations
+      });
+
+      setAdvisorAnswer(response);
+      setAdvisorStatus("success");
+    } catch (error) {
+      setAdvisorStatus("error");
+      setAdvisorError(error instanceof Error ? error.message : "Advisor answer failed");
+    }
+  }
+
+  function handleResolveAdvisorMissing(item: AdvisorAskResponse["missing_data"][number]) {
+    if (item.key === "profile") {
+      openProfileEditor();
+      return;
+    }
+
+    if (item.key === "monthly_income") {
+      openProfileEditor("cash-flow");
+      return;
+    }
+
+    if (item.key === "transactions" || item.key === "forecast" || item.key === "personal_inflation" || item.key === "health_score") {
+      setTransactionPreset(null);
+      setTransactionPrompt(null);
+      setIsTransactionModalOpen(true);
+      return;
+    }
+
+    if (item.key === "rate_impact") {
+      openProfileEditor("debts");
+      return;
+    }
+
+    if (item.key.startsWith("category_")) {
+      openTransactionPrompt(item.key.replace("category_", ""));
+    }
+  }
+
   const missingCostOfLivingCategories = ["groceries", "transport", "utilities", "housing"].filter(
     (category) => !hasCategory(category)
   );
@@ -884,9 +987,14 @@ export function DashboardShell() {
           setForecastRows([]);
           setTransactionRows([]);
           setForecastPeriod("No forecast yet");
+          setLatestForecast(null);
+          setPersonalInflation(null);
           setCostOfLiving(emptyCostOfLiving());
           setHealthScore(emptyHealthScore(profile));
           setRecommendations([]);
+          setAdvisorAnswer(null);
+          setAdvisorStatus("idle");
+          setAdvisorError("");
           setActiveProfile(profile);
         }}
       />
@@ -1467,6 +1575,18 @@ export function DashboardShell() {
           ) : null}
         </aside>
         </div>
+      ) : null}
+
+      {activeView === "advisor" ? (
+        <AdvisorPanel
+          answer={advisorAnswer}
+          errorMessage={advisorError}
+          status={advisorStatus}
+          onAsk={(question) => {
+            void handleAskAdvisor(question);
+          }}
+          onResolveMissing={handleResolveAdvisorMissing}
+        />
       ) : null}
 
       {activeView === "profile" ? (

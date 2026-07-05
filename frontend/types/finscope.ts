@@ -253,6 +253,74 @@ export type RecommendationsResponse = {
   recommendations: Recommendation[];
 };
 
+export type AdvisorProfile = {
+  monthly_income: number;
+  rent_or_mortgage: number;
+  monthly_debt_payment: number;
+  liquid_savings: number;
+  investment_balance: number;
+  pension_balance: number;
+  property_value: number;
+  mortgage_balance: number;
+  credit_card_balance: number;
+  loan_balance: number;
+  average_debt_apr: number;
+  emergency_fund_target: number;
+  savings_goal_target: number;
+  monthly_goal_contribution: number;
+};
+
+export type AdvisorMissingData = {
+  key: string;
+  label: string;
+  reason: string;
+  impact: string;
+  action: string;
+};
+
+export type AdvisorKnowledgeChunk = {
+  id: string;
+  title: string;
+  source: string;
+  heading_path: string[];
+  text: string;
+  score: number;
+  tags: string[];
+};
+
+export type AdvisorCitation = {
+  source: string;
+  title: string;
+  chunk_id: string;
+  heading_path: string[];
+};
+
+export type AdvisorAskRequest = {
+  question: string;
+  max_chunks?: number;
+  min_retrieval_score?: number;
+  profile?: AdvisorProfile | null;
+  transactions?: TransactionPayload[];
+  forecast?: ForecastResponse | null;
+  personal_inflation?: PersonalInflationResponse | null;
+  health_score?: DerivedHealthScoreResponse | null;
+  rate_impact?: RateImpactResponse | null;
+  recommendations?: Recommendation[];
+};
+
+export type AdvisorAskResponse = {
+  answer: string;
+  summary_bullets: string[];
+  citations: AdvisorCitation[];
+  used_numbers: string[];
+  missing_data: AdvisorMissingData[];
+  retrieved_chunks: AdvisorKnowledgeChunk[];
+  guardrails: string[];
+  confidence: string;
+  provider: string;
+  notes: string[];
+};
+
 export type TransactionAnalysisResponse = TransactionPreviewResponse & {
   transactions: CategorisedTransaction[];
   forecast: ForecastResponse;
