@@ -16,6 +16,13 @@ class Settings(BaseSettings):
     config_dir: str = Field(default=str(PROJECT_ROOT / "config"), alias="CONFIG_DIR")
     docs_dir: str = Field(default=str(PROJECT_ROOT / "docs"), alias="DOCS_DIR")
     cors_origins_raw: str = Field(default="http://localhost:3000", alias="CORS_ORIGINS")
+    advisor_llm_provider: str = Field(default="deterministic", alias="ADVISOR_LLM_PROVIDER")
+    advisor_llm_api_key: str | None = Field(default=None, alias="ADVISOR_LLM_API_KEY")
+    advisor_llm_model: str = Field(default="gpt-4.1-mini", alias="ADVISOR_LLM_MODEL")
+    advisor_llm_base_url: str = Field(default="https://api.openai.com/v1", alias="ADVISOR_LLM_BASE_URL")
+    advisor_llm_timeout_seconds: float = Field(default=30, alias="ADVISOR_LLM_TIMEOUT_SECONDS")
+    advisor_llm_max_output_tokens: int = Field(default=900, alias="ADVISOR_LLM_MAX_OUTPUT_TOKENS")
+    advisor_llm_temperature: float | None = Field(default=0.2, alias="ADVISOR_LLM_TEMPERATURE")
 
     @property
     def cors_origins(self) -> list[str]:

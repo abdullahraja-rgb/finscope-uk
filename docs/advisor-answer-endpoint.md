@@ -2,7 +2,7 @@
 
 I added the answer endpoint after the context pack and retrieval layer were working.
 
-This endpoint gives the frontend one place to ask a question and get back a structured advisor response. For now it uses a deterministic fallback answer, not a live LLM call. That is intentional: the API contract, grounding rules, citations, and tests should be stable before I add an external provider.
+This endpoint gives the frontend one place to ask a question and get back a structured advisor response. It now supports an optional live LLM provider, but the deterministic fallback remains the default for local development and tests.
 
 ## Endpoint
 
@@ -39,9 +39,9 @@ The response includes:
 - `provider`: the answer client used.
 - `notes`: implementation notes, including whether the deterministic fallback was used.
 
-## Current Provider
+## Providers
 
-The current provider is:
+The default provider is:
 
 ```text
 deterministic_fallback
@@ -49,17 +49,34 @@ deterministic_fallback
 
 It does not call an LLM. It builds a plain-English response from the supplied context facts and retrieved chunks. This lets me test grounding without network calls, API keys, or provider-specific behaviour.
 
+The optional live provider is:
+
+```text
+openai_responses
+```
+
+I enable it with environment variables:
+
+```text
+ADVISOR_LLM_PROVIDER=openai
+ADVISOR_LLM_API_KEY=...
+ADVISOR_LLM_MODEL=gpt-4.1-mini
+```
+
+If the provider is not configured, or if its response fails validation, the endpoint falls back to `deterministic_fallback`.
+
 ## Provider Boundary
 
 The provider boundary lives in:
 
 ```text
 backend/app/services/advisor_answer.py
+backend/app/services/advisor_llm.py
 ```
 
-The key interface is `AdvisorAnswerClient`. A future OpenAI, Anthropic, or local model client can implement the same method and return the same `AdvisorAskResponse` shape.
+The key interface is `AdvisorAnswerClient`. The OpenAI Responses client implements that interface and returns the same `AdvisorAskResponse` shape.
 
-That means the frontend does not need to change when I swap the fallback for a real LLM.
+That means the frontend does not need to change when I switch between fallback and live answers.
 
 ## Guarding Against Hallucinated Numbers
 
@@ -74,6 +91,13 @@ The context pack supplies:
 
 The provider should only use those values. If something is missing, the answer should say it is missing.
 
+For the live provider, I add two backend checks after the model returns:
+
+- `used_numbers` must be copied exactly from the context pack's allowed-number list.
+- the answer text and bullets cannot introduce numeric tokens that are not present in the allowed-number list.
+
+If either check fails, I discard the live answer and return the deterministic fallback.
+
 ## Tests
 
 The tests check that:
@@ -83,7 +107,5 @@ The tests check that:
 - used numbers come from the context pack
 - missing data is reported
 - the FastAPI endpoint returns the same structured shape
-
-## Next Step
-
-The next step is adding a real LLM client behind the `AdvisorAnswerClient` boundary. I would keep the deterministic fallback as the default for tests and local development, then enable the live client only when an API key is configured.
+- the live provider accepts a valid structured response
+- the live provider falls back when it invents an unsupported number

@@ -4,7 +4,10 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.schemas.transactions import AdvisorAskRequest
-from app.services.advisor_answer import answer_advisor_question
+from app.services.advisor_answer import answer_advisor_question, build_advisor_prompt
+from app.services.advisor_context import build_advisor_context
+from app.services.advisor_llm import OpenAIResponsesAdvisorClient, OpenAIResponsesConfig
+from app.services.advisor_retrieval import retrieve_advisor_chunks
 from tests.test_advisor_context import full_context_request
 
 
@@ -66,3 +69,77 @@ def test_advisor_ask_endpoint_returns_structured_answer() -> None:
     assert payload["citations"]
     assert payload["used_numbers"]
     assert payload["guardrails"]
+
+
+def openai_config() -> OpenAIResponsesConfig:
+    return OpenAIResponsesConfig(
+        api_key="test-key",
+        model="test-model",
+        base_url="https://example.test/v1",
+        timeout_seconds=5,
+        max_output_tokens=500,
+        temperature=0.2,
+    )
+
+
+def llm_inputs():
+    request = ask_request("What should I fix first?")
+    context = build_advisor_context(request)
+    chunks = retrieve_advisor_chunks(
+        question=request.question,
+        docs_dir=str(DOCS_DIR),
+        max_chunks=request.max_chunks,
+        min_score=request.min_retrieval_score,
+    ).chunks
+    prompt = build_advisor_prompt(request, context, chunks)
+    return request, context, chunks, prompt
+
+
+def test_openai_responses_client_returns_validated_answer() -> None:
+    request, context, chunks, prompt = llm_inputs()
+    first_chunk_id = chunks[0].id
+
+    def fake_post_json(url, headers, json_body, timeout_seconds):
+        assert url == "https://example.test/v1/responses"
+        assert headers["Authorization"] == "Bearer test-key"
+        assert json_body["text"]["format"]["type"] == "json_schema"
+        assert timeout_seconds == 5
+        return {
+            "output_text": (
+                '{"answer":"Monthly spend is GBP 1,420, so I would start with the weakest score driver.",'
+                '"summary_bullets":["Monthly spend is GBP 1,420 [health_score]."],'
+                f'"citation_chunk_ids":["{first_chunk_id}"],'
+                '"used_numbers":["Monthly spend: GBP 1,420 [health_score]"],'
+                '"confidence":"high"}'
+            )
+        }
+
+    client = OpenAIResponsesAdvisorClient(openai_config(), post_json=fake_post_json)
+    response = client.answer(request, context, chunks, prompt)
+
+    assert response.provider == "openai_responses"
+    assert response.answer.startswith("Monthly spend is GBP 1,420")
+    assert response.used_numbers == ["Monthly spend: GBP 1,420 [health_score]"]
+    assert response.citations[0].chunk_id == first_chunk_id
+    assert response.missing_data == context.missing_data
+
+
+def test_openai_responses_client_falls_back_when_answer_invents_number() -> None:
+    request, context, chunks, prompt = llm_inputs()
+
+    def fake_post_json(url, headers, json_body, timeout_seconds):
+        return {
+            "output_text": (
+                '{"answer":"You should save GBP 999 next month.",'
+                '"summary_bullets":["Set aside GBP 999."],'
+                f'"citation_chunk_ids":["{chunks[0].id}"],'
+                '"used_numbers":[],'
+                '"confidence":"high"}'
+            )
+        }
+
+    client = OpenAIResponsesAdvisorClient(openai_config(), post_json=fake_post_json)
+    response = client.answer(request, context, chunks, prompt)
+
+    assert response.provider == "deterministic_fallback"
+    assert "unsupported numbers" in response.notes[0]
