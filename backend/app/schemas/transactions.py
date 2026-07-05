@@ -340,6 +340,32 @@ class AdvisorRetrieveResponse(BaseModel):
     notes: list[str] = Field(default_factory=list)
 
 
+class AdvisorAskRequest(AdvisorContextRequest):
+    question: str = Field(min_length=1)
+    max_chunks: int = Field(default=4, ge=1, le=8)
+    min_retrieval_score: float = Field(default=0.05, ge=0)
+
+
+class AdvisorCitation(BaseModel):
+    source: str
+    title: str
+    chunk_id: str
+    heading_path: list[str]
+
+
+class AdvisorAskResponse(BaseModel):
+    answer: str
+    summary_bullets: list[str]
+    citations: list[AdvisorCitation]
+    used_numbers: list[str]
+    missing_data: list[AdvisorMissingData]
+    retrieved_chunks: list[AdvisorKnowledgeChunk]
+    guardrails: list[str]
+    confidence: str
+    provider: str
+    notes: list[str] = Field(default_factory=list)
+
+
 class TransactionAnalysisResponse(TransactionPreviewResponse):
     transactions: list[CategorisedTransaction]
     forecast: ForecastResponse
