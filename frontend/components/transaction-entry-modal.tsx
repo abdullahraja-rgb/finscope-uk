@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Plus, Trash2, X } from "lucide-react";
+import { Pencil, Plus, Trash2, X } from "lucide-react";
 
 import type { TransactionPayload } from "@/types/finscope";
 
@@ -75,11 +75,13 @@ export function TransactionEntryModal({
   onAnalyse
 }: TransactionEntryModalProps) {
   const [draft, setDraft] = useState(blankDraft());
+  const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
   const amount = Number(draft.amount);
   const canAdd = draft.date.trim() !== "" && draft.description.trim() !== "" && Number.isFinite(amount) && amount > 0;
 
   useEffect(() => {
     if (!open) return;
+    setEditingRowIndex(null);
     setDraft((current) => ({
       ...current,
       ...initialDraft,
@@ -107,17 +109,21 @@ export function TransactionEntryModal({
     if (!canAdd) return;
 
     const signedAmount = draft.transaction_type === "income" ? Math.abs(amount) : -Math.abs(amount);
-    onRowsChange([
-      ...rows,
-      {
-        date: draft.date,
-        description: draft.description.trim(),
-        amount: signedAmount,
-        category: draft.category,
-        transaction_type: draft.transaction_type,
-        account: draft.account
-      }
-    ]);
+    const nextRow: TransactionPayload = {
+      date: draft.date,
+      description: draft.description.trim(),
+      amount: signedAmount,
+      category: draft.category,
+      transaction_type: draft.transaction_type,
+      account: draft.account
+    };
+
+    if (editingRowIndex === null) {
+      onRowsChange([...rows, nextRow]);
+    } else {
+      onRowsChange(rows.map((row, index) => (index === editingRowIndex ? nextRow : row)));
+      setEditingRowIndex(null);
+    }
     setDraft({
       ...blankDraft(),
       date: draft.date,
@@ -129,6 +135,23 @@ export function TransactionEntryModal({
 
   function removeRow(index: number) {
     onRowsChange(rows.filter((_, rowIndex) => rowIndex !== index));
+    if (editingRowIndex === index) {
+      setEditingRowIndex(null);
+      setDraft(blankDraft());
+    }
+  }
+
+  function editRow(index: number) {
+    const row = rows[index];
+    setEditingRowIndex(index);
+    setDraft({
+      date: row.date,
+      description: row.description,
+      amount: Math.abs(row.amount).toFixed(2),
+      category: row.category ?? "groceries",
+      transaction_type: row.transaction_type ?? (row.amount >= 0 ? "income" : "expense"),
+      account: row.account ?? "current"
+    });
   }
 
   return (
@@ -238,7 +261,7 @@ export function TransactionEntryModal({
             type="submit"
           >
             <Plus size={18} aria-hidden="true" />
-            Add row
+            {editingRowIndex === null ? "Add row" : "Save changes"}
           </button>
         </form>
 
@@ -257,6 +280,7 @@ export function TransactionEntryModal({
                     <th className="px-4 py-3">Type</th>
                     <th className="px-4 py-3">Category</th>
                     <th className="px-4 py-3">Amount</th>
+                    <th className="px-4 py-3">Edit</th>
                     <th className="px-4 py-3">Remove</th>
                   </tr>
                 </thead>
@@ -268,6 +292,16 @@ export function TransactionEntryModal({
                       <td className="px-4 py-3 text-slate-600">{displayCategory(row.transaction_type)}</td>
                       <td className="px-4 py-3 text-slate-600">{displayCategory(row.category)}</td>
                       <td className="px-4 py-3 font-semibold text-ink">GBP {Math.abs(row.amount).toFixed(2)}</td>
+                      <td className="px-4 py-3">
+                        <button
+                          className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-cobalt"
+                          type="button"
+                          onClick={() => editRow(index)}
+                        >
+                          <Pencil size={16} aria-hidden="true" />
+                          <span className="sr-only">Edit row</span>
+                        </button>
+                      </td>
                       <td className="px-4 py-3">
                         <button
                           className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-rose"

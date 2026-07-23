@@ -50,6 +50,7 @@ import type {
 import { askAdvisor, calculateRateImpact, uploadTransactions } from "@/lib/api";
 import { AdvisorPanel } from "@/components/advisor-panel";
 import { OnboardingFlow } from "@/components/onboarding-flow";
+import { UploadDataModal } from "@/components/upload-data-modal";
 import {
   emptyProfile,
   normaliseProfile,
@@ -142,9 +143,7 @@ const dashboardViews: Array<{
   { id: "debt", label: "Debt payoff", helper: "Balances and payoff time", icon: CircleAlert },
   { id: "goals", label: "Savings goals", helper: "Emergency and target progress", icon: PiggyBank },
   { id: "simulator", label: "Simulator", helper: "What-if changes", icon: SlidersHorizontal },
-  { id: "actions", label: "Next actions", helper: "Recommendations and scenario", icon: CheckCircle2 },
-  { id: "advisor", label: "Advisor", helper: "Grounded answers", icon: MessageSquareText },
-  { id: "profile", label: "Profile", helper: "Setup and targets", icon: Settings }
+  { id: "advisor", label: "Advisor", helper: "Grounded answers", icon: MessageSquareText }
 ];
 
 const profileStorageKey = "finscope:financial-profile:v1";
@@ -361,6 +360,31 @@ function transactionRowsToFile(rows: TransactionPayload[]) {
   return new File([transactionRowsToCsv(rows)], "form_transactions.csv", { type: "text/csv" });
 }
 
+function demoTransactionRows(): TransactionPayload[] {
+  const monthFactors = [0.98, 1.01, 1.04, 0.97, 1.03, 1.06, 1.02, 0.99, 1.05, 1, 1.08, 1.12];
+  const months = ["2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"];
+
+  return months.flatMap((month, index) => {
+    const factor = monthFactors[index];
+    const amount = (value: number) => Number((value * factor).toFixed(2));
+
+    return [
+      { date: `${month}-01`, description: "Salary Payroll", amount: 3420, category: "income", transaction_type: "income", account: "current" },
+      { date: `${month}-02`, description: "Rent Payment", amount: -1180, category: "housing", transaction_type: "expense", account: "current" },
+      { date: `${month}-03`, description: "Octopus Energy", amount: -amount(118), category: "utilities", transaction_type: "expense", account: "current" },
+      { date: `${month}-04`, description: "Tesco Superstore", amount: -amount(286), category: "groceries", transaction_type: "expense", account: "current" },
+      { date: `${month}-06`, description: "Aldi Stores", amount: -amount(132), category: "groceries", transaction_type: "expense", account: "current" },
+      { date: `${month}-08`, description: "TfL Travel Charge", amount: -amount(164), category: "transport", transaction_type: "expense", account: "current" },
+      { date: `${month}-10`, description: "Netflix", amount: -10.99, category: "subscriptions", transaction_type: "expense", account: "current" },
+      { date: `${month}-11`, description: "Spotify", amount: -11.99, category: "subscriptions", transaction_type: "expense", account: "current" },
+      { date: `${month}-14`, description: "Pret A Manger", amount: -amount(62), category: "eating_out", transaction_type: "expense", account: "current" },
+      { date: `${month}-18`, description: "Amazon Marketplace", amount: -amount(92), category: "shopping", transaction_type: "expense", account: "credit_card" },
+      { date: `${month}-21`, description: "Boots Pharmacy", amount: -amount(24), category: "health", transaction_type: "expense", account: "current" },
+      { date: `${month}-25`, description: "Savings Transfer", amount: -250, category: "transfer", transaction_type: "transfer", account: "savings" }
+    ];
+  });
+}
+
 function priorityTone(priority: string) {
   if (priority === "high") return "text-rose";
   if (priority === "medium") return "text-amber";
@@ -393,7 +417,7 @@ export function DashboardShell() {
   const [hasCheckedStoredProfile, setHasCheckedStoredProfile] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [activeView, setActiveView] = useState<DashboardView>("overview");
-  const [dataMode, setDataMode] = useState<"empty" | "uploaded" | "manual">("empty");
+  const [dataMode, setDataMode] = useState<"empty" | "uploaded" | "manual" | "demo">("empty");
   const [scenario, setScenario] = useState({
     rentChangePct: 8,
     foodChangePct: 10,
@@ -404,6 +428,7 @@ export function DashboardShell() {
   const [manualRows, setManualRows] = useState<TransactionPayload[]>([]);
   const [transactionRows, setTransactionRows] = useState<TransactionPayload[]>([]);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [transactionPreset, setTransactionPreset] = useState<TransactionDraftPreset | null>(null);
   const [transactionPrompt, setTransactionPrompt] = useState<{
     intro: string;
@@ -481,12 +506,12 @@ export function DashboardShell() {
 
   async function analyseTransactionFile(
     file: File,
-    source: "uploaded" | "manual",
+    source: "uploaded" | "manual" | "demo",
     profileOverride?: OnboardingProfile,
     nextView: DashboardView = "overview"
   ) {
     const profileForAnalysis = profileOverride ?? activeProfile ?? undefined;
-    const sourceLabel = source === "uploaded" ? "CSV" : "form rows";
+    const sourceLabel = source === "uploaded" ? "CSV" : source === "demo" ? "demo CSV" : "form rows";
     setUploadStatus({ state: "loading", message: `Analysing ${sourceLabel}` });
     setUploadSummary(null);
     try {
@@ -539,6 +564,7 @@ export function DashboardShell() {
 
       setHealthScore(result.health_score ?? emptyHealthScore(profileForAnalysis));
       setRecommendations(result.recommendations);
+      setIsUploadModalOpen(false);
     } catch (error) {
       setUploadSummary(null);
       setUploadStatus({
@@ -551,6 +577,23 @@ export function DashboardShell() {
   async function handleUpload(file: File | undefined) {
     if (!file) return;
     await analyseTransactionFile(file, "uploaded");
+  }
+
+  async function handleUseDemoData() {
+    await analyseTransactionFile(
+      new File([transactionRowsToCsv(demoTransactionRows())], "finscope-demo-transactions.csv", { type: "text/csv" }),
+      "demo"
+    );
+  }
+
+  function downloadDemoCsv() {
+    const blob = new Blob([transactionRowsToCsv(demoTransactionRows())], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "finscope-demo-transactions.csv";
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   async function handleManualAnalyse(rows: TransactionPayload[]) {
@@ -645,15 +688,23 @@ export function DashboardShell() {
   ];
   const housingBenchmark = healthScore.benchmarks.find((benchmark) => benchmark.coicop_code === "04");
   const dataModeLabel =
-    dataMode === "uploaded" ? "Uploaded CSV" : dataMode === "manual" ? "Form entries" : "No transactions";
+    dataMode === "uploaded"
+      ? "Uploaded CSV"
+      : dataMode === "manual"
+        ? "Form entries"
+        : dataMode === "demo"
+          ? "Demo data"
+          : "No transactions";
   const dataModeDetail =
     !hasFinancialSetup
       ? "Start with your own setup values, then add transactions to unlock spend, forecast, inflation, and action insights."
       : dataMode === "uploaded"
-      ? "Spend, forecast, inflation, health score, and actions are using the latest CSV analysis."
-      : dataMode === "manual"
-        ? "Spend, forecast, inflation, health score, and actions are using the transaction rows entered in the form."
-        : "Add transactions with the form or upload a CSV to unlock spending, forecast, inflation, and action insights.";
+        ? "Spend, forecast, inflation, health score, and actions are using the latest CSV analysis."
+        : dataMode === "demo"
+          ? "You are viewing the FinScope demo statement. Upload your own CSV or edit the rows whenever you are ready."
+          : dataMode === "manual"
+            ? "Spend, forecast, inflation, health score, and actions are using the transaction rows entered in the form."
+            : "Add transactions with the form or upload a CSV to unlock spending, forecast, inflation, and action insights.";
   const totalAssets =
     (activeProfile?.liquidSavings ?? 0) +
     (activeProfile?.investmentBalance ?? 0) +
@@ -871,6 +922,15 @@ export function DashboardShell() {
     return transactionRows.some((transaction) => transaction.category === category);
   }
 
+  function openTransactionEditor() {
+    if (transactionRows.length > 0) {
+      setManualRows(transactionRows);
+    }
+    setTransactionPreset(null);
+    setTransactionPrompt(null);
+    setIsTransactionModalOpen(true);
+  }
+
   function openTransactionPrompt(category: string) {
     const prompt = categoryPrompts[category] ?? {
       amount: "25.00",
@@ -890,6 +950,9 @@ export function DashboardShell() {
       intro: prompt.intro,
       title: prompt.title
     });
+    if (transactionRows.length > 0) {
+      setManualRows(transactionRows);
+    }
     setIsTransactionModalOpen(true);
   }
 
@@ -1017,28 +1080,19 @@ export function DashboardShell() {
               <button
                 className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white shadow-soft transition hover:bg-slate-800"
                 type="button"
-                onClick={() => {
-                  setTransactionPreset(null);
-                  setTransactionPrompt(null);
-                  setIsTransactionModalOpen(true);
-                }}
+                onClick={openTransactionEditor}
               >
                 <Plus size={18} aria-hidden="true" />
                 Add transaction
               </button>
-              <label className="focus-ring inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:border-cobalt">
+              <button
+                className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:border-cobalt"
+                type="button"
+                onClick={() => setIsUploadModalOpen(true)}
+              >
                 <Upload size={18} aria-hidden="true" />
-                <span>Upload CSV</span>
-                <input
-                  className="sr-only"
-                  type="file"
-                  accept=".csv"
-                  onChange={(event) => {
-                    void handleUpload(event.target.files?.[0]);
-                    event.currentTarget.value = "";
-                  }}
-                />
-              </label>
+                Upload CSV
+              </button>
               <button
                 className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-600"
                 type="button"
@@ -1055,6 +1109,8 @@ export function DashboardShell() {
                     ? "bg-emerald-50 text-teal"
                     : dataMode === "manual"
                       ? "bg-amber/10 text-amber"
+                      : dataMode === "demo"
+                        ? "bg-blue-50 text-cobalt"
                       : "bg-blue-50 text-cobalt"
                 }`}
               >
@@ -1080,6 +1136,23 @@ export function DashboardShell() {
           setTransactionPrompt(null);
         }}
         onRowsChange={setManualRows}
+      />
+
+      <UploadDataModal
+        isAnalysing={isAnalysingTransactions}
+        open={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onDownloadDemo={downloadDemoCsv}
+        onFileSelected={(file) => {
+          void handleUpload(file);
+        }}
+        onOpenEditor={() => {
+          setIsUploadModalOpen(false);
+          openTransactionEditor();
+        }}
+        onUseDemo={() => {
+          void handleUseDemoData();
+        }}
       />
 
       {uploadStatus.state !== "idle" ? (
@@ -1282,28 +1355,19 @@ export function DashboardShell() {
                   <button
                     className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white"
                     type="button"
-                    onClick={() => {
-                      setTransactionPreset(null);
-                      setTransactionPrompt(null);
-                      setIsTransactionModalOpen(true);
-                    }}
+                    onClick={openTransactionEditor}
                   >
                     <Plus size={18} aria-hidden="true" />
                     Enter transactions
                   </button>
-                  <label className="focus-ring inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-600">
+                  <button
+                    className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 px-4 text-sm font-semibold text-slate-600"
+                    type="button"
+                    onClick={() => setIsUploadModalOpen(true)}
+                  >
                     <Upload size={18} aria-hidden="true" />
                     Upload CSV
-                    <input
-                      className="sr-only"
-                      type="file"
-                      accept=".csv"
-                      onChange={(event) => {
-                        void handleUpload(event.target.files?.[0]);
-                        event.currentTarget.value = "";
-                      }}
-                    />
-                  </label>
+                  </button>
                 </div>
               </div>
             </section>
