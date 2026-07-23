@@ -82,7 +82,7 @@ def transactions_frame(transactions: list[TransactionIn]) -> pd.DataFrame:
     rows = [transaction.model_dump() for transaction in transactions]
     frame = pd.DataFrame(rows)
     if frame.empty:
-        return pd.DataFrame(columns=["date", "amount", "category", "month"])
+        return pd.DataFrame(columns=["date", "amount", "category", "transaction_type", "month"])
 
     frame["date"] = pd.to_datetime(frame["date"], errors="coerce")
     frame["amount"] = pd.to_numeric(frame["amount"], errors="coerce")
@@ -147,7 +147,8 @@ def derive_health_score(
     notes: list[str] = []
 
     income_mask = frame["amount"] > 0
-    expense_mask = frame["amount"] < 0
+    transfer_mask = frame["transaction_type"].fillna("").astype(str).str.lower().eq("transfer")
+    expense_mask = (frame["amount"] < 0) & ~transfer_mask
     monthly_income = (
         request.monthly_income
         if request.monthly_income is not None

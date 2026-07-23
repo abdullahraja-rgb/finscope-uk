@@ -122,7 +122,7 @@ def has_profile_values(profile: AdvisorProfile | None) -> bool:
 def spend_by_category(transactions: list[TransactionIn]) -> dict[str, float]:
     totals: dict[str, float] = {}
     for transaction in transactions:
-        if transaction.amount >= 0:
+        if transaction.amount >= 0 or transaction.transaction_type == "transfer":
             continue
         category = transaction.category or "uncategorised"
         totals[category] = totals.get(category, 0.0) + abs(float(transaction.amount))
@@ -404,7 +404,11 @@ def missing_data(request: AdvisorContextRequest) -> list[AdvisorMissingData]:
             )
         )
     else:
-        categories = {transaction.category for transaction in request.transactions if transaction.amount < 0}
+        categories = {
+            transaction.category
+            for transaction in request.transactions
+            if transaction.amount < 0 and transaction.transaction_type != "transfer"
+        }
         for category in ["groceries", "transport", "utilities", "housing", "subscriptions"]:
             if category not in categories:
                 missing.append(

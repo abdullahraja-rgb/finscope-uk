@@ -25,7 +25,7 @@ CANDIDATE_MODELS = [MOVING_AVERAGE_MODEL, TREND_MODEL, SEASONAL_MODEL]
 def monthly_spend_frame(transactions: list[TransactionIn]) -> pd.DataFrame:
     rows = []
     for transaction in transactions:
-        if transaction.amount >= 0:
+        if transaction.amount >= 0 or transaction.transaction_type == "transfer":
             continue
         rows.append(
             {

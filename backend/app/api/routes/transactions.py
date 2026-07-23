@@ -73,7 +73,8 @@ def transactions_from_frame(frame: pd.DataFrame) -> list[TransactionIn]:
 
 def preview_response(frame: pd.DataFrame, columns: list[str]) -> TransactionPreviewResponse:
     total_income = float(frame.loc[frame["amount"] > 0, "amount"].sum())
-    total_spend = float(-frame.loc[frame["amount"] < 0, "amount"].sum())
+    transfers = frame["transaction_type"].fillna("").astype(str).str.lower().eq("transfer")
+    total_spend = float(-frame.loc[(frame["amount"] < 0) & ~transfers, "amount"].sum())
     preview = frame.head(10).copy()
     preview["date"] = preview["date"].astype(str)
 

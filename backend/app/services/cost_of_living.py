@@ -25,11 +25,15 @@ def load_category_mapping(config_dir: str | Path) -> dict[str, str | None]:
     return {name: details.get("ons_coicop") for name, details in categories.items()}
 
 
-def coicop_code_from_mapping(value: str | None) -> str | None:
-    if not value:
+def coicop_code_from_mapping(value: object) -> str | None:
+    if value is None or pd.isna(value):
         return None
 
-    match = re.match(r"^(?P<code>\d{2}(?:\.\d+)*)\b", value.strip())
+    text = str(value).strip()
+    if not text:
+        return None
+
+    match = re.match(r"^(?P<code>\d{2}(?:\.\d+)*)\b", text)
     return match.group("code") if match else None
 
 
@@ -37,7 +41,7 @@ def spend_by_category(transactions: list[TransactionIn]) -> pd.DataFrame:
     rows = [
         {"category": transaction.category or "uncategorised", "spend": abs(transaction.amount)}
         for transaction in transactions
-        if transaction.amount < 0
+        if transaction.amount < 0 and transaction.transaction_type != "transfer"
     ]
     if not rows:
         return pd.DataFrame(columns=["category", "spend"])

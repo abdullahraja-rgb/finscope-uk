@@ -63,7 +63,7 @@ def benchmark_fixture() -> pd.DataFrame:
 def upload_csv() -> bytes:
     return "\n".join(
         [
-            "date,description,amount",
+            "date,description,amount,category,transaction_type,account",
             "2026-01-25,Salary Payroll,3200",
             "2026-01-01,Rent Payment,-1000",
             "2026-01-03,Tesco Superstore,-120",
@@ -79,6 +79,7 @@ def upload_csv() -> bytes:
             "2026-05-25,Salary Payroll,3200",
             "2026-05-01,Rent Payment,-1000",
             "2026-05-03,Tesco Superstore,-160",
+            "2026-05-20,Savings Transfer,-250,transfer,transfer,savings",
         ]
     ).encode()
 
@@ -123,13 +124,18 @@ def test_transactions_analyse_runs_dashboard_services(monkeypatch) -> None:
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["rows"] == 15
+    assert payload["rows"] == 16
+    assert payload["total_spend"] == 5700
     assert payload["transactions"][1]["category"] == "housing"
     assert payload["transactions"][2]["category"] == "groceries"
     assert payload["forecast"]["forecasts"]
+    assert all(item["category"] != "transfer" for item in payload["forecast"]["forecasts"])
     assert payload["personal_inflation"]["personal_inflation_pct"] > 0
+    assert all(item["app_category"] != "transfer" for item in payload["personal_inflation"]["categories"])
     assert payload["health_score"]["monthly_income"] == 4000
+    assert payload["health_score"]["monthly_spend"] == 1140
     assert payload["health_score"]["rent_to_income"] == 0.225
+    assert not any("Financial health score skipped" in note for note in payload["notes"])
     assert payload["recommendations"]
 
 
