@@ -171,9 +171,9 @@ def test_build_advisor_context_calculates_core_facts() -> None:
     assert fact_by_id(response, "forecast_expected_total").formatted == "GBP 1,260"
     assert fact_by_id(response, "largest_inflation_contributor").formatted == "housing: 3.38 percentage points"
     assert fact_by_id(response, "net_worth").formatted == "GBP 15,000"
-    assert "Net worth: GBP 15,000 [profile]" in response.allowed_numbers
+    assert "Net worth: GBP 15,000" in response.allowed_numbers
     assert "Use only the facts and numbers in this context pack." in response.guardrails
-    assert "Disposable income: GBP 1,780 [health_score]" in response.context_markdown
+    assert "Disposable income: GBP 1,780 (from financial health calculation)" in response.context_markdown
 
 
 def test_build_advisor_context_flags_missing_inputs() -> None:

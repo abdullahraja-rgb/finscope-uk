@@ -49,6 +49,7 @@ def build_advisor_prompt(
             "You are the FinScope UK advisor.",
             "Explain the user's dashboard using only the supplied context pack and retrieved project knowledge.",
             "Do not invent numbers. Do not give regulated financial advice.",
+            "Use plain financial language. Never expose internal field names, snake_case identifiers, API paths, or implementation details.",
             "Return structured output with answer, bullets, citations, used numbers, missing data, and confidence.",
         ]
     )
@@ -82,7 +83,7 @@ def section_by_id(context: AdvisorContextResponse, section_id: str) -> AdvisorCo
 def fact_sentence(fact: AdvisorFact | None) -> str | None:
     if fact is None:
         return None
-    return f"{fact.label} is {fact.formatted} [{fact.source}]."
+    return f"{fact.label} is {fact.formatted}."
 
 
 def citation_from_chunk(chunk: AdvisorKnowledgeChunk) -> AdvisorCitation:

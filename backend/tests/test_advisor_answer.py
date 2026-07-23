@@ -27,7 +27,7 @@ def test_answer_advisor_question_returns_grounded_response() -> None:
     assert response.summary_bullets
     assert response.citations
     assert response.retrieved_chunks
-    assert any("Monthly spend: GBP 1,420 [health_score]" == item for item in response.used_numbers)
+    assert any("Monthly spend: GBP 1,420" == item for item in response.used_numbers)
     assert "GBP 1,780" in response.answer
     assert "supplied FinScope facts" in response.answer
     assert all(citation.source.endswith(".md") for citation in response.citations)
@@ -107,9 +107,9 @@ def test_openai_responses_client_returns_validated_answer() -> None:
         return {
             "output_text": (
                 '{"answer":"Monthly spend is GBP 1,420, so I would start with the weakest score driver.",'
-                '"summary_bullets":["Monthly spend is GBP 1,420 [health_score]."],'
+                '"summary_bullets":["Monthly spend is GBP 1,420."],'
                 f'"citation_chunk_ids":["{first_chunk_id}"],'
-                '"used_numbers":["Monthly spend: GBP 1,420 [health_score]"],'
+                '"used_numbers":["Monthly spend: GBP 1,420"],'
                 '"confidence":"high"}'
             )
         }
@@ -119,7 +119,7 @@ def test_openai_responses_client_returns_validated_answer() -> None:
 
     assert response.provider == "openai_responses"
     assert response.answer.startswith("Monthly spend is GBP 1,420")
-    assert response.used_numbers == ["Monthly spend: GBP 1,420 [health_score]"]
+    assert response.used_numbers == ["Monthly spend: GBP 1,420"]
     assert response.citations[0].chunk_id == first_chunk_id
     assert response.missing_data == context.missing_data
 

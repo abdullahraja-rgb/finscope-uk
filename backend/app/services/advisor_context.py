@@ -34,6 +34,16 @@ SOURCE_MAP = {
     "recommendations": "Deterministic recommendation rules.",
 }
 
+SOURCE_LABELS = {
+    "profile": "financial setup",
+    "transactions": "transaction analysis",
+    "health_score": "financial health calculation",
+    "forecast": "spending forecast",
+    "inflation": "personal inflation calculation",
+    "rate_impact": "Bank Rate scenario",
+    "recommendations": "dashboard recommendations",
+}
+
 
 def format_gbp(value: float | None) -> str:
     if value is None:
@@ -454,7 +464,7 @@ def allowed_numbers(sections: list[AdvisorContextSection]) -> list[str]:
     for item in sections:
         for item_fact in item.facts:
             if isinstance(item_fact.value, (int, float)):
-                numbers.append(f"{item_fact.label}: {item_fact.formatted} [{item_fact.source}]")
+                numbers.append(f"{item_fact.label}: {item_fact.formatted}")
     return numbers
 
 
@@ -470,7 +480,10 @@ def context_markdown(
     for item in sections:
         lines.append(f"## {item.title}")
         if item.facts:
-            lines.extend(f"- {item_fact.label}: {item_fact.formatted} [{item_fact.source}]" for item_fact in item.facts)
+            lines.extend(
+                f"- {item_fact.label}: {item_fact.formatted} (from {SOURCE_LABELS.get(item_fact.source, 'the dashboard')})"
+                for item_fact in item.facts
+            )
         else:
             lines.append("- No facts supplied.")
         for note in item.notes:

@@ -164,6 +164,7 @@ class OpenAIResponsesAdvisorClient:
                 "Return only JSON that matches the supplied schema.",
                 "Use citation_chunk_ids from the retrieved chunk ids only.",
                 "Copy used_numbers exactly from the allowed numbers list.",
+                "Write for a dashboard user: never use snake_case, internal field names, or API terminology.",
                 "Do not introduce any numeric value that is not in the allowed numbers list.",
             ]
         )

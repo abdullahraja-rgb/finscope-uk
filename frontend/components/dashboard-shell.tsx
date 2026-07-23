@@ -148,6 +148,23 @@ const dashboardViews: Array<{
 
 const profileStorageKey = "finscope:financial-profile:v1";
 
+const demoProfile: OnboardingProfile = {
+  monthlyIncome: 3420,
+  liquidSavings: 7400,
+  monthlyDebtPayment: 210,
+  rentOrMortgage: 1180,
+  investmentBalance: 3500,
+  pensionBalance: 24800,
+  propertyValue: 0,
+  mortgageBalance: 0,
+  creditCardBalance: 900,
+  loanBalance: 2300,
+  averageDebtApr: 18.9,
+  emergencyFundTarget: 6000,
+  savingsGoalTarget: 10000,
+  monthlyGoalContribution: 300
+};
+
 function formatGBP(value: number) {
   return `GBP ${Math.round(value).toLocaleString()}`;
 }
@@ -412,6 +429,7 @@ function advisorProfileFromProfile(profile: OnboardingProfile) {
 
 export function DashboardShell() {
   const [activeProfile, setActiveProfile] = useState<OnboardingProfile | null>(null);
+  const [profileBeforeDemo, setProfileBeforeDemo] = useState<OnboardingProfile | null>(null);
   const [profileDraft, setProfileDraft] = useState<OnboardingProfile>(emptyProfile);
   const [profileSectionFocus, setProfileSectionFocus] = useState<ProfileSectionId | null>(null);
   const [hasCheckedStoredProfile, setHasCheckedStoredProfile] = useState(false);
@@ -576,13 +594,25 @@ export function DashboardShell() {
 
   async function handleUpload(file: File | undefined) {
     if (!file) return;
-    await analyseTransactionFile(file, "uploaded");
+    const profileForUpload = dataMode === "demo" && profileBeforeDemo ? profileBeforeDemo : activeProfile ?? undefined;
+    if (dataMode === "demo" && profileBeforeDemo) {
+      setActiveProfile(profileBeforeDemo);
+      setProfileDraft(profileBeforeDemo);
+      setProfileBeforeDemo(null);
+    }
+    await analyseTransactionFile(file, "uploaded", profileForUpload);
   }
 
   async function handleUseDemoData() {
+    if (dataMode !== "demo" && activeProfile) {
+      setProfileBeforeDemo(activeProfile);
+    }
+    setActiveProfile(demoProfile);
+    setProfileDraft(demoProfile);
     await analyseTransactionFile(
       new File([transactionRowsToCsv(demoTransactionRows())], "finscope-demo-transactions.csv", { type: "text/csv" }),
-      "demo"
+      "demo",
+      demoProfile
     );
   }
 
@@ -607,6 +637,7 @@ export function DashboardShell() {
   async function handleProfileSave(profile: OnboardingProfile) {
     writeStoredProfile(profile);
     setActiveProfile(profile);
+    setProfileBeforeDemo(null);
     setProfileDraft(profile);
     setProfileSectionFocus(null);
     setAdvisorAnswer(null);
@@ -631,6 +662,7 @@ export function DashboardShell() {
   function resetProfileAndData() {
     clearStoredProfile();
     setActiveProfile(null);
+    setProfileBeforeDemo(null);
     setProfileDraft(emptyProfile);
     setProfileSectionFocus(null);
     setActiveView("overview");
