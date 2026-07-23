@@ -13,6 +13,12 @@ from app.schemas.transactions import (
     AdvisorKnowledgeChunk,
 )
 from app.services.advisor_context import build_advisor_context
+from app.services.advisor_extractive import extractive_explanation
+from app.services.advisor_intent import (
+    SECTION_FACT_PRIORITY,
+    QuestionIntent,
+    build_question_intent,
+)
 from app.services.advisor_retrieval import retrieve_advisor_chunks
 
 
@@ -104,6 +110,56 @@ def relevant_used_numbers(context: AdvisorContextResponse, selected_fact_ids: li
     ]
 
 
+# Opening lines vary by detected intent so answers read differently for
+# "why", "how much", advice, and plain explanation questions. Every template
+# keeps the "supplied FinScope facts" grounding clause.
+OPENING_TEMPLATES = {
+    "why": "Here is what is driving your {topic}, using the supplied FinScope facts and project methodology.",
+    "how_much": "Here are the key figures for your {topic} from the supplied FinScope facts.",
+    "what_should_i_do": "Here is what the supplied FinScope facts suggest you focus on for your {topic}.",
+    "explain": "Here is an explanation of your {topic} from the supplied FinScope facts and project methodology.",
+}
+
+
+def select_facts_for_intent(
+    context: AdvisorContextResponse,
+    intent: QuestionIntent,
+    limit: int = 6,
+) -> list[AdvisorFact]:
+    """Choose facts based on where the question routed, not a fixed list.
+
+    First pass takes the prioritised facts for each routed section; the second
+    pass backfills any remaining facts from those sections (dynamic ids such as
+    top_spend_category_4 or rate_line_*) up to the limit.
+    """
+    facts = facts_by_id(context)
+    selected: list[AdvisorFact] = []
+    seen: set[str] = set()
+
+    def take(item: AdvisorFact) -> bool:
+        if item.id in seen:
+            return False
+        selected.append(item)
+        seen.add(item.id)
+        return len(selected) >= limit
+
+    for section_id in intent.sections:
+        for fact_id in SECTION_FACT_PRIORITY.get(section_id, []):
+            item = facts.get(fact_id)
+            if item is not None and take(item):
+                return selected
+
+    for section_id in intent.sections:
+        current = section_by_id(context, section_id)
+        if current is None:
+            continue
+        for item in current.facts:
+            if take(item):
+                return selected
+
+    return selected
+
+
 class DeterministicAdvisorClient:
     provider = "deterministic_fallback"
 
@@ -114,41 +170,32 @@ class DeterministicAdvisorClient:
         chunks: list[AdvisorKnowledgeChunk],
         prompt: AdvisorPrompt,
     ) -> AdvisorAskResponse:
-        facts = facts_by_id(context)
-        selected_fact_ids = [
-            "monthly_income",
-            "monthly_spend",
-            "disposable_income",
-            "health_score",
-            "weakest_health_component",
-            "forecast_expected_total",
-            "forecast_upper_total",
-            "largest_forecast_category",
-            "personal_inflation",
-            "national_inflation",
-            "inflation_gap",
-            "monthly_rate_cashflow_delta",
-            "net_worth",
-            "consumer_debt",
-            "emergency_gap",
-        ]
-        selected_facts = [facts[fact_id] for fact_id in selected_fact_ids if fact_id in facts]
+        intent = build_question_intent(request.question)
+        selected_facts = select_facts_for_intent(context, intent)
+        selected_fact_ids = [item.id for item in selected_facts]
 
-        opening = "I can explain this from the supplied FinScope facts and project methodology."
-        if context.missing_data:
-            opening += " Some inputs are missing, so I would treat this as a partial view."
-
-        bullets = self.summary_bullets(facts)
+        opening = OPENING_TEMPLATES.get(intent.kind, OPENING_TEMPLATES["explain"]).format(topic=intent.topic_label)
         answer_parts = [opening]
-        for item in bullets[:5]:
-            answer_parts.append(item)
+        if context.missing_data:
+            answer_parts.append("Some inputs are missing, so treat this as a partial view.")
 
-        if chunks:
-            cited_sources = ", ".join(dict.fromkeys(chunk.source for chunk in chunks[:3]))
-            answer_parts.append(f"For the methodology behind this, I would cite {cited_sources}.")
+        # Lead with the facts the question actually routed to.
+        for item in selected_facts[:3]:
+            sentence = fact_sentence(item)
+            if sentence:
+                answer_parts.append(sentence)
+
+        # Weave in the retrieved methodology sentences that match the question.
+        for sentence, chunk in extractive_explanation(request.question, chunks, limit=2):
+            answer_parts.append(f"{sentence.rstrip('.')}. This reflects the {chunk.source} methodology.")
+
         if context.missing_data:
             top_missing = context.missing_data[0]
-            answer_parts.append(f"The first data gap to fix is {top_missing.label}: {top_missing.action}")
+            answer_parts.append(f"The first data gap to close is {top_missing.label}: {top_missing.action}")
+
+        bullets = [sentence for item in selected_facts if (sentence := fact_sentence(item))]
+        if not bullets:
+            bullets = ["I do not have enough supplied facts to explain this yet."]
 
         confidence = "high"
         if context.missing_data:
@@ -167,63 +214,11 @@ class DeterministicAdvisorClient:
             confidence=confidence,
             provider=self.provider,
             notes=[
-                "This response used the deterministic fallback. A live LLM provider can replace it behind the same response contract.",
+                "This response used the deterministic extractive synthesizer (no LLM call).",
+                f"Question routed to sections: {', '.join(intent.sections[:3]) or 'none'} (intent: {intent.kind}).",
                 f"Prompt prepared with {len(prompt.user)} user-context characters.",
             ],
         )
-
-    def summary_bullets(self, facts: dict[str, AdvisorFact]) -> list[str]:
-        bullets: list[str] = []
-
-        cash_parts = [
-            fact_sentence(facts.get("monthly_income")),
-            fact_sentence(facts.get("monthly_spend")),
-            fact_sentence(facts.get("disposable_income")),
-        ]
-        cash_sentence = " ".join(part for part in cash_parts if part)
-        if cash_sentence:
-            bullets.append(cash_sentence)
-
-        health_parts = [
-            fact_sentence(facts.get("health_score")),
-            fact_sentence(facts.get("weakest_health_component")),
-        ]
-        health_sentence = " ".join(part for part in health_parts if part)
-        if health_sentence:
-            bullets.append(health_sentence)
-
-        forecast_parts = [
-            fact_sentence(facts.get("forecast_expected_total")),
-            fact_sentence(facts.get("forecast_upper_total")),
-            fact_sentence(facts.get("largest_forecast_category")),
-        ]
-        forecast_sentence = " ".join(part for part in forecast_parts if part)
-        if forecast_sentence:
-            bullets.append(forecast_sentence)
-
-        inflation_parts = [
-            fact_sentence(facts.get("personal_inflation")),
-            fact_sentence(facts.get("national_inflation")),
-            fact_sentence(facts.get("inflation_gap")),
-        ]
-        inflation_sentence = " ".join(part for part in inflation_parts if part)
-        if inflation_sentence:
-            bullets.append(inflation_sentence)
-
-        rate_sentence = fact_sentence(facts.get("monthly_rate_cashflow_delta"))
-        if rate_sentence:
-            bullets.append(rate_sentence)
-
-        wealth_parts = [
-            fact_sentence(facts.get("net_worth")),
-            fact_sentence(facts.get("consumer_debt")),
-            fact_sentence(facts.get("emergency_gap")),
-        ]
-        wealth_sentence = " ".join(part for part in wealth_parts if part)
-        if wealth_sentence:
-            bullets.append(wealth_sentence)
-
-        return bullets or ["I do not have enough supplied facts to explain the dashboard yet."]
 
 
 def answer_advisor_question(
