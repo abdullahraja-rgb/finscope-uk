@@ -57,6 +57,10 @@ def format_percent(value: float | None, digits: int = 1) -> str:
     return f"{value:.{digits}f}%"
 
 
+def plural(value: int, word: str) -> str:
+    return f"{value} {word}" if value == 1 else f"{value} {word}s"
+
+
 def format_months(months: int | None) -> str:
     if months is None:
         return "not available"
@@ -65,10 +69,10 @@ def format_months(months: int | None) -> str:
     years = months // 12
     remaining = months % 12
     if years == 0:
-        return f"{remaining} months"
+        return plural(remaining, "month")
     if remaining == 0:
-        return f"{years} years"
-    return f"{years} years {remaining} months"
+        return plural(years, "year")
+    return f"{plural(years, 'year')} {plural(remaining, 'month')}"
 
 
 def round_value(value: float | None, digits: int = 2) -> float | None:
@@ -219,8 +223,8 @@ def health_section(request: AdvisorContextRequest) -> AdvisorContextSection:
 def transaction_section(request: AdvisorContextRequest) -> AdvisorContextSection:
     totals = spend_by_category(request.transactions)
     facts = [
-        fact("transaction_rows", "Transaction rows", len(request.transactions), str(len(request.transactions)), "transactions"),
-        fact("transaction_months", "Transaction months", transaction_month_count(request.transactions), str(transaction_month_count(request.transactions)), "transactions"),
+        fact("transaction_rows", "Number of transactions", len(request.transactions), str(len(request.transactions)), "transactions"),
+        fact("transaction_months", "Months of spending history", transaction_month_count(request.transactions), str(transaction_month_count(request.transactions)), "transactions"),
     ]
     for index, (category, spend) in enumerate(list(totals.items())[:5], start=1):
         facts.append(
@@ -364,7 +368,7 @@ def recommendation_fact(index: int, item: Recommendation) -> AdvisorFact:
         f"recommendation_{index}",
         f"Recommendation {index}",
         item.title,
-        f"{item.title} ({item.priority}): {item.action}",
+        f"{item.title.rstrip('.')} - {item.action.rstrip('.')}",
         "recommendations",
     )
 
@@ -378,9 +382,9 @@ def missing_data(request: AdvisorContextRequest) -> list[AdvisorMissingData]:
             AdvisorMissingData(
                 key="profile",
                 label="Financial setup",
-                reason="No profile setup values were supplied.",
-                impact="Net worth, debt payoff, savings goals, and some cash-flow explanations will be thin.",
-                action="Fill in the Profile setup page.",
+                reason="Your financial setup details have not been filled in.",
+                impact="Net worth, debt payoff, savings goals, and some cash-flow explanations will be limited.",
+                action="Fill in your financial setup details.",
             )
         )
     if profile is None or profile.monthly_income <= 0:
@@ -388,19 +392,19 @@ def missing_data(request: AdvisorContextRequest) -> list[AdvisorMissingData]:
             AdvisorMissingData(
                 key="monthly_income",
                 label="Monthly income",
-                reason="Monthly income is not set.",
-                impact="Spend-to-income, savings rate, and disposable income are less useful.",
-                action="Add monthly income in Profile setup.",
+                reason="Your monthly income is not set.",
+                impact="Your savings rate and spare income are harder to judge.",
+                action="Add your monthly income to your financial setup.",
             )
         )
     if not request.transactions:
         missing.append(
             AdvisorMissingData(
                 key="transactions",
-                label="Transaction rows",
-                reason="No transaction rows were supplied.",
-                impact="The advisor cannot explain spending mix, forecasts, or personal inflation properly.",
-                action="Upload a CSV or add transaction rows manually.",
+                label="Spending history",
+                reason="No spending has been added yet.",
+                impact="Your spending mix, forecast, and personal inflation cannot be explained properly.",
+                action="Upload a bank statement or add your spending manually.",
             )
         )
     else:
@@ -415,19 +419,19 @@ def missing_data(request: AdvisorContextRequest) -> list[AdvisorMissingData]:
                     AdvisorMissingData(
                         key=f"category_{category}",
                         label=f"{category.replace('_', ' ').title()} spending",
-                        reason=f"No {category.replace('_', ' ')} expense rows were found.",
-                        impact="Some category-level explanations may miss this part of the budget.",
-                        action=f"Add a {category.replace('_', ' ')} transaction row if this spending exists.",
+                        reason=f"No {category.replace('_', ' ')} spending was found.",
+                        impact="This part of your budget may be missing from the explanation.",
+                        action=f"Add your {category.replace('_', ' ')} spending if you have any.",
                     )
                 )
     if request.forecast is None or not request.forecast.forecasts:
         missing.append(
             AdvisorMissingData(
                 key="forecast",
-                label="Forecast",
-                reason="No forecast output was supplied.",
-                impact="The advisor cannot explain next-month pressure.",
-                action="Analyse enough transaction history to generate a forecast.",
+                label="Spending forecast",
+                reason="There is no spending forecast yet.",
+                impact="Next month's pressure on your budget cannot be explained.",
+                action="Add a few months of spending history.",
             )
         )
     if request.personal_inflation is None:
@@ -435,19 +439,19 @@ def missing_data(request: AdvisorContextRequest) -> list[AdvisorMissingData]:
             AdvisorMissingData(
                 key="personal_inflation",
                 label="Personal inflation",
-                reason="No personal inflation output was supplied.",
-                impact="The advisor cannot compare personal inflation against the UK figure.",
-                action="Run the transaction analysis with mapped spending categories.",
+                reason="Your personal inflation has not been worked out yet.",
+                impact="Your own inflation cannot be compared against the UK figure.",
+                action="Add spending with categories so your inflation can be compared.",
             )
         )
     if request.health_score is None:
         missing.append(
             AdvisorMissingData(
                 key="health_score",
-                label="Health score",
-                reason="No health score output was supplied.",
-                impact="The advisor cannot explain the strongest and weakest score components.",
-                action="Run the transaction analysis with profile values.",
+                label="Financial health score",
+                reason="Your financial health score has not been worked out yet.",
+                impact="Your strongest and weakest areas cannot be explained.",
+                action="Add your spending and financial setup details.",
             )
         )
     if request.rate_impact is None:
@@ -455,9 +459,9 @@ def missing_data(request: AdvisorContextRequest) -> list[AdvisorMissingData]:
             AdvisorMissingData(
                 key="rate_impact",
                 label="Bank Rate impact",
-                reason="No rate-impact output was supplied.",
-                impact="The advisor cannot explain interest-rate sensitivity.",
-                action="Run the Bank Rate scenario calculation.",
+                reason="The Bank Rate scenario has not been run yet.",
+                impact="How sensitive you are to interest-rate changes cannot be explained.",
+                action="Try the Bank Rate scenario.",
             )
         )
     return missing

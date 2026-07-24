@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     advisor_llm_timeout_seconds: float = Field(default=30, alias="ADVISOR_LLM_TIMEOUT_SECONDS")
     advisor_llm_max_output_tokens: int = Field(default=900, alias="ADVISOR_LLM_MAX_OUTPUT_TOKENS")
     advisor_llm_temperature: float | None = Field(default=0.2, alias="ADVISOR_LLM_TEMPERATURE")
+    advisor_retrieval_mode: str = Field(default="lexical", alias="ADVISOR_RETRIEVAL_MODE")
+    advisor_embedding_model: str = Field(default="BAAI/bge-small-en-v1.5", alias="ADVISOR_EMBEDDING_MODEL")
 
     @property
     def cors_origins(self) -> list[str]:

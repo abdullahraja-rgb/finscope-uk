@@ -328,8 +328,12 @@ class AdvisorKnowledgeChunk(BaseModel):
     id: str
     title: str
     source: str
+    # Plain-English name for the source, safe to show to a dashboard user.
+    source_label: str = ""
     heading_path: list[str]
     text: str
+    # Display copy: the chunk text without the internal heading breadcrumb.
+    body: str = ""
     score: float
     tags: list[str] = Field(default_factory=list)
 
@@ -348,6 +352,7 @@ class AdvisorAskRequest(AdvisorContextRequest):
 
 class AdvisorCitation(BaseModel):
     source: str
+    source_label: str = ""
     title: str
     chunk_id: str
     heading_path: list[str]

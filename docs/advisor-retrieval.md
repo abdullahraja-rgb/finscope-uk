@@ -77,22 +77,36 @@ This means citations point to a clear source and section, not a vague bundle of 
 
 ## How Retrieval Works
 
-For now, retrieval is local and dependency-free.
+Retrieval runs in one of two modes, chosen by `ADVISOR_RETRIEVAL_MODE`.
 
-The scoring uses:
+### Lexical mode (default, dependency-free)
+
+The lexical scoring uses:
 
 - token overlap between the question and chunk text
 - simple inverse document frequency weighting
 - phrase boosts for matching neighbouring words
 - tag boosts for finance-specific concepts
 
-I chose this before embeddings because the knowledge base is still small and mostly project-authored. It is easier to inspect and explain, and the tests can prove exactly which source should be retrieved for common questions.
+This is easy to inspect and explain, and the tests can prove exactly which source should be retrieved for common questions.
+
+### Hybrid mode (lexical + local embeddings)
+
+Set `ADVISOR_RETRIEVAL_MODE=hybrid` to add a dense semantic signal on top of the lexical scorer:
+
+- Each chunk is embedded once with a local model via `fastembed` (ONNX, no torch) and cached in memory.
+- The question is embedded and compared to every chunk with cosine similarity.
+- The lexical ranking and the dense ranking are combined with Reciprocal Rank Fusion (RRF), so exact-term matches and paraphrase matches both contribute.
+
+Embeddings are computed with a small model (default `BAAI/bge-small-en-v1.5`). The corpus is tiny, so vectors live in memory with plain cosine — no FAISS, pgvector, or hosted store.
+
+Hybrid is opt-in and safe: if `fastembed` is not installed or the model cannot load, retrieval falls back to lexical and records a note explaining why. The `AdvisorKnowledgeChunk` response shape is identical in both modes, so callers and the frontend never change.
 
 ## Why Not A Vector Database Yet
 
-I do not need pgvector, Pinecone, or a hosted vector store for the first advisor.
+I do not need pgvector, Pinecone, or a hosted vector store.
 
-The current knowledge base is small enough to load from markdown on demand. Once I add more official guidance, longer documents, or user-specific historical notes, then embeddings and a vector index will make more sense.
+The knowledge base is small enough to embed and load from markdown on demand, so in-memory cosine is enough. A vector index only becomes worthwhile with far more official guidance, longer documents, or user-specific historical notes.
 
 ## Tests
 

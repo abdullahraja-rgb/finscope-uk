@@ -282,14 +282,20 @@ export type AdvisorKnowledgeChunk = {
   id: string;
   title: string;
   source: string;
+  /** Plain-English source name. Render this, never `source` or `title`. */
+  source_label: string;
   heading_path: string[];
   text: string;
+  /** Display copy without the internal heading breadcrumb. */
+  body: string;
   score: number;
   tags: string[];
 };
 
 export type AdvisorCitation = {
   source: string;
+  /** Plain-English source name. Render this, never `source` or `title`. */
+  source_label: string;
   title: string;
   chunk_id: string;
   heading_path: string[];

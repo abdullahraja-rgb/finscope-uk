@@ -11,10 +11,15 @@ from app.schemas.transactions import (
 )
 from app.services.advisor_answer import answer_advisor_question
 from app.services.advisor_context import build_advisor_context
+from app.services.advisor_embeddings import configured_embedder
 from app.services.advisor_llm import configured_advisor_client
 from app.services.advisor_retrieval import retrieve_advisor_chunks
 
 router = APIRouter()
+
+
+def _advisor_embedder():
+    return configured_embedder(settings.advisor_retrieval_mode, settings.advisor_embedding_model)
 
 
 @router.post("/advisor/context", response_model=AdvisorContextResponse)
@@ -30,6 +35,7 @@ def advisor_retrieve(request: AdvisorRetrieveRequest) -> AdvisorRetrieveResponse
         max_chunks=request.max_chunks,
         min_score=request.min_score,
         sources=request.sources,
+        embedder=_advisor_embedder(),
     )
 
 
@@ -39,4 +45,5 @@ def advisor_ask(request: AdvisorAskRequest) -> AdvisorAskResponse:
         request,
         docs_dir=settings.docs_dir,
         client=configured_advisor_client(settings),
+        embedder=_advisor_embedder(),
     )

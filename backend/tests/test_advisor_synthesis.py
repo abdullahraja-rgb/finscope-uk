@@ -90,6 +90,8 @@ def test_extractive_explanation_is_digit_free_and_relevant() -> None:
 
 
 def test_split_sentences_drops_numeric_lines() -> None:
-    sentences = split_sentences("We validate with a rolling backtest.\nThe target error is 12 percent.")
-    assert any("rolling backtest" in sentence for sentence in sentences)
+    sentences = split_sentences(
+        "Your spending is compared against last month to spot changes.\nThe target error is 12 percent."
+    )
+    assert any("compared against last month" in sentence for sentence in sentences)
     assert all("12 percent" not in sentence for sentence in sentences)

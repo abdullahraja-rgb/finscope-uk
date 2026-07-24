@@ -29,8 +29,10 @@ def test_answer_advisor_question_returns_grounded_response() -> None:
     assert response.retrieved_chunks
     assert any("Monthly spend: GBP 1,420" == item for item in response.used_numbers)
     assert "GBP 1,780" in response.answer
-    assert "supplied FinScope facts" in response.answer
+    assert "based on your own figures" in response.answer
     assert all(citation.source.endswith(".md") for citation in response.citations)
+    # Filenames stay internal; users see the friendly label instead.
+    assert all(not citation.source_label.endswith(".md") for citation in response.citations)
 
 
 def test_answer_advisor_question_reports_missing_data() -> None:
@@ -53,7 +55,7 @@ def test_answer_advisor_question_reports_missing_data() -> None:
     assert "forecast" in missing_keys
     assert "personal_inflation" in missing_keys
     assert response.confidence in {"low", "medium"}
-    assert "partial view" in response.answer
+    assert "partial picture" in response.answer
 
 
 def test_advisor_ask_endpoint_returns_structured_answer() -> None:

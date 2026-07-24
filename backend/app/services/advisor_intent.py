@@ -17,47 +17,64 @@ DEFAULT_SECTION_ORDER = [
 ]
 
 
-# Keyword sets used to route a question to the dashboard sections it is about.
-# Kept declarative and dependency-free; Phase 2 can swap this for embedding
-# similarity without changing the callers.
-SECTION_KEYWORDS: dict[str, set[str]] = {
+# Keywords are weighted by how strongly they identify a section. Defining terms
+# ("ons", "predict") must outrank generic ones ("spending") that appear in many
+# kinds of question - the eval harness showed unweighted overlap misrouting
+# "map my spending to ONS categories" and "predict my spending" to cash flow.
+CORE_WEIGHT = 2.0
+SUPPORT_WEIGHT = 1.0
+
+SECTION_CORE_KEYWORDS: dict[str, set[str]] = {
     "cash_flow": {
-        "cash", "flow", "income", "salary", "wage", "wages", "pay", "paid",
-        "spend", "spending", "outgoings", "expenses", "budget", "disposable",
-        "surplus", "deficit", "leftover", "left", "afford", "affordable",
+        "cash", "flow", "disposable", "surplus", "deficit", "outgoings",
+        "income", "salary", "wage", "wages",
     },
-    "health": {
-        "health", "score", "band", "wellbeing", "overall", "rating",
-        "strong", "strongest", "weak", "weakest", "component", "components",
-    },
+    "health": {"health", "score", "band", "wellbeing", "rating"},
     "transactions": {
-        "transaction", "transactions", "category", "categories", "merchant",
-        "breakdown", "biggest", "largest", "top", "where", "most",
+        "transaction", "transactions", "merchant",
+        "categorise", "categorised", "categorisation",
     },
     "forecast": {
         "forecast", "forecasts", "forecasting", "predict", "prediction",
-        "projected", "projection", "estimate", "expected", "next", "upcoming",
-        "future", "month", "coming",
+        "projected", "projection", "estimate",
     },
-    "inflation": {
-        "inflation", "cost", "living", "prices", "price", "cpi", "cpih",
-        "ons", "national", "personal", "basket", "rising", "dearer",
-    },
-    "rate_impact": {
-        "rate", "rates", "interest", "bank", "boe", "base", "mortgage",
-        "variable", "tracker", "hike", "hikes", "cut", "cuts", "rise",
-    },
+    "inflation": {"inflation", "cpi", "cpih", "ons", "basket"},
+    "rate_impact": {"rate", "rates", "interest", "boe", "mortgage", "tracker"},
     "wealth": {
-        "net", "worth", "wealth", "assets", "asset", "liabilities",
-        "debt", "debts", "loan", "loans", "credit", "card", "borrowing",
-        "emergency", "fund", "buffer", "goal", "goals", "payoff", "repay",
-        "pension", "investment", "investments", "savings", "saving",
+        "worth", "wealth", "assets", "asset", "liabilities", "debt", "debts",
+        "loan", "loans", "pension", "payoff", "repay", "borrowing",
     },
     "recommendations": {
-        "recommendation", "recommendations", "recommend", "advice", "advise",
-        "suggest", "suggestion", "action", "actions", "fix", "improve",
-        "priority", "prioritise", "focus", "step", "steps",
+        "recommendation", "recommendations", "recommend",
+        "advice", "advise", "suggest", "suggestion",
     },
+}
+
+SECTION_SUPPORT_KEYWORDS: dict[str, set[str]] = {
+    "cash_flow": {
+        "spend", "spending", "expenses", "budget", "pay", "paid",
+        "leftover", "left", "afford", "affordable",
+    },
+    "health": {"overall", "strong", "strongest", "weak", "weakest", "component", "components"},
+    "transactions": {
+        "category", "categories", "breakdown", "biggest", "largest", "top", "where", "most",
+    },
+    "forecast": {"next", "upcoming", "future", "month", "coming", "expected"},
+    "inflation": {"cost", "living", "prices", "price", "national", "personal", "rising", "dearer"},
+    "rate_impact": {"bank", "base", "variable", "hike", "hikes", "cut", "cuts", "rise"},
+    "wealth": {
+        "net", "credit", "card", "emergency", "fund", "buffer", "goal", "goals",
+        "investment", "investments", "savings", "saving",
+    },
+    "recommendations": {
+        "action", "actions", "fix", "improve", "priority", "prioritise", "focus", "step", "steps",
+    },
+}
+
+# Combined view, useful for inspection and tests.
+SECTION_KEYWORDS: dict[str, set[str]] = {
+    section_id: SECTION_CORE_KEYWORDS[section_id] | SECTION_SUPPORT_KEYWORDS[section_id]
+    for section_id in SECTION_CORE_KEYWORDS
 }
 
 
@@ -128,12 +145,15 @@ def detect_intent_kind(question: str) -> str:
 
 def route_sections(question: str) -> list[str]:
     tokens = set(tokenize(question))
-    scored: list[tuple[int, int, str]] = []
-    for order, (section_id, keywords) in enumerate(SECTION_KEYWORDS.items()):
-        overlap = len(tokens & keywords)
-        if overlap:
-            # Sort by overlap desc, then by declaration order so ties are stable.
-            scored.append((overlap, -order, section_id))
+    scored: list[tuple[float, int, str]] = []
+    for order, section_id in enumerate(SECTION_CORE_KEYWORDS):
+        score = (
+            len(tokens & SECTION_CORE_KEYWORDS[section_id]) * CORE_WEIGHT
+            + len(tokens & SECTION_SUPPORT_KEYWORDS[section_id]) * SUPPORT_WEIGHT
+        )
+        if score:
+            # Sort by score desc, then by declaration order so ties are stable.
+            scored.append((score, -order, section_id))
     scored.sort(reverse=True)
     return [section_id for _, _, section_id in scored]
 

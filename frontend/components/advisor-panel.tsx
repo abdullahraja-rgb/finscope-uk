@@ -28,6 +28,11 @@ function confidenceTone(confidence: string) {
   return "text-rose";
 }
 
+function citationLabels(citations: AdvisorAskResponse["citations"]) {
+  // Show the plain-English source name, never the internal document filename.
+  return Array.from(new Set(citations.map((citation) => citation.source_label).filter(Boolean)));
+}
+
 function missingButtonLabel(item: AdvisorMissingData) {
   if (item.key.startsWith("category_")) return "Add row";
   if (item.key === "profile" || item.key === "monthly_income") return "Open profile";
@@ -59,7 +64,7 @@ export function AdvisorPanel({
           <div>
             <h2 className="text-lg font-semibold tracking-normal text-ink">Advisor</h2>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              Ask about the current dashboard numbers and the project methods behind them.
+              Ask about your dashboard numbers and how they were worked out.
             </p>
           </div>
           <MessageSquareText className="text-cobalt" size={22} aria-hidden="true" />
@@ -128,13 +133,13 @@ export function AdvisorPanel({
         {status === "loading" ? (
           <div className="flex items-center gap-3 rounded-md border border-slate-200 p-4 text-sm font-semibold text-slate-600">
             <LoaderCircle className="animate-spin text-cobalt" size={18} aria-hidden="true" />
-            Reading dashboard facts and project notes
+            Reading your figures and the background behind them
           </div>
         ) : null}
 
         {!answer && status !== "loading" ? (
           <div className="rounded-md border border-dashed border-slate-300 p-5 text-sm leading-6 text-slate-500">
-            Ask a question to get a grounded answer with citations and missing-data checks.
+            Ask a question to get an answer based on your own figures, with sources and anything still missing.
           </div>
         ) : null}
 
@@ -189,12 +194,12 @@ export function AdvisorPanel({
               <div>
                 <h3 className="text-sm font-semibold uppercase text-slate-500">Citations</h3>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {answer.citations.map((citation) => (
+                  {citationLabels(answer.citations).map((label) => (
                     <span
-                      key={citation.chunk_id}
+                      key={label}
                       className="rounded-sm bg-blue-50 px-2 py-1 text-xs font-semibold text-cobalt"
                     >
-                      {citation.source} / {citation.title}
+                      {label}
                     </span>
                   ))}
                 </div>
@@ -221,8 +226,8 @@ export function AdvisorPanel({
         <section className="rounded-md border border-slate-200 bg-panel p-5 shadow-soft lg:col-span-2">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold tracking-normal text-ink">Retrieved sources</h2>
-              <p className="text-sm text-slate-500">Project notes used to ground this answer</p>
+              <h2 className="text-lg font-semibold tracking-normal text-ink">Where this came from</h2>
+              <p className="text-sm text-slate-500">Background used to explain this answer</p>
             </div>
             <BookOpen className="text-teal" size={22} aria-hidden="true" />
           </div>
@@ -230,13 +235,9 @@ export function AdvisorPanel({
             {answer.retrieved_chunks.slice(0, 4).map((chunk) => (
               <article key={chunk.id} className="rounded-md border border-slate-200 p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-sm font-semibold text-ink">{chunk.title}</h3>
-                    <p className="mt-1 text-xs text-slate-500">{chunk.source}</p>
-                  </div>
-                  <span className="text-xs font-semibold text-teal">{chunk.score.toFixed(2)}</span>
+                  <h3 className="text-sm font-semibold text-ink">{chunk.source_label}</h3>
                 </div>
-                <p className="mt-3 line-clamp-4 text-xs leading-5 text-slate-600">{chunk.text}</p>
+                <p className="mt-3 line-clamp-4 text-xs leading-5 text-slate-600">{chunk.body}</p>
               </article>
             ))}
           </div>
