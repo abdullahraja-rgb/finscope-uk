@@ -4,6 +4,13 @@
 !.env.example
 .agents/
 .codex/
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.mobileprovision
 
 # Python
 __pycache__/
@@ -17,6 +24,9 @@ htmlcov/
 backend/.venv/
 backend/venv/
 venv/
+*.sqlite
+*.sqlite3
+*.db
 
 # Node / Next.js
 node_modules/
@@ -46,9 +56,17 @@ data/processed/*
 !data/processed/.gitkeep
 data/models/*
 !data/models/.gitkeep
+data/uploads/
+uploads/
+backend/uploads/
+*.pkl
+*.pickle
+*.joblib
+*.onnx
 
 # Local notebooks and OS files
 .ipynb_checkpoints/
+notebooks/**/*.ipynb
 .DS_Store
 Thumbs.db
 

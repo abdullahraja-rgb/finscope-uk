@@ -221,7 +221,7 @@ class DeterministicAdvisorClient:
 
         bullets = [sentence for item in selected_facts if (sentence := fact_sentence(item))]
         if not bullets:
-            bullets = ["I do not have enough supplied facts to explain this yet."]
+            bullets = ["There are not enough supplied facts to explain this yet."]
 
         confidence = "high"
         if context.missing_data:

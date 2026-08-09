@@ -1,6 +1,6 @@
 # Data Folder
 
-I keep raw downloaded datasets out of Git.
+Raw downloads and generated artifacts are kept out of Git.
 
 ```text
 data/
@@ -13,20 +13,20 @@ data/
 
 Generate a sample transaction file:
 
-```powershell
+```zsh
 python scripts/generate_synthetic_transactions.py --output data/sample/synthetic_transactions.csv
 ```
 
-Verify the raw downloads:
+Verify expected raw downloads:
 
-```powershell
+```zsh
 python scripts/verify_raw_datasets.py
 ```
 
 Train the transaction categoriser:
 
-```powershell
+```zsh
 python scripts/train_categorisation_model.py
 ```
 
-The backend data layer starts in `backend/app/data/loaders.py`. I use that code for repeatable reads instead of loading the workbooks ad hoc in notebooks. The first loaders cover synthetic transactions, UK HPI, Bank Rate, ONS CPIH/CPI category inflation, and ONS Family Spending benchmarks.
+The backend data layer starts in `backend/app/data/loaders.py`. Loader functions handle synthetic transactions, UK HPI, Bank Rate, ONS CPIH/CPI category inflation, and ONS Family Spending benchmarks.

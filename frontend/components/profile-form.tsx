@@ -40,7 +40,7 @@ export const profileFieldGroups: ProfileFieldGroup[] = [
   {
     id: "cash-flow",
     title: "Cash flow",
-    intro: "The regular monthly numbers I use for the health score.",
+    intro: "Regular monthly numbers used for the health score.",
     fields: [
       {
         label: "Monthly income",
@@ -65,7 +65,7 @@ export const profileFieldGroups: ProfileFieldGroup[] = [
   {
     id: "assets",
     title: "Assets",
-    intro: "Balances I use for net worth and emergency cover.",
+    intro: "Balances used for net worth and emergency cover.",
     fields: [
       {
         label: "Liquid savings",
@@ -96,7 +96,7 @@ export const profileFieldGroups: ProfileFieldGroup[] = [
   {
     id: "debts",
     title: "Debts",
-    intro: "Balances I use for payoff and rate-pressure estimates.",
+    intro: "Balances used for payoff and rate-pressure estimates.",
     fields: [
       {
         label: "Mortgage balance",
@@ -128,7 +128,7 @@ export const profileFieldGroups: ProfileFieldGroup[] = [
   {
     id: "goals",
     title: "Goals",
-    intro: "Targets I use to make the savings page practical.",
+    intro: "Targets used for savings progress and planning.",
     fields: [
       {
         label: "Emergency target",

@@ -1,8 +1,6 @@
 # Advisor Retrieval Layer
 
-I added retrieval after the deterministic advisor context pack and before any LLM answer generation.
-
-The job of this layer is to find trusted background context from the project docs. The LLM should use this to explain concepts such as personal inflation, Bank Rate impact, forecasting validation, and the health score methodology.
+The retrieval layer finds trusted background context from selected project docs. Advisor answers use these chunks to explain concepts such as personal inflation, Bank Rate impact, forecast validation, and financial-health scoring.
 
 ## Endpoint
 
@@ -39,7 +37,7 @@ Example response shape:
 }
 ```
 
-## What It Searches
+## Search Corpus
 
 The retriever reads selected markdown files from `docs/`:
 
@@ -53,17 +51,15 @@ The retriever reads selected markdown files from `docs/`:
 - `dashboard-data-flow.md`
 - `upload-analysis-flow.md`
 
-Each file has tags, for example:
+Each file has finance-domain tags. Examples:
 
 - `cost-of-living-engine.md`: inflation, ONS, cost of living, personal inflation.
 - `spend-forecasting.md`: forecasting, time series, backtesting, baseline.
 - `financial-health-score.md`: health score, savings, debt, housing, benchmarks.
 
-## How Chunking Works
+## Chunking
 
-I split each markdown file by headings.
-
-Each chunk stores:
+Markdown files are split by headings. Each chunk stores:
 
 - `id`
 - `title`
@@ -73,62 +69,54 @@ Each chunk stores:
 - `tags`
 - token list used for scoring
 
-This means citations point to a clear source and section, not a vague bundle of text.
+This gives citations a clear source and section.
 
-## How Retrieval Works
+## Retrieval Modes
 
 Retrieval runs in one of two modes, chosen by `ADVISOR_RETRIEVAL_MODE`.
 
-### Lexical mode (default, dependency-free)
+### Lexical mode
 
-The lexical scoring uses:
+The default scorer uses:
 
 - token overlap between the question and chunk text
 - simple inverse document frequency weighting
-- phrase boosts for matching neighbouring words
+- phrase boosts for neighbouring-word matches
 - tag boosts for finance-specific concepts
 
-This is easy to inspect and explain, and the tests can prove exactly which source should be retrieved for common questions.
+Lexical mode is dependency-free and easy to test.
 
-### Hybrid mode (lexical + local embeddings)
+### Hybrid mode
 
-Set `ADVISOR_RETRIEVAL_MODE=hybrid` to add a dense semantic signal on top of the lexical scorer:
+Set `ADVISOR_RETRIEVAL_MODE=hybrid` to add a dense semantic signal:
 
-- Each chunk is embedded once with a local model via `fastembed` (ONNX, no torch) and cached in memory.
-- The question is embedded and compared to every chunk with cosine similarity.
-- The lexical ranking and the dense ranking are combined with Reciprocal Rank Fusion (RRF), so exact-term matches and paraphrase matches both contribute.
+- Chunks are embedded once with a local `fastembed` model and cached in memory.
+- The question is embedded and compared to each chunk with cosine similarity.
+- Lexical and dense rankings are combined with Reciprocal Rank Fusion.
 
-Embeddings are computed with a small model (default `BAAI/bge-small-en-v1.5`). The corpus is tiny, so vectors live in memory with plain cosine — no FAISS, pgvector, or hosted store.
+Embeddings use `BAAI/bge-small-en-v1.5` by default. The corpus is small enough for in-memory vectors, so no vector database is needed yet.
 
-Hybrid is opt-in and safe: if `fastembed` is not installed or the model cannot load, retrieval falls back to lexical and records a note explaining why. The `AdvisorKnowledgeChunk` response shape is identical in both modes, so callers and the frontend never change.
-
-## Why Not A Vector Database Yet
-
-I do not need pgvector, Pinecone, or a hosted vector store.
-
-The knowledge base is small enough to embed and load from markdown on demand, so in-memory cosine is enough. A vector index only becomes worthwhile with far more official guidance, longer documents, or user-specific historical notes.
+If `fastembed` is unavailable or the model cannot load, retrieval falls back to lexical mode and records a note.
 
 ## Tests
 
 The tests check that:
 
 - markdown splits into heading chunks
-- inflation questions retrieve the cost-of-living docs
-- random train/test split questions retrieve the forecasting docs
-- health score questions retrieve the health-score docs
+- inflation questions retrieve cost-of-living docs
+- random train/test split questions retrieve forecasting docs
+- health-score questions retrieve health-score docs
 - source filters restrict results
 - the FastAPI endpoint returns citation-ready chunks
 
-## How This Fits The RAG Advisor
-
-The future answer flow should be:
+## Advisor Flow
 
 ```text
 question
   -> advisor context pack
   -> retrieve relevant docs
   -> build guarded prompt
-  -> LLM structured answer
+  -> structured advisor answer
 ```
 
-The context pack supplies trusted user numbers. The retrieval layer supplies trusted explanation text. The LLM should only turn those into a clear answer with citations.
+The context pack supplies trusted user numbers. The retrieval layer supplies trusted explanation text.

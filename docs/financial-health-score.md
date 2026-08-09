@@ -1,6 +1,6 @@
 # Financial Health Score
 
-I calculate the first financial-health score from six components:
+The financial-health score combines six components:
 
 - Savings rate.
 - Housing burden.
@@ -9,10 +9,12 @@ I calculate the first financial-health score from six components:
 - Subscription leakage.
 - Spending volatility.
 
-The score is deliberately transparent. Each component has a score from 0 to 100 and a weight, then the final score is the weighted average.
+Each component has a score from 0 to 100 and a weight. The final score is the weighted average.
 
-The transaction-derived endpoint estimates monthly spend, housing spend, subscriptions, and volatility from transaction history. I can still pass income, savings, and debt payments directly because those are not always visible from card or current-account transactions.
+The transaction-derived endpoint estimates monthly spend, housing spend, subscriptions, and volatility from transaction history. Income, savings, and debt payments can still be supplied directly because they are not always visible in card or current-account exports.
 
-I compare the user's spending mix with ONS Family Spending `Table 4.1`. The first benchmark compares app categories mapped to COICOP divisions against the latest all-household average spending shares.
+Spending mix is compared with ONS Family Spending `Table 4.1`. The benchmark maps app categories to COICOP divisions and compares them with the latest all-household average spending shares.
 
-Current limitation: the benchmark is broad and all-household, not matched to age, region, household size, or income decile yet. I will tighten that later if the dashboard needs more precise peer comparisons.
+## Limitations
+
+The benchmark is broad and all-household. It is not yet adjusted by age, region, household size, or income decile.

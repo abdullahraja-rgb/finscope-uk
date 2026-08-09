@@ -109,7 +109,7 @@ export function OnboardingFlow({ onReady }: OnboardingFlowProps) {
             </h1>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               {isNameStep
-                ? "I use this only to make the setup feel less anonymous while this browser session is active."
+                ? "Only used to personalise this setup while the browser session is active."
                 : group.intro}
             </p>
           </div>
@@ -133,13 +133,13 @@ export function OnboardingFlow({ onReady }: OnboardingFlowProps) {
                 autoComplete="given-name"
                 autoFocus
                 className="h-12 rounded-md border border-slate-200 bg-white px-3 text-base text-ink outline-none focus:border-cobalt"
-                placeholder="Abdullah"
+                placeholder="Your name"
                 type="text"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
               />
               <span className="text-xs font-normal leading-5 text-slate-500">
-                I cache it in this tab for a few hours, then ask again.
+                Stored in this tab for a few hours, then asked again.
               </span>
             </label>
           ) : (

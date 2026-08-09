@@ -1,8 +1,8 @@
 # Advisor Context Pack
 
-I built the advisor context as a deterministic backend layer before adding any LLM calls.
+The advisor context pack is a deterministic backend layer between dashboard calculations and advisor answers.
 
-The point is simple: the LLM should explain the dashboard, not calculate the dashboard. All numbers the future advisor can mention should come from this context pack first.
+The advisor explains the dashboard; it does not calculate financial values. Numbers that appear in advisor output must come from the context pack first.
 
 ## Endpoint
 
@@ -24,23 +24,21 @@ It returns:
 
 - Structured sections.
 - Individual facts with source labels.
-- A markdown context block ready for a future prompt.
+- A markdown context block for prompt construction.
 - Missing-data warnings.
 - A list of allowed numbers.
-- Guardrails for the future LLM.
+- Guardrails for generated answers.
 - A source map explaining where each source comes from.
 
-## Why I Built It This Way
+## Design
 
-I do not want the advisor to invent calculations. The backend already has deterministic services for spend, forecast, inflation, rate impact, scoring, debt, and goals. The advisor context gathers those outputs into one controlled object.
-
-That means the future RAG advisor can work like this:
+The backend already owns the deterministic services for spend, forecast, inflation, rate impact, scoring, debt, and goals. The context pack gathers those outputs into one controlled object before retrieval or optional LLM wording happens.
 
 ```text
-dashboard data -> advisor context -> retrieve docs -> LLM explanation
+dashboard data -> advisor context -> retrieve docs -> answer generation
 ```
 
-The context pack becomes the boundary between calculated facts and generated explanation.
+The context pack is the boundary between calculated facts and generated explanation.
 
 ## Sections
 
@@ -53,7 +51,7 @@ The context builder creates these sections:
 - Cost Of Living: personal inflation, UK inflation, inflation gap, and largest inflation contributor.
 - Rate Impact: current Bank Rate, scenario rate, monthly cash-flow impact, and line-item effects.
 - Net Worth, Debt, And Goals: assets, liabilities, net worth, consumer debt, debt payoff time, emergency gap, and savings-goal gap.
-- Recommendations: existing deterministic next actions.
+- Recommendations: deterministic next actions.
 
 Each fact has:
 
@@ -65,11 +63,11 @@ Each fact has:
 - `citation`
 - `unit`
 
-I use both raw values and formatted values because the app needs structured data, while the prompt needs readable text.
+Raw values support structured UI logic. Formatted values support readable advisor text.
 
 ## Missing Data
 
-The builder also flags gaps before the advisor answers.
+The builder flags gaps before the advisor answers.
 
 Examples:
 
@@ -82,21 +80,19 @@ Examples:
 - Missing Bank Rate impact.
 - Missing category coverage such as groceries, transport, utilities, housing, or subscriptions.
 
-This matters because the advisor should say "I do not have transport spending yet" instead of pretending the user spends nothing on transport.
+This lets the advisor say what is missing instead of treating unknown values as zero.
 
 ## Guardrails
 
-The context includes these rules for the future LLM:
+Generated answers must:
 
-- Use only the facts and numbers in this context pack.
-- If a number is missing, say what is missing instead of estimating it.
+- Use only facts and numbers in the context pack.
+- Say what is missing instead of estimating unavailable numbers.
 - Give budgeting guidance, not regulated financial advice.
-- Do not recommend specific investments, credit products, or providers.
-- Cite the source label beside any important claim.
+- Avoid recommending specific investments, credit products, or providers.
+- Cite source labels beside important claims.
 
-These rules are intentionally simple. I want the first advisor to be reliable before making it clever.
-
-## Files Added
+## Files
 
 Backend service:
 
@@ -122,7 +118,7 @@ Tests:
 backend/tests/test_advisor_context.py
 ```
 
-## What I Tested
+## Test Coverage
 
 The tests check that:
 
@@ -131,7 +127,3 @@ The tests check that:
 - Missing profile, transaction, forecast, inflation, score, and rate data are flagged.
 - Missing category coverage is flagged without falsely flagging supplied categories.
 - The FastAPI endpoint returns the context pack.
-
-## Next Step
-
-The next layer is retrieval. I will add a small local knowledge base from project docs, split it into chunks, and retrieve the most relevant chunks for a question. Only after that should the LLM response endpoint be added.

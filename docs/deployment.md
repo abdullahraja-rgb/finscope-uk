@@ -1,20 +1,20 @@
 # Deployment
 
-I deploy the MVP as two services:
+The app deploys as two services:
 
 - FastAPI backend on Render or Railway.
 - Next.js frontend on Vercel.
 
 ## Backend
 
-The backend has a Dockerfile at `backend/Dockerfile`. It copies:
+The backend Dockerfile lives at `backend/Dockerfile`. It copies:
 
 - `backend/app`
 - `backend/requirements.txt`
 - `config`
 - `data/sample`
 
-I do not copy `data/raw`, `data/processed`, or `data/models` into the image. Raw official datasets and trained model artifacts stay out of Git.
+It does not copy `data/raw`, `data/processed`, or `data/models`. Raw official datasets and trained model artifacts stay out of Git and out of the public image.
 
 Recommended backend environment:
 
@@ -24,14 +24,14 @@ CONFIG_DIR=/app/config
 CORS_ORIGINS=https://your-vercel-domain.vercel.app
 ```
 
-Render can use `render.yaml` from the repo root. After the backend deploys, I check:
+Render can use `render.yaml` from the repo root. After deployment, check:
 
 ```text
 https://your-backend-url/health
 https://your-backend-url/docs
 ```
 
-The hosted demo uses bundled fallback macro data if the raw ONS or Bank of England files are not present. I keep that fallback clearly labelled in API response notes. For the full local analysis, I use the official raw downloads in `data/raw`.
+Hosted demos use bundled fallback macro data when raw ONS or Bank of England files are absent. API response notes label fallback data clearly.
 
 ## Frontend
 
@@ -52,7 +52,7 @@ Frontend environment:
 NEXT_PUBLIC_API_BASE_URL=https://your-backend-url
 ```
 
-After deploy, I upload `data/sample/synthetic_transactions.csv` through the dashboard and confirm the forecast, inflation, health score, and recommendations update from the uploaded file.
+After deployment, upload `data/sample/synthetic_transactions.csv` through the dashboard and confirm that forecasts, inflation, health score, and recommendations update from the uploaded file.
 
 ## Pre-Deploy Checklist
 

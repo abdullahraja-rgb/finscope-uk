@@ -1,14 +1,14 @@
 # Recommendations Engine
 
-I generate the first recommendations with deterministic rules rather than an LLM.
+Recommendations are generated with deterministic rules rather than an LLM.
 
-The engine reads the outputs the app already calculated:
+The engine reads outputs the app has already calculated:
 
 - Financial-health score.
 - Forecast intervals.
 - Personal inflation.
 - Bank Rate impact when available.
 
-Each recommendation includes a title, detail, action, priority, and source. I keep the source explicit so the dashboard advice can be traced back to a number in the app.
+Each recommendation includes a title, detail, action, priority, and source. The source remains explicit so dashboard advice can be traced back to a calculated value.
 
-This is deliberately simple for the MVP. It gives useful guidance without inventing facts, and it leaves a clean path for the later grounded advisor: the LLM can explain these same calculated facts in a richer style once the app has retrieval and guardrails.
+This keeps the first recommendation layer predictable. The advisor can later explain the same calculated facts in a richer style, but it should not invent new financial values.

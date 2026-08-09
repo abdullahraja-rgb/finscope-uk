@@ -1,11 +1,11 @@
 # Cost Of Living Engine
 
-I calculate personal inflation by weighting ONS category inflation by the user's own spending mix.
+The cost-of-living engine estimates personal inflation by weighting ONS category inflation against the user's own spending mix.
 
-The first version uses:
+Inputs:
 
-- User transaction categories from uploaded CSVs or form-entered transaction rows.
-- `config/category_mapping.yml` to map app categories to ONS COICOP divisions.
+- User transaction categories from uploaded CSVs or form-entered rows.
+- `config/category_mapping.yml` for mapping app categories to ONS COICOP divisions.
 - Latest CPIH category inflation from the ONS detailed reference tables.
 
 Formula:
@@ -20,6 +20,8 @@ Example:
 groceries spend share 20% * food inflation 2.2% = 0.44 percentage points
 ```
 
-I compare the weighted personal rate against the latest CPIH headline rate. Unmapped spending is listed in the response notes and excluded from the weighted rate until I add a defended mapping.
+The weighted personal rate is compared with the latest CPIH headline rate. Unmapped spending is listed in response notes and excluded from the weighted rate until a defensible mapping exists.
 
-Current limitation: this is a category-level estimate, not a true item-level inflation model. That is fine for the MVP because bank transaction data usually has merchant/category detail rather than item baskets.
+## Limitations
+
+This is a category-level estimate, not an item-level inflation model. That matches the available transaction data, which usually contains merchant and category information rather than basket-level item prices.

@@ -1,18 +1,18 @@
 # Advisor LLM Provider
 
-I added the live provider after the deterministic context, retrieval, and answer contract were already working.
+The live provider sits behind the deterministic context, retrieval, and answer contract.
 
-The point is not to let the model calculate finance values. The backend already calculates those. The provider's job is only to turn supplied facts and retrieved project notes into a clearer explanation.
+The model does not calculate finance values. The backend calculates those values; the provider only turns supplied facts and retrieved notes into a clearer explanation.
 
 ## Runtime Choice
 
-The default remains:
+The default provider is:
 
 ```text
 deterministic_fallback
 ```
 
-To use the live provider locally, I set:
+Live provider configuration:
 
 ```text
 ADVISOR_LLM_PROVIDER=openai
@@ -20,7 +20,7 @@ ADVISOR_LLM_API_KEY=...
 ADVISOR_LLM_MODEL=gpt-4.1-mini
 ```
 
-If those are not set, the app uses the deterministic fallback with no network call.
+If those values are not set, the app uses the deterministic fallback with no network call.
 
 ## Flow
 
@@ -54,7 +54,7 @@ The backend fills the rest of the response from trusted local data: citations, m
 
 ## Number Guardrail
 
-I treat numbers as controlled data, not wording.
+Numbers are treated as controlled data, not wording.
 
 The context pack creates an allowed-number list such as:
 
@@ -62,9 +62,9 @@ The context pack creates an allowed-number list such as:
 Monthly spend: GBP 1,420 [health_score]
 ```
 
-The live answer must copy `used_numbers` exactly from that list. The backend also scans the generated answer and bullets for numeric tokens. If the model introduces a number that was not in the allowed list, I reject that answer and return the deterministic fallback.
+The live answer must copy `used_numbers` exactly from that list. The backend also scans generated answer text and bullets for numeric tokens. If the model introduces a number that was not in the allowed list, the endpoint rejects that answer and returns the deterministic fallback.
 
-That is deliberately strict. It is better for the advisor to be less chatty than to sound confident with an invented figure.
+That strictness is intentional: a shorter answer is better than a confident answer with invented figures.
 
 ## Provider Boundary
 
@@ -80,4 +80,4 @@ The orchestration remains in:
 backend/app/services/advisor_answer.py
 ```
 
-That keeps the design swappable. I can later add Anthropic, Ollama, or another local provider without changing the frontend or the endpoint contract.
+The boundary keeps the design swappable if another provider is added later.

@@ -64,7 +64,7 @@ Before a CSV upload or form entry:
 - Next actions: recommendation list and the rate scenario snapshot.
 - Profile: editable cash-flow, asset, debt, and goal setup values.
 
-## Not Built Yet
+## Out Of Scope For Now
 
 - Authentication.
 - Server-side profile table.

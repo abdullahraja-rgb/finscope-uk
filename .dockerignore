@@ -4,6 +4,13 @@
 .codex
 .env
 .env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.mobileprovision
 
 backend/.venv
 backend/venv
@@ -22,7 +29,18 @@ data/raw
 data/external
 data/processed
 data/models
+data/uploads
+uploads
+backend/uploads
+*.pkl
+*.pickle
+*.joblib
+*.onnx
+*.sqlite
+*.sqlite3
+*.db
 
 notebooks/.ipynb_checkpoints
+notebooks
 dist
 build

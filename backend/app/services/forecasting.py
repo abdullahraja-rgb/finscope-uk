@@ -251,7 +251,7 @@ def forecast_next_month(transactions: list[TransactionIn]) -> ForecastResponse:
         "Intervals use backtest residuals where available and a simple fallback margin otherwise.",
     ]
     if used_fallback_interval:
-        notes.append("Some categories have too little history for backtesting, so their intervals are deliberately wider.")
+        notes.append("Some categories have too little history for backtesting, so their intervals are wider to reflect the uncertainty.")
 
     return ForecastResponse(
         period=period,
